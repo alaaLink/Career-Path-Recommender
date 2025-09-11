@@ -1,0 +1,209 @@
+@model CareerPathRecommender.Web.Models.DashboardViewModel
+
+<div class="row fade-in">
+    <!-- Employee Profile Card -->
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-user-circle fa-2x me-3"></i>
+                    <div>
+                        <h5 class="mb-0">@Model.SelectedEmployee!.FullName</h5>
+                        <small class="opacity-75">Employee Profile</small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <div class="text-center p-2 bg-light rounded">
+                            <i class="fas fa-briefcase text-primary"></i>
+                            <div class="fw-bold">@Model.SelectedEmployee.Position</div>
+                            <small class="text-muted">Position</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-2 bg-light rounded">
+                            <i class="fas fa-building text-success"></i>
+                            <div class="fw-bold">@Model.SelectedEmployee.Department</div>
+                            <small class="text-muted">Department</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mb-3">
+                    <div class="d-inline-flex align-items-center p-2 bg-warning bg-opacity-10 rounded">
+                        <i class="fas fa-calendar-alt text-warning me-2"></i>
+                        <span class="fw-bold">@Model.SelectedEmployee.YearsOfExperience Years Experience</span>
+                    </div>
+                </div>
+                
+                <h6 class="fw-bold mb-3">
+                    <i class="fas fa-cogs text-info"></i> Current Skills
+                </h6>
+                <div class="skills-container">
+                    @foreach (var skill in Model.SelectedEmployee.Skills)
+                    {
+                        var skillColor = skill.Level switch
+                        {
+                            CareerPathRecommender.Core.Models.SkillLevel.Beginner => "secondary",
+                            CareerPathRecommender.Core.Models.SkillLevel.Intermediate => "warning",
+                            CareerPathRecommender.Core.Models.SkillLevel.Advanced => "success",
+                            CareerPathRecommender.Core.Models.SkillLevel.Expert => "primary",
+                            _ => "secondary"
+                        };
+                        
+                        <span class="badge bg-@skillColor me-1 mb-1 p-2">
+                            @skill.Skill.Name
+                            <small class="opacity-75">(@skill.Level)</small>
+                        </span>
+                    }
+                </div>
+                
+                <div class="mt-3 p-2 bg-info bg-opacity-10 rounded">
+                    <small class="text-info">
+                        <i class="fas fa-info-circle"></i>
+                        Skills are categorized by proficiency level from Beginner to Expert
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="col-lg-8 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0">
+                            <i class="fas fa-lightbulb"></i> AI-Powered Recommendations
+                        </h5>
+                        <small class="opacity-75">Personalized for @Model.SelectedEmployee.FullName</small>
+                    </div>
+                    <div class="badge bg-white text-dark">@Model.Recommendations.Count items</div>
+                </div>
+            </div>
+            <div class="card-body">
+                @if (Model.Recommendations.Any())
+                {
+                    @foreach (var recommendation in Model.Recommendations)
+                    {
+                        var typeIcon = recommendation.Type switch
+                        {
+                            CareerPathRecommender.Core.Models.RecommendationType.Course => "book",
+                            CareerPathRecommender.Core.Models.RecommendationType.Mentor => "user-friends",
+                            CareerPathRecommender.Core.Models.RecommendationType.Project => "project-diagram",
+                            CareerPathRecommender.Core.Models.RecommendationType.Certification => "certificate",
+                            _ => "lightbulb"
+                        };
+                        
+                        var typeColor = recommendation.Type switch
+                        {
+                            CareerPathRecommender.Core.Models.RecommendationType.Course => "primary",
+                            CareerPathRecommender.Core.Models.RecommendationType.Mentor => "success",
+                            CareerPathRecommender.Core.Models.RecommendationType.Project => "warning",
+                            CareerPathRecommender.Core.Models.RecommendationType.Certification => "info",
+                            _ => "secondary"
+                        };
+
+                        <div class="recommendation-card mb-3 p-3 border rounded position-relative" id="rec-@recommendation.Id">
+                            <!-- Priority indicator -->
+                            <div class="position-absolute top-0 start-0 p-2">
+                                @for (int i = 1; i <= recommendation.Priority; i++)
+                                {
+                                    <i class="fas fa-star text-warning" style="font-size: 0.8rem;"></i>
+                                }
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-start mt-2">
+                                <div class="flex-grow-1 me-3">
+                                    <h6 class="text-@typeColor mb-2">
+                                        <i class="fas fa-@typeIcon me-2"></i>
+                                        @recommendation.Title
+                                    </h6>
+                                    <p class="text-muted mb-2">@recommendation.Description</p>
+                                    
+                                    <!-- AI Reasoning Box -->
+                                    <div class="reasoning-box p-3 rounded mb-3" style="background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%); border-left: 4px solid #@typeColor;">
+                                        <div class="d-flex align-items-start">
+                                            <i class="fas fa-robot text-@typeColor me-2 mt-1"></i>
+                                            <div>
+                                                <small class="fw-bold text-@typeColor">AI Analysis:</small>
+                                                <div class="small">@recommendation.Reasoning</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Metrics -->
+                                <div class="text-end flex-shrink-0">
+                                    <div class="mb-2">
+                                        <span class="badge bg-@typeColor">@recommendation.Type</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted d-block">Confidence</small>
+                                        <div class="fw-bold text-success">@((recommendation.ConfidenceScore * 100).ToString("F0"))%</div>
+                                    </div>
+                                    <div class="progress" style="height: 4px;">
+                                        <div class="progress-bar bg-success" style="width: @((recommendation.ConfidenceScore * 100).ToString("F0"))%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Action buttons -->
+                            <div class="mt-3 d-flex gap-2">
+                                <button class="btn btn-success btn-sm accept-btn" onclick="acceptRecommendation(@recommendation.Id)">
+                                    <i class="fas fa-check me-1"></i> Accept
+                                </button>
+                                <button class="btn btn-outline-info btn-sm" onclick="viewRecommendationDetails(@recommendation.Id)">
+                                    <i class="fas fa-info-circle me-1"></i> Details
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-bookmark me-1"></i> Save for Later
+                                </button>
+                            </div>
+                            
+                            <!-- Created date -->
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>
+                                    Generated @recommendation.CreatedDate.ToString("MMM dd, yyyy 'at' h:mm tt")
+                                </small>
+                            </div>
+                        </div>
+                    }
+                    
+                    <!-- Summary Stats -->
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="h4 text-primary mb-0">@Model.Recommendations.Count</div>
+                                <small class="text-muted">Total Recommendations</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="h4 text-success mb-0">@(Model.Recommendations.Any() ? (Model.Recommendations.Average(r => (double)r.ConfidenceScore) * 100).ToString("F0") : "0")%</div>
+                                <small class="text-muted">Avg. Confidence</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="h4 text-warning mb-0">@Model.Recommendations.Count(r => r.Priority >= 4)</div>
+                                <small class="text-muted">High Priority</small>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Recommendations Available</h5>
+                        <p class="text-muted">Our AI is analyzing the employee profile to generate personalized recommendations.</p>
+                        <button class="btn btn-outline-primary" onclick="selectEmployee(@Model.SelectedEmployee.Id)">
+                            <i class="fas fa-refresh"></i> Refresh Recommendations
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,15 @@
+D:\AI Competition\CareerPathRecommender.Application\bin\Debug\net8.0\CareerPathRecommender.Application.deps.json
+D:\AI Competition\CareerPathRecommender.Application\bin\Debug\net8.0\CareerPathRecommender.Application.dll
+D:\AI Competition\CareerPathRecommender.Application\bin\Debug\net8.0\CareerPathRecommender.Application.pdb
+D:\AI Competition\CareerPathRecommender.Application\bin\Debug\net8.0\CareerPathRecommender.Domain.dll
+D:\AI Competition\CareerPathRecommender.Application\bin\Debug\net8.0\CareerPathRecommender.Domain.pdb
+D:\AI Competition\CareerPathRecommender.Application\obj\Debug\net8.0\CareerPathRecommender.Application.csproj.AssemblyReference.cache
+D:\AI Competition\CareerPathRecommender.Application\obj\Debug\net8.0\CareerPathRecommender.Application.GeneratedMSBuildEditorConfig.editorconfig
+D:\AI Competition\CareerPathRecommender.Application\obj\Debug\net8.0\CareerPathRecommender.Application.AssemblyInfoInputs.cache
+D:\AI Competition\CareerPathRecommender.Application\obj\Debug\net8.0\CareerPathRecommender.Application.AssemblyInfo.cs
+D:\AI Competition\CareerPathRecommender.Application\obj\Debug\net8.0\CareerPathRecommender.Application.csproj.CoreCompileInputs.cache
+D:\AI Competition\CareerPathRecommender.Application\obj\Debug\net8.0\CareerPa.66CB46FF.Up2Date
+D:\AI Competition\CareerPathRecommender.Application\obj\Debug\net8.0\CareerPathRecommender.Application.dll
+D:\AI Competition\CareerPathRecommender.Application\obj\Debug\net8.0\refint\CareerPathRecommender.Application.dll
+D:\AI Competition\CareerPathRecommender.Application\obj\Debug\net8.0\CareerPathRecommender.Application.pdb
+D:\AI Competition\CareerPathRecommender.Application\obj\Debug\net8.0\ref\CareerPathRecommender.Application.dll

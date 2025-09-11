@@ -1,0 +1,11 @@
+D:\AI Competition\CareerPathRecommender.Domain\bin\Debug\net8.0\CareerPathRecommender.Domain.deps.json
+D:\AI Competition\CareerPathRecommender.Domain\bin\Debug\net8.0\CareerPathRecommender.Domain.dll
+D:\AI Competition\CareerPathRecommender.Domain\bin\Debug\net8.0\CareerPathRecommender.Domain.pdb
+D:\AI Competition\CareerPathRecommender.Domain\obj\Debug\net8.0\CareerPathRecommender.Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\AI Competition\CareerPathRecommender.Domain\obj\Debug\net8.0\CareerPathRecommender.Domain.AssemblyInfoInputs.cache
+D:\AI Competition\CareerPathRecommender.Domain\obj\Debug\net8.0\CareerPathRecommender.Domain.AssemblyInfo.cs
+D:\AI Competition\CareerPathRecommender.Domain\obj\Debug\net8.0\CareerPathRecommender.Domain.csproj.CoreCompileInputs.cache
+D:\AI Competition\CareerPathRecommender.Domain\obj\Debug\net8.0\CareerPathRecommender.Domain.dll
+D:\AI Competition\CareerPathRecommender.Domain\obj\Debug\net8.0\refint\CareerPathRecommender.Domain.dll
+D:\AI Competition\CareerPathRecommender.Domain\obj\Debug\net8.0\CareerPathRecommender.Domain.pdb
+D:\AI Competition\CareerPathRecommender.Domain\obj\Debug\net8.0\ref\CareerPathRecommender.Domain.dll

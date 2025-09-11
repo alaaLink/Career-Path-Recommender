@@ -1,0 +1,1315 @@
+2025-09-11 13:10:40.319 +03:00 [INF] Executed DbCommand (22ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+PRAGMA journal_mode = 'wal';
+2025-09-11 13:10:40.562 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "AspNetRoles" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_AspNetRoles" PRIMARY KEY,
+    "Name" TEXT NULL,
+    "NormalizedName" TEXT NULL,
+    "ConcurrencyStamp" TEXT NULL
+);
+2025-09-11 13:10:40.563 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "AspNetUsers" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_AspNetUsers" PRIMARY KEY,
+    "UserName" TEXT NULL,
+    "NormalizedUserName" TEXT NULL,
+    "Email" TEXT NULL,
+    "NormalizedEmail" TEXT NULL,
+    "EmailConfirmed" INTEGER NOT NULL,
+    "PasswordHash" TEXT NULL,
+    "SecurityStamp" TEXT NULL,
+    "ConcurrencyStamp" TEXT NULL,
+    "PhoneNumber" TEXT NULL,
+    "PhoneNumberConfirmed" INTEGER NOT NULL,
+    "TwoFactorEnabled" INTEGER NOT NULL,
+    "LockoutEnd" TEXT NULL,
+    "LockoutEnabled" INTEGER NOT NULL,
+    "AccessFailedCount" INTEGER NOT NULL
+);
+2025-09-11 13:10:40.563 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Courses" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_Courses" PRIMARY KEY AUTOINCREMENT,
+    "Title" TEXT NOT NULL,
+    "Provider" TEXT NOT NULL,
+    "Url" TEXT NOT NULL,
+    "Description" TEXT NOT NULL,
+    "DurationHours" INTEGER NOT NULL,
+    "Rating" TEXT NOT NULL,
+    "Category" TEXT NOT NULL,
+    "Price" TEXT NOT NULL
+);
+2025-09-11 13:10:40.564 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Employees" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_Employees" PRIMARY KEY AUTOINCREMENT,
+    "FirstName" TEXT NOT NULL,
+    "LastName" TEXT NOT NULL,
+    "Email" TEXT NOT NULL,
+    "Position" TEXT NOT NULL,
+    "Department" TEXT NOT NULL,
+    "YearsOfExperience" INTEGER NOT NULL
+);
+2025-09-11 13:10:40.564 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Projects" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_Projects" PRIMARY KEY AUTOINCREMENT,
+    "Name" TEXT NOT NULL,
+    "Description" TEXT NOT NULL,
+    "StartDate" TEXT NOT NULL,
+    "EndDate" TEXT NULL,
+    "Status" INTEGER NOT NULL,
+    "Department" TEXT NOT NULL,
+    "MaxTeamSize" INTEGER NOT NULL
+);
+2025-09-11 13:10:40.564 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Skills" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_Skills" PRIMARY KEY AUTOINCREMENT,
+    "Name" TEXT NOT NULL,
+    "Category" TEXT NOT NULL,
+    "Description" TEXT NOT NULL
+);
+2025-09-11 13:10:40.564 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "AspNetRoleClaims" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_AspNetRoleClaims" PRIMARY KEY AUTOINCREMENT,
+    "RoleId" TEXT NOT NULL,
+    "ClaimType" TEXT NULL,
+    "ClaimValue" TEXT NULL,
+    CONSTRAINT "FK_AspNetRoleClaims_AspNetRoles_RoleId" FOREIGN KEY ("RoleId") REFERENCES "AspNetRoles" ("Id") ON DELETE CASCADE
+);
+2025-09-11 13:10:40.564 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "AspNetUserClaims" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_AspNetUserClaims" PRIMARY KEY AUTOINCREMENT,
+    "UserId" TEXT NOT NULL,
+    "ClaimType" TEXT NULL,
+    "ClaimValue" TEXT NULL,
+    CONSTRAINT "FK_AspNetUserClaims_AspNetUsers_UserId" FOREIGN KEY ("UserId") REFERENCES "AspNetUsers" ("Id") ON DELETE CASCADE
+);
+2025-09-11 13:10:40.565 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "AspNetUserLogins" (
+    "LoginProvider" TEXT NOT NULL,
+    "ProviderKey" TEXT NOT NULL,
+    "ProviderDisplayName" TEXT NULL,
+    "UserId" TEXT NOT NULL,
+    CONSTRAINT "PK_AspNetUserLogins" PRIMARY KEY ("LoginProvider", "ProviderKey"),
+    CONSTRAINT "FK_AspNetUserLogins_AspNetUsers_UserId" FOREIGN KEY ("UserId") REFERENCES "AspNetUsers" ("Id") ON DELETE CASCADE
+);
+2025-09-11 13:10:40.565 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "AspNetUserRoles" (
+    "UserId" TEXT NOT NULL,
+    "RoleId" TEXT NOT NULL,
+    CONSTRAINT "PK_AspNetUserRoles" PRIMARY KEY ("UserId", "RoleId"),
+    CONSTRAINT "FK_AspNetUserRoles_AspNetRoles_RoleId" FOREIGN KEY ("RoleId") REFERENCES "AspNetRoles" ("Id") ON DELETE CASCADE,
+    CONSTRAINT "FK_AspNetUserRoles_AspNetUsers_UserId" FOREIGN KEY ("UserId") REFERENCES "AspNetUsers" ("Id") ON DELETE CASCADE
+);
+2025-09-11 13:10:40.565 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "AspNetUserTokens" (
+    "UserId" TEXT NOT NULL,
+    "LoginProvider" TEXT NOT NULL,
+    "Name" TEXT NOT NULL,
+    "Value" TEXT NULL,
+    CONSTRAINT "PK_AspNetUserTokens" PRIMARY KEY ("UserId", "LoginProvider", "Name"),
+    CONSTRAINT "FK_AspNetUserTokens_AspNetUsers_UserId" FOREIGN KEY ("UserId") REFERENCES "AspNetUsers" ("Id") ON DELETE CASCADE
+);
+2025-09-11 13:10:40.565 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "EmployeeCourses" (
+    "EmployeeId" INTEGER NOT NULL,
+    "CourseId" INTEGER NOT NULL,
+    "Status" INTEGER NOT NULL,
+    "EnrolledDate" TEXT NOT NULL,
+    "CompletedDate" TEXT NULL,
+    "Progress" INTEGER NULL,
+    CONSTRAINT "PK_EmployeeCourses" PRIMARY KEY ("EmployeeId", "CourseId"),
+    CONSTRAINT "FK_EmployeeCourses_Courses_CourseId" FOREIGN KEY ("CourseId") REFERENCES "Courses" ("Id") ON DELETE CASCADE,
+    CONSTRAINT "FK_EmployeeCourses_Employees_EmployeeId" FOREIGN KEY ("EmployeeId") REFERENCES "Employees" ("Id") ON DELETE CASCADE
+);
+2025-09-11 13:10:40.565 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ProjectAssignments" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_ProjectAssignments" PRIMARY KEY AUTOINCREMENT,
+    "EmployeeId" INTEGER NOT NULL,
+    "ProjectId" INTEGER NOT NULL,
+    "Role" TEXT NOT NULL,
+    "AssignedDate" TEXT NOT NULL,
+    "MatchScore" INTEGER NOT NULL,
+    CONSTRAINT "FK_ProjectAssignments_Employees_EmployeeId" FOREIGN KEY ("EmployeeId") REFERENCES "Employees" ("Id") ON DELETE CASCADE,
+    CONSTRAINT "FK_ProjectAssignments_Projects_ProjectId" FOREIGN KEY ("ProjectId") REFERENCES "Projects" ("Id") ON DELETE CASCADE
+);
+2025-09-11 13:10:40.566 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Recommendations" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_Recommendations" PRIMARY KEY AUTOINCREMENT,
+    "EmployeeId" INTEGER NOT NULL,
+    "Type" INTEGER NOT NULL,
+    "Title" TEXT NOT NULL,
+    "Description" TEXT NOT NULL,
+    "Reasoning" TEXT NOT NULL,
+    "Priority" INTEGER NOT NULL,
+    "ConfidenceScore" TEXT NOT NULL,
+    "CreatedDate" TEXT NOT NULL,
+    "IsViewed" INTEGER NOT NULL,
+    "IsAccepted" INTEGER NOT NULL,
+    "CourseId" INTEGER NULL,
+    "MentorEmployeeId" INTEGER NULL,
+    "ProjectId" INTEGER NULL,
+    CONSTRAINT "FK_Recommendations_Courses_CourseId" FOREIGN KEY ("CourseId") REFERENCES "Courses" ("Id") ON DELETE SET NULL,
+    CONSTRAINT "FK_Recommendations_Employees_EmployeeId" FOREIGN KEY ("EmployeeId") REFERENCES "Employees" ("Id") ON DELETE CASCADE,
+    CONSTRAINT "FK_Recommendations_Employees_MentorEmployeeId" FOREIGN KEY ("MentorEmployeeId") REFERENCES "Employees" ("Id") ON DELETE SET NULL,
+    CONSTRAINT "FK_Recommendations_Projects_ProjectId" FOREIGN KEY ("ProjectId") REFERENCES "Projects" ("Id")
+);
+2025-09-11 13:10:40.566 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "EmployeeSkills" (
+    "EmployeeId" INTEGER NOT NULL,
+    "SkillId" INTEGER NOT NULL,
+    "Level" INTEGER NOT NULL,
+    "AcquiredDate" TEXT NOT NULL,
+    CONSTRAINT "PK_EmployeeSkills" PRIMARY KEY ("EmployeeId", "SkillId"),
+    CONSTRAINT "FK_EmployeeSkills_Employees_EmployeeId" FOREIGN KEY ("EmployeeId") REFERENCES "Employees" ("Id") ON DELETE CASCADE,
+    CONSTRAINT "FK_EmployeeSkills_Skills_SkillId" FOREIGN KEY ("SkillId") REFERENCES "Skills" ("Id") ON DELETE CASCADE
+);
+2025-09-11 13:10:40.566 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ProjectSkills" (
+    "ProjectId" INTEGER NOT NULL,
+    "SkillId" INTEGER NOT NULL,
+    "RequiredLevel" INTEGER NOT NULL,
+    "IsRequired" INTEGER NOT NULL,
+    CONSTRAINT "PK_ProjectSkills" PRIMARY KEY ("ProjectId", "SkillId"),
+    CONSTRAINT "FK_ProjectSkills_Projects_ProjectId" FOREIGN KEY ("ProjectId") REFERENCES "Projects" ("Id") ON DELETE CASCADE,
+    CONSTRAINT "FK_ProjectSkills_Skills_SkillId" FOREIGN KEY ("SkillId") REFERENCES "Skills" ("Id") ON DELETE CASCADE
+);
+2025-09-11 13:10:40.566 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_AspNetRoleClaims_RoleId" ON "AspNetRoleClaims" ("RoleId");
+2025-09-11 13:10:40.566 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "RoleNameIndex" ON "AspNetRoles" ("NormalizedName");
+2025-09-11 13:10:40.566 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_AspNetUserClaims_UserId" ON "AspNetUserClaims" ("UserId");
+2025-09-11 13:10:40.566 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_AspNetUserLogins_UserId" ON "AspNetUserLogins" ("UserId");
+2025-09-11 13:10:40.567 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_AspNetUserRoles_RoleId" ON "AspNetUserRoles" ("RoleId");
+2025-09-11 13:10:40.567 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "EmailIndex" ON "AspNetUsers" ("NormalizedEmail");
+2025-09-11 13:10:40.567 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "UserNameIndex" ON "AspNetUsers" ("NormalizedUserName");
+2025-09-11 13:10:40.567 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_EmployeeCourses_CourseId" ON "EmployeeCourses" ("CourseId");
+2025-09-11 13:10:40.567 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_EmployeeSkills_SkillId" ON "EmployeeSkills" ("SkillId");
+2025-09-11 13:10:40.567 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProjectAssignments_EmployeeId" ON "ProjectAssignments" ("EmployeeId");
+2025-09-11 13:10:40.568 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProjectAssignments_ProjectId" ON "ProjectAssignments" ("ProjectId");
+2025-09-11 13:10:40.568 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ProjectSkills_SkillId" ON "ProjectSkills" ("SkillId");
+2025-09-11 13:10:40.568 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Recommendations_CourseId" ON "Recommendations" ("CourseId");
+2025-09-11 13:10:40.568 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Recommendations_EmployeeId" ON "Recommendations" ("EmployeeId");
+2025-09-11 13:10:40.568 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Recommendations_MentorEmployeeId" ON "Recommendations" ("MentorEmployeeId");
+2025-09-11 13:10:40.568 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Recommendations_ProjectId" ON "Recommendations" ("ProjectId");
+2025-09-11 13:10:40.745 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Employees" AS "e")
+2025-09-11 13:10:40.957 +03:00 [INF] Executed DbCommand (6ms) [Parameters=[@p0='?' (Size = 11), @p1='?' (Size = 23), @p2='?' (Size = 2)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Skills" ("Category", "Description", "Name")
+VALUES (@p0, @p1, @p2)
+RETURNING "Id";
+2025-09-11 13:10:40.986 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 11), @p1='?' (Size = 22), @p2='?' (Size = 10)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Skills" ("Category", "Description", "Name")
+VALUES (@p0, @p1, @p2)
+RETURNING "Id";
+2025-09-11 13:10:40.987 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 8), @p1='?' (Size = 15), @p2='?' (Size = 5)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Skills" ("Category", "Description", "Name")
+VALUES (@p0, @p1, @p2)
+RETURNING "Id";
+2025-09-11 13:10:40.987 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 7), @p1='?' (Size = 22), @p2='?' (Size = 12)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Skills" ("Category", "Description", "Name")
+VALUES (@p0, @p1, @p2)
+RETURNING "Id";
+2025-09-11 13:10:40.988 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 8), @p1='?' (Size = 19), @p2='?' (Size = 10)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Skills" ("Category", "Description", "Name")
+VALUES (@p0, @p1, @p2)
+RETURNING "Id";
+2025-09-11 13:10:40.988 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 5), @p1='?' (Size = 30), @p2='?' (Size = 5)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Skills" ("Category", "Description", "Name")
+VALUES (@p0, @p1, @p2)
+RETURNING "Id";
+2025-09-11 13:10:40.988 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 11), @p1='?' (Size = 25), @p2='?' (Size = 10)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Skills" ("Category", "Description", "Name")
+VALUES (@p0, @p1, @p2)
+RETURNING "Id";
+2025-09-11 13:10:40.989 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 10), @p1='?' (Size = 25), @p2='?' (Size = 18)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Skills" ("Category", "Description", "Name")
+VALUES (@p0, @p1, @p2)
+RETURNING "Id";
+2025-09-11 13:10:40.989 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 6), @p1='?' (Size = 28), @p2='?' (Size = 6)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Skills" ("Category", "Description", "Name")
+VALUES (@p0, @p1, @p2)
+RETURNING "Id";
+2025-09-11 13:10:40.989 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 6), @p1='?' (Size = 23), @p2='?' (Size = 10)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Skills" ("Category", "Description", "Name")
+VALUES (@p0, @p1, @p2)
+RETURNING "Id";
+2025-09-11 13:10:41.057 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@p0='?' (Size = 11), @p1='?' (Size = 47), @p2='?' (DbType = Int32), @p3='?' (DbType = Decimal), @p4='?' (Size = 5), @p5='?' (DbType = Decimal), @p6='?' (Size = 23), @p7='?' (Size = 40)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Courses" ("Category", "Description", "DurationHours", "Price", "Provider", "Rating", "Title", "Url")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2025-09-11 13:10:41.059 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@p0='?' (Size = 8), @p1='?' (Size = 33), @p2='?' (DbType = Int32), @p3='?' (DbType = Decimal), @p4='?' (Size = 12), @p5='?' (DbType = Decimal), @p6='?' (Size = 19), @p7='?' (Size = 30)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Courses" ("Category", "Description", "DurationHours", "Price", "Provider", "Rating", "Title", "Url")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2025-09-11 13:10:41.060 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 5), @p1='?' (Size = 29), @p2='?' (DbType = Int32), @p3='?' (DbType = Decimal), @p4='?' (Size = 15), @p5='?' (DbType = Decimal), @p6='?' (Size = 18), @p7='?' (Size = 38)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Courses" ("Category", "Description", "DurationHours", "Price", "Provider", "Rating", "Title", "Url")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2025-09-11 13:10:41.060 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 10), @p1='?' (Size = 40), @p2='?' (DbType = Int32), @p3='?' (DbType = Decimal), @p4='?' (Size = 8), @p5='?' (DbType = Decimal), @p6='?' (Size = 21), @p7='?' (Size = 31)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Courses" ("Category", "Description", "DurationHours", "Price", "Provider", "Rating", "Title", "Url")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2025-09-11 13:10:41.060 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 6), @p1='?' (Size = 27), @p2='?' (DbType = Int32), @p3='?' (DbType = Decimal), @p4='?' (Size = 7), @p5='?' (DbType = Decimal), @p6='?' (Size = 14), @p7='?' (Size = 26)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Courses" ("Category", "Description", "DurationHours", "Price", "Provider", "Rating", "Title", "Url")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2025-09-11 13:10:41.097 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 11), @p1='?' (Size = 20), @p2='?' (Size = 4), @p3='?' (Size = 3), @p4='?' (Size = 18), @p5='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Employees" ("Department", "Email", "FirstName", "LastName", "Position", "YearsOfExperience")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5)
+RETURNING "Id";
+2025-09-11 13:10:41.101 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 11), @p1='?' (Size = 25), @p2='?' (Size = 5), @p3='?' (Size = 7), @p4='?' (Size = 16), @p5='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Employees" ("Department", "Email", "FirstName", "LastName", "Position", "YearsOfExperience")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5)
+RETURNING "Id";
+2025-09-11 13:10:41.101 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 11), @p1='?' (Size = 25), @p2='?' (Size = 7), @p3='?' (Size = 5), @p4='?' (Size = 9), @p5='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Employees" ("Department", "Email", "FirstName", "LastName", "Position", "YearsOfExperience")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5)
+RETURNING "Id";
+2025-09-11 13:10:41.102 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 11), @p1='?' (Size = 23), @p2='?' (Size = 5), @p3='?' (Size = 5), @p4='?' (Size = 18), @p5='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Employees" ("Department", "Email", "FirstName", "LastName", "Position", "YearsOfExperience")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5)
+RETURNING "Id";
+2025-09-11 13:10:41.102 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 11), @p1='?' (Size = 24), @p2='?' (Size = 5), @p3='?' (Size = 6), @p4='?' (Size = 15), @p5='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Employees" ("Department", "Email", "FirstName", "LastName", "Position", "YearsOfExperience")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5)
+RETURNING "Id";
+2025-09-11 13:10:41.150 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (DbType = DateTime), @p3='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "EmployeeSkills" ("EmployeeId", "SkillId", "AcquiredDate", "Level")
+VALUES (@p0, @p1, @p2, @p3);
+2025-09-11 13:10:41.151 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (DbType = DateTime), @p3='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "EmployeeSkills" ("EmployeeId", "SkillId", "AcquiredDate", "Level")
+VALUES (@p0, @p1, @p2, @p3);
+2025-09-11 13:10:41.151 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (DbType = DateTime), @p3='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "EmployeeSkills" ("EmployeeId", "SkillId", "AcquiredDate", "Level")
+VALUES (@p0, @p1, @p2, @p3);
+2025-09-11 13:10:41.151 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (DbType = DateTime), @p3='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "EmployeeSkills" ("EmployeeId", "SkillId", "AcquiredDate", "Level")
+VALUES (@p0, @p1, @p2, @p3);
+2025-09-11 13:10:41.151 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (DbType = DateTime), @p3='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "EmployeeSkills" ("EmployeeId", "SkillId", "AcquiredDate", "Level")
+VALUES (@p0, @p1, @p2, @p3);
+2025-09-11 13:10:41.152 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (DbType = DateTime), @p3='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "EmployeeSkills" ("EmployeeId", "SkillId", "AcquiredDate", "Level")
+VALUES (@p0, @p1, @p2, @p3);
+2025-09-11 13:10:41.152 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (DbType = DateTime), @p3='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "EmployeeSkills" ("EmployeeId", "SkillId", "AcquiredDate", "Level")
+VALUES (@p0, @p1, @p2, @p3);
+2025-09-11 13:10:41.152 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (DbType = DateTime), @p3='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "EmployeeSkills" ("EmployeeId", "SkillId", "AcquiredDate", "Level")
+VALUES (@p0, @p1, @p2, @p3);
+2025-09-11 13:10:41.197 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 11), @p1='?' (Size = 64), @p2='?' (DbType = DateTime), @p3='?' (DbType = Int32), @p4='?' (Size = 19), @p5='?' (DbType = DateTime), @p6='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Projects" ("Department", "Description", "EndDate", "MaxTeamSize", "Name", "StartDate", "Status")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6)
+RETURNING "Id";
+2025-09-11 13:10:41.199 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 11), @p1='?' (Size = 53), @p2='?' (DbType = DateTime), @p3='?' (DbType = Int32), @p4='?' (Size = 19), @p5='?' (DbType = DateTime), @p6='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Projects" ("Department", "Description", "EndDate", "MaxTeamSize", "Name", "StartDate", "Status")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6)
+RETURNING "Id";
+2025-09-11 13:10:41.200 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 11), @p1='?' (Size = 46), @p2='?' (DbType = DateTime), @p3='?' (DbType = Int32), @p4='?' (Size = 15), @p5='?' (DbType = DateTime), @p6='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Projects" ("Department", "Description", "EndDate", "MaxTeamSize", "Name", "StartDate", "Status")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6)
+RETURNING "Id";
+2025-09-11 13:10:41.223 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (DbType = Boolean), @p3='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ProjectSkills" ("ProjectId", "SkillId", "IsRequired", "RequiredLevel")
+VALUES (@p0, @p1, @p2, @p3);
+2025-09-11 13:10:41.223 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (DbType = Boolean), @p3='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ProjectSkills" ("ProjectId", "SkillId", "IsRequired", "RequiredLevel")
+VALUES (@p0, @p1, @p2, @p3);
+2025-09-11 13:10:41.224 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (DbType = Boolean), @p3='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ProjectSkills" ("ProjectId", "SkillId", "IsRequired", "RequiredLevel")
+VALUES (@p0, @p1, @p2, @p3);
+2025-09-11 13:10:41.224 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (DbType = Boolean), @p3='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ProjectSkills" ("ProjectId", "SkillId", "IsRequired", "RequiredLevel")
+VALUES (@p0, @p1, @p2, @p3);
+2025-09-11 13:10:41.224 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (DbType = Boolean), @p3='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ProjectSkills" ("ProjectId", "SkillId", "IsRequired", "RequiredLevel")
+VALUES (@p0, @p1, @p2, @p3);
+2025-09-11 13:10:41.224 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (DbType = Boolean), @p3='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ProjectSkills" ("ProjectId", "SkillId", "IsRequired", "RequiredLevel")
+VALUES (@p0, @p1, @p2, @p3);
+2025-09-11 13:10:41.225 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (DbType = Boolean), @p3='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ProjectSkills" ("ProjectId", "SkillId", "IsRequired", "RequiredLevel")
+VALUES (@p0, @p1, @p2, @p3);
+2025-09-11 13:11:52.175 +03:00 [INF] Executed DbCommand (11ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*) FROM "sqlite_master" WHERE "type" = 'table' AND "rootpage" IS NOT NULL;
+2025-09-11 13:11:52.409 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Employees" AS "e")
+2025-09-11 13:11:52.490 +03:00 [INF] User profile is available. Using 'C:\Users\alaa.osama\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-09-11 13:11:52.628 +03:00 [INF] Now listening on: http://localhost:5019
+2025-09-11 13:11:52.632 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-09-11 13:11:52.633 +03:00 [INF] Hosting environment: Development
+2025-09-11 13:11:52.633 +03:00 [INF] Content root path: D:\AI Competition\CareerPathRecommender.Web
+2025-09-11 13:12:26.703 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5019/ - null null
+2025-09-11 13:12:26.711 +03:00 [WRN] Failed to determine the https port for redirect.
+2025-09-11 13:12:26.779 +03:00 [INF] Executing endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.Index (CareerPathRecommender.Web)'
+2025-09-11 13:12:26.816 +03:00 [INF] Route matched with {action = "Index", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Index() on controller CareerPathRecommender.Web.Controllers.DashboardController (CareerPathRecommender.Web).
+2025-09-11 13:12:26.985 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+FROM "Employees" AS "e"
+2025-09-11 13:12:27.221 +03:00 [INF] Executing ViewResult, running view Index.
+2025-09-11 13:12:27.335 +03:00 [INF] Executed ViewResult - view Index executed in 117.8113ms.
+2025-09-11 13:12:27.337 +03:00 [INF] Executed action CareerPathRecommender.Web.Controllers.DashboardController.Index (CareerPathRecommender.Web) in 517.9941ms
+2025-09-11 13:12:27.337 +03:00 [INF] Executed endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.Index (CareerPathRecommender.Web)'
+2025-09-11 13:12:27.345 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5019/ - 200 null text/html; charset=utf-8 643.6752ms
+2025-09-11 13:12:27.378 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5019/lib/bootstrap/dist/css/bootstrap.min.css - null null
+2025-09-11 13:12:27.379 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5019/css/site.css?v=j6fhJSuuyLpOSLuPJU0TsDV0iNjor5S3rDnvxJrt4bg - null null
+2025-09-11 13:12:27.382 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5019/lib/jquery/dist/jquery.min.js - null null
+2025-09-11 13:12:27.383 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5019/CareerPathRecommender.Web.styles.css?v=ZwMsEOyEUieSeG8L2UEzUBegZkf1f-ies1SPo0g54yk - null null
+2025-09-11 13:12:27.384 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5019/lib/bootstrap/dist/js/bootstrap.bundle.min.js - null null
+2025-09-11 13:12:27.384 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5019/js/site.js?v=hRQyftXiu1lLX2P9Ly9xa4gHJgLeR1uGN5qegUobtGo - null null
+2025-09-11 13:12:27.394 +03:00 [INF] Sending file. Request path: '/css/site.css'. Physical path: 'D:\AI Competition\CareerPathRecommender.Web\wwwroot\css\site.css'
+2025-09-11 13:12:27.395 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5019/css/site.css?v=j6fhJSuuyLpOSLuPJU0TsDV0iNjor5S3rDnvxJrt4bg - 200 667 text/css 15.3841ms
+2025-09-11 13:12:27.416 +03:00 [INF] Sending file. Request path: '/js/site.js'. Physical path: 'D:\AI Competition\CareerPathRecommender.Web\wwwroot\js\site.js'
+2025-09-11 13:12:27.417 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5019/js/site.js?v=hRQyftXiu1lLX2P9Ly9xa4gHJgLeR1uGN5qegUobtGo - 200 231 text/javascript 32.4809ms
+2025-09-11 13:12:27.422 +03:00 [INF] Sending file. Request path: '/lib/bootstrap/dist/js/bootstrap.bundle.min.js'. Physical path: 'D:\AI Competition\CareerPathRecommender.Web\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js'
+2025-09-11 13:12:27.422 +03:00 [INF] Sending file. Request path: '/lib/jquery/dist/jquery.min.js'. Physical path: 'D:\AI Competition\CareerPathRecommender.Web\wwwroot\lib\jquery\dist\jquery.min.js'
+2025-09-11 13:12:27.422 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5019/lib/bootstrap/dist/js/bootstrap.bundle.min.js - 200 80721 text/javascript 38.7744ms
+2025-09-11 13:12:27.422 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5019/lib/jquery/dist/jquery.min.js - 200 87533 text/javascript 40.5098ms
+2025-09-11 13:12:27.427 +03:00 [INF] Sending file. Request path: '/lib/bootstrap/dist/css/bootstrap.min.css'. Physical path: 'D:\AI Competition\CareerPathRecommender.Web\wwwroot\lib\bootstrap\dist\css\bootstrap.min.css'
+2025-09-11 13:12:27.427 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5019/lib/bootstrap/dist/css/bootstrap.min.css - 200 232803 text/css 48.7839ms
+2025-09-11 13:12:27.434 +03:00 [INF] Sending file. Request path: '/CareerPathRecommender.Web.styles.css'. Physical path: 'D:\AI Competition\CareerPathRecommender.Web\obj\Debug\net8.0\scopedcss\bundle\CareerPathRecommender.Web.styles.css'
+2025-09-11 13:12:27.435 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5019/CareerPathRecommender.Web.styles.css?v=ZwMsEOyEUieSeG8L2UEzUBegZkf1f-ies1SPo0g54yk - 200 1143 text/css 51.2343ms
+2025-09-11 13:12:28.783 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5019/Dashboard/GetEmployeeMetrics - null null
+2025-09-11 13:12:28.786 +03:00 [INF] Executing endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.GetEmployeeMetrics (CareerPathRecommender.Web)'
+2025-09-11 13:12:28.795 +03:00 [INF] Route matched with {action = "GetEmployeeMetrics", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetEmployeeMetrics() on controller CareerPathRecommender.Web.Controllers.DashboardController (CareerPathRecommender.Web).
+2025-09-11 13:12:28.919 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Employees" AS "e"
+2025-09-11 13:12:28.922 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Courses" AS "c"
+2025-09-11 13:12:28.925 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Projects" AS "p"
+2025-09-11 13:12:28.956 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "EmployeeCourses" AS "e"
+WHERE "e"."Status" = 1
+2025-09-11 13:12:28.959 +03:00 [INF] Executing JsonResult, writing value of type '<>f__AnonymousType4`4[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-09-11 13:12:29.018 +03:00 [INF] Executed action CareerPathRecommender.Web.Controllers.DashboardController.GetEmployeeMetrics (CareerPathRecommender.Web) in 223.2341ms
+2025-09-11 13:12:29.018 +03:00 [INF] Executed endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.GetEmployeeMetrics (CareerPathRecommender.Web)'
+2025-09-11 13:12:29.019 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5019/Dashboard/GetEmployeeMetrics - 200 null application/json; charset=utf-8 235.9787ms
+2025-09-11 13:12:29.917 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5019/favicon.ico - null null
+2025-09-11 13:12:29.918 +03:00 [INF] Sending file. Request path: '/favicon.ico'. Physical path: 'D:\AI Competition\CareerPathRecommender.Web\wwwroot\favicon.ico'
+2025-09-11 13:12:29.918 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5019/favicon.ico - 200 5430 image/x-icon 1.3322ms
+2025-09-11 13:12:39.487 +03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - application/x-www-form-urlencoded; charset=UTF-8 12
+2025-09-11 13:12:39.492 +03:00 [INF] Executing endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:12:39.501 +03:00 [INF] Route matched with {action = "SelectEmployee", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] SelectEmployee(Int32) on controller CareerPathRecommender.Web.Controllers.DashboardController (CareerPathRecommender.Web).
+2025-09-11 13:12:39.616 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:12:39.685 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:12:39.697 +03:00 [ERR] Error selecting employee 1
+System.NotSupportedException: SQLite does not support expressions of type 'decimal' in ORDER BY clauses. Convert the values to a supported type, or use LINQ to Objects to order the results on the client side.
+   at Microsoft.EntityFrameworkCore.Sqlite.Query.Internal.SqliteQueryableMethodTranslatingExpressionVisitor.TranslateOrderBy(ShapedQueryExpression source, LambdaExpression keySelector, Boolean ascending)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.QueryCompilationContext.CreateQueryExecutor[TResult](Expression query)
+   at Microsoft.EntityFrameworkCore.Storage.Database.CompileQuery[TResult](Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.CompileQueryCore[TResult](IDatabase database, Expression query, IModel model, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.<>c__DisplayClass12_0`1.<ExecuteAsync>b__0()
+   at Microsoft.EntityFrameworkCore.Query.Internal.CompiledQueryCache.GetOrAddQuery[TResult](Object cacheKey, Func`1 compiler)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.ExecuteAsync[TResult](Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryable`1.GetAsyncEnumerator(CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable`1.GetAsyncEnumerator()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at CareerPathRecommender.Core.Services.RecommendationService.RecommendCoursesAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 39
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateCourseRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 118
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 22
+   at CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Web\Controllers\DashboardController.cs:line 56
+2025-09-11 13:12:39.713 +03:00 [INF] Executing JsonResult, writing value of type '<>f__AnonymousType0`2[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-09-11 13:12:39.728 +03:00 [INF] Executed action CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web) in 226.9097ms
+2025-09-11 13:12:39.729 +03:00 [INF] Executed endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:12:39.729 +03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - 200 null application/json; charset=utf-8 241.7999ms
+2025-09-11 13:12:44.033 +03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - application/x-www-form-urlencoded; charset=UTF-8 12
+2025-09-11 13:12:44.034 +03:00 [INF] Executing endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:12:44.034 +03:00 [INF] Route matched with {action = "SelectEmployee", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] SelectEmployee(Int32) on controller CareerPathRecommender.Web.Controllers.DashboardController (CareerPathRecommender.Web).
+2025-09-11 13:12:44.040 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:12:44.043 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:12:44.047 +03:00 [ERR] Error selecting employee 2
+System.NotSupportedException: SQLite does not support expressions of type 'decimal' in ORDER BY clauses. Convert the values to a supported type, or use LINQ to Objects to order the results on the client side.
+   at Microsoft.EntityFrameworkCore.Sqlite.Query.Internal.SqliteQueryableMethodTranslatingExpressionVisitor.TranslateOrderBy(ShapedQueryExpression source, LambdaExpression keySelector, Boolean ascending)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.QueryCompilationContext.CreateQueryExecutor[TResult](Expression query)
+   at Microsoft.EntityFrameworkCore.Storage.Database.CompileQuery[TResult](Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.CompileQueryCore[TResult](IDatabase database, Expression query, IModel model, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.<>c__DisplayClass12_0`1.<ExecuteAsync>b__0()
+   at Microsoft.EntityFrameworkCore.Query.Internal.CompiledQueryCache.GetOrAddQuery[TResult](Object cacheKey, Func`1 compiler)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.ExecuteAsync[TResult](Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryable`1.GetAsyncEnumerator(CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable`1.GetAsyncEnumerator()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at CareerPathRecommender.Core.Services.RecommendationService.RecommendCoursesAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 39
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateCourseRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 118
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 22
+   at CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Web\Controllers\DashboardController.cs:line 56
+2025-09-11 13:12:44.048 +03:00 [INF] Executing JsonResult, writing value of type '<>f__AnonymousType0`2[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-09-11 13:12:44.049 +03:00 [INF] Executed action CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web) in 14.8234ms
+2025-09-11 13:12:44.049 +03:00 [INF] Executed endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:12:44.049 +03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - 200 null application/json; charset=utf-8 16.6756ms
+2025-09-11 13:12:45.176 +03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - application/x-www-form-urlencoded; charset=UTF-8 12
+2025-09-11 13:12:45.177 +03:00 [INF] Executing endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:12:45.177 +03:00 [INF] Route matched with {action = "SelectEmployee", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] SelectEmployee(Int32) on controller CareerPathRecommender.Web.Controllers.DashboardController (CareerPathRecommender.Web).
+2025-09-11 13:12:45.179 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:12:45.181 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:12:45.182 +03:00 [ERR] Error selecting employee 3
+System.NotSupportedException: SQLite does not support expressions of type 'decimal' in ORDER BY clauses. Convert the values to a supported type, or use LINQ to Objects to order the results on the client side.
+   at Microsoft.EntityFrameworkCore.Sqlite.Query.Internal.SqliteQueryableMethodTranslatingExpressionVisitor.TranslateOrderBy(ShapedQueryExpression source, LambdaExpression keySelector, Boolean ascending)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.QueryCompilationContext.CreateQueryExecutor[TResult](Expression query)
+   at Microsoft.EntityFrameworkCore.Storage.Database.CompileQuery[TResult](Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.CompileQueryCore[TResult](IDatabase database, Expression query, IModel model, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.<>c__DisplayClass12_0`1.<ExecuteAsync>b__0()
+   at Microsoft.EntityFrameworkCore.Query.Internal.CompiledQueryCache.GetOrAddQuery[TResult](Object cacheKey, Func`1 compiler)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.ExecuteAsync[TResult](Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryable`1.GetAsyncEnumerator(CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable`1.GetAsyncEnumerator()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at CareerPathRecommender.Core.Services.RecommendationService.RecommendCoursesAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 39
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateCourseRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 118
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 22
+   at CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Web\Controllers\DashboardController.cs:line 56
+2025-09-11 13:12:45.183 +03:00 [INF] Executing JsonResult, writing value of type '<>f__AnonymousType0`2[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-09-11 13:12:45.184 +03:00 [INF] Executed action CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web) in 6.388ms
+2025-09-11 13:12:45.184 +03:00 [INF] Executed endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:12:45.184 +03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - 200 null application/json; charset=utf-8 7.3612ms
+2025-09-11 13:12:46.524 +03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - application/x-www-form-urlencoded; charset=UTF-8 12
+2025-09-11 13:12:46.525 +03:00 [INF] Executing endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:12:46.525 +03:00 [INF] Route matched with {action = "SelectEmployee", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] SelectEmployee(Int32) on controller CareerPathRecommender.Web.Controllers.DashboardController (CareerPathRecommender.Web).
+2025-09-11 13:12:46.528 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:12:46.530 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:12:46.532 +03:00 [ERR] Error selecting employee 5
+System.NotSupportedException: SQLite does not support expressions of type 'decimal' in ORDER BY clauses. Convert the values to a supported type, or use LINQ to Objects to order the results on the client side.
+   at Microsoft.EntityFrameworkCore.Sqlite.Query.Internal.SqliteQueryableMethodTranslatingExpressionVisitor.TranslateOrderBy(ShapedQueryExpression source, LambdaExpression keySelector, Boolean ascending)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.QueryCompilationContext.CreateQueryExecutor[TResult](Expression query)
+   at Microsoft.EntityFrameworkCore.Storage.Database.CompileQuery[TResult](Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.CompileQueryCore[TResult](IDatabase database, Expression query, IModel model, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.<>c__DisplayClass12_0`1.<ExecuteAsync>b__0()
+   at Microsoft.EntityFrameworkCore.Query.Internal.CompiledQueryCache.GetOrAddQuery[TResult](Object cacheKey, Func`1 compiler)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.ExecuteAsync[TResult](Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryable`1.GetAsyncEnumerator(CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable`1.GetAsyncEnumerator()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at CareerPathRecommender.Core.Services.RecommendationService.RecommendCoursesAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 39
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateCourseRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 118
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 22
+   at CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Web\Controllers\DashboardController.cs:line 56
+2025-09-11 13:12:46.532 +03:00 [INF] Executing JsonResult, writing value of type '<>f__AnonymousType0`2[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-09-11 13:12:46.533 +03:00 [INF] Executed action CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web) in 7.3591ms
+2025-09-11 13:12:46.533 +03:00 [INF] Executed endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:12:46.533 +03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - 200 null application/json; charset=utf-8 8.4748ms
+2025-09-11 13:13:06.737 +03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - application/x-www-form-urlencoded; charset=UTF-8 12
+2025-09-11 13:13:06.737 +03:00 [INF] Executing endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:13:06.737 +03:00 [INF] Route matched with {action = "SelectEmployee", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] SelectEmployee(Int32) on controller CareerPathRecommender.Web.Controllers.DashboardController (CareerPathRecommender.Web).
+2025-09-11 13:13:06.740 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:13:06.742 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:13:06.744 +03:00 [ERR] Error selecting employee 1
+System.NotSupportedException: SQLite does not support expressions of type 'decimal' in ORDER BY clauses. Convert the values to a supported type, or use LINQ to Objects to order the results on the client side.
+   at Microsoft.EntityFrameworkCore.Sqlite.Query.Internal.SqliteQueryableMethodTranslatingExpressionVisitor.TranslateOrderBy(ShapedQueryExpression source, LambdaExpression keySelector, Boolean ascending)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.QueryCompilationContext.CreateQueryExecutor[TResult](Expression query)
+   at Microsoft.EntityFrameworkCore.Storage.Database.CompileQuery[TResult](Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.CompileQueryCore[TResult](IDatabase database, Expression query, IModel model, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.<>c__DisplayClass12_0`1.<ExecuteAsync>b__0()
+   at Microsoft.EntityFrameworkCore.Query.Internal.CompiledQueryCache.GetOrAddQuery[TResult](Object cacheKey, Func`1 compiler)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.ExecuteAsync[TResult](Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryable`1.GetAsyncEnumerator(CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable`1.GetAsyncEnumerator()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at CareerPathRecommender.Core.Services.RecommendationService.RecommendCoursesAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 39
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateCourseRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 118
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 22
+   at CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Web\Controllers\DashboardController.cs:line 56
+2025-09-11 13:13:06.746 +03:00 [INF] Executing JsonResult, writing value of type '<>f__AnonymousType0`2[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-09-11 13:13:06.747 +03:00 [INF] Executed action CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web) in 9.3816ms
+2025-09-11 13:13:06.747 +03:00 [INF] Executed endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:13:06.747 +03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - 200 null application/json; charset=utf-8 10.2744ms
+2025-09-11 13:13:12.774 +03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5019/Dashboard/AnalyzeSkillGaps - application/x-www-form-urlencoded; charset=UTF-8 34
+2025-09-11 13:13:12.775 +03:00 [INF] Executing endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.AnalyzeSkillGaps (CareerPathRecommender.Web)'
+2025-09-11 13:13:12.778 +03:00 [INF] Route matched with {action = "AnalyzeSkillGaps", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] AnalyzeSkillGaps(Int32, System.String) on controller CareerPathRecommender.Web.Controllers.DashboardController (CareerPathRecommender.Web).
+2025-09-11 13:13:12.785 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:13:12.791 +03:00 [INF] Executing PartialViewResult, running view _SkillGapAnalysis.
+2025-09-11 13:13:12.801 +03:00 [INF] Executed PartialViewResult - view _SkillGapAnalysis executed in 10.8412ms.
+2025-09-11 13:13:12.801 +03:00 [INF] Executed action CareerPathRecommender.Web.Controllers.DashboardController.AnalyzeSkillGaps (CareerPathRecommender.Web) in 22.7055ms
+2025-09-11 13:13:12.801 +03:00 [INF] Executed endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.AnalyzeSkillGaps (CareerPathRecommender.Web)'
+2025-09-11 13:13:12.801 +03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5019/Dashboard/AnalyzeSkillGaps - 200 null text/html; charset=utf-8 27.4817ms
+2025-09-11 13:13:48.665 +03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - application/x-www-form-urlencoded; charset=UTF-8 12
+2025-09-11 13:13:48.666 +03:00 [INF] Executing endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:13:48.666 +03:00 [INF] Route matched with {action = "SelectEmployee", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] SelectEmployee(Int32) on controller CareerPathRecommender.Web.Controllers.DashboardController (CareerPathRecommender.Web).
+2025-09-11 13:13:48.670 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:13:48.672 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:13:48.674 +03:00 [ERR] Error selecting employee 1
+System.NotSupportedException: SQLite does not support expressions of type 'decimal' in ORDER BY clauses. Convert the values to a supported type, or use LINQ to Objects to order the results on the client side.
+   at Microsoft.EntityFrameworkCore.Sqlite.Query.Internal.SqliteQueryableMethodTranslatingExpressionVisitor.TranslateOrderBy(ShapedQueryExpression source, LambdaExpression keySelector, Boolean ascending)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.QueryCompilationContext.CreateQueryExecutor[TResult](Expression query)
+   at Microsoft.EntityFrameworkCore.Storage.Database.CompileQuery[TResult](Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.CompileQueryCore[TResult](IDatabase database, Expression query, IModel model, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.<>c__DisplayClass12_0`1.<ExecuteAsync>b__0()
+   at Microsoft.EntityFrameworkCore.Query.Internal.CompiledQueryCache.GetOrAddQuery[TResult](Object cacheKey, Func`1 compiler)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.ExecuteAsync[TResult](Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryable`1.GetAsyncEnumerator(CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable`1.GetAsyncEnumerator()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at CareerPathRecommender.Core.Services.RecommendationService.RecommendCoursesAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 39
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateCourseRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 118
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 22
+   at CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Web\Controllers\DashboardController.cs:line 56
+2025-09-11 13:13:48.675 +03:00 [INF] Executing JsonResult, writing value of type '<>f__AnonymousType0`2[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-09-11 13:13:48.675 +03:00 [INF] Executed action CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web) in 8.6905ms
+2025-09-11 13:13:48.675 +03:00 [INF] Executed endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:13:48.675 +03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - 200 null application/json; charset=utf-8 10.3788ms
+2025-09-11 13:13:50.513 +03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - application/x-www-form-urlencoded; charset=UTF-8 12
+2025-09-11 13:13:50.513 +03:00 [INF] Executing endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:13:50.513 +03:00 [INF] Route matched with {action = "SelectEmployee", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] SelectEmployee(Int32) on controller CareerPathRecommender.Web.Controllers.DashboardController (CareerPathRecommender.Web).
+2025-09-11 13:13:50.516 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:13:50.518 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:13:50.521 +03:00 [ERR] Error selecting employee 2
+System.NotSupportedException: SQLite does not support expressions of type 'decimal' in ORDER BY clauses. Convert the values to a supported type, or use LINQ to Objects to order the results on the client side.
+   at Microsoft.EntityFrameworkCore.Sqlite.Query.Internal.SqliteQueryableMethodTranslatingExpressionVisitor.TranslateOrderBy(ShapedQueryExpression source, LambdaExpression keySelector, Boolean ascending)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.QueryCompilationContext.CreateQueryExecutor[TResult](Expression query)
+   at Microsoft.EntityFrameworkCore.Storage.Database.CompileQuery[TResult](Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.CompileQueryCore[TResult](IDatabase database, Expression query, IModel model, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.<>c__DisplayClass12_0`1.<ExecuteAsync>b__0()
+   at Microsoft.EntityFrameworkCore.Query.Internal.CompiledQueryCache.GetOrAddQuery[TResult](Object cacheKey, Func`1 compiler)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.ExecuteAsync[TResult](Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryable`1.GetAsyncEnumerator(CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable`1.GetAsyncEnumerator()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at CareerPathRecommender.Core.Services.RecommendationService.RecommendCoursesAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 39
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateCourseRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 118
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 22
+   at CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Web\Controllers\DashboardController.cs:line 56
+2025-09-11 13:13:50.522 +03:00 [INF] Executing JsonResult, writing value of type '<>f__AnonymousType0`2[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-09-11 13:13:50.523 +03:00 [INF] Executed action CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web) in 9.2808ms
+2025-09-11 13:13:50.523 +03:00 [INF] Executed endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:13:50.523 +03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - 200 null application/json; charset=utf-8 10.1001ms
+2025-09-11 13:13:53.819 +03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - application/x-www-form-urlencoded; charset=UTF-8 12
+2025-09-11 13:13:53.819 +03:00 [INF] Executing endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:13:53.819 +03:00 [INF] Route matched with {action = "SelectEmployee", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] SelectEmployee(Int32) on controller CareerPathRecommender.Web.Controllers.DashboardController (CareerPathRecommender.Web).
+2025-09-11 13:13:53.821 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:13:53.821 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:13:53.823 +03:00 [ERR] Error selecting employee 3
+System.NotSupportedException: SQLite does not support expressions of type 'decimal' in ORDER BY clauses. Convert the values to a supported type, or use LINQ to Objects to order the results on the client side.
+   at Microsoft.EntityFrameworkCore.Sqlite.Query.Internal.SqliteQueryableMethodTranslatingExpressionVisitor.TranslateOrderBy(ShapedQueryExpression source, LambdaExpression keySelector, Boolean ascending)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.QueryCompilationContext.CreateQueryExecutor[TResult](Expression query)
+   at Microsoft.EntityFrameworkCore.Storage.Database.CompileQuery[TResult](Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.CompileQueryCore[TResult](IDatabase database, Expression query, IModel model, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.<>c__DisplayClass12_0`1.<ExecuteAsync>b__0()
+   at Microsoft.EntityFrameworkCore.Query.Internal.CompiledQueryCache.GetOrAddQuery[TResult](Object cacheKey, Func`1 compiler)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.ExecuteAsync[TResult](Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryable`1.GetAsyncEnumerator(CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable`1.GetAsyncEnumerator()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at CareerPathRecommender.Core.Services.RecommendationService.RecommendCoursesAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 39
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateCourseRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 118
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 22
+   at CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Web\Controllers\DashboardController.cs:line 56
+2025-09-11 13:13:53.824 +03:00 [INF] Executing JsonResult, writing value of type '<>f__AnonymousType0`2[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-09-11 13:13:53.824 +03:00 [INF] Executed action CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web) in 5.1344ms
+2025-09-11 13:13:53.825 +03:00 [INF] Executed endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:13:53.825 +03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - 200 null application/json; charset=utf-8 6.56ms
+2025-09-11 13:13:56.167 +03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - application/x-www-form-urlencoded; charset=UTF-8 12
+2025-09-11 13:13:56.168 +03:00 [INF] Executing endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:13:56.168 +03:00 [INF] Route matched with {action = "SelectEmployee", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] SelectEmployee(Int32) on controller CareerPathRecommender.Web.Controllers.DashboardController (CareerPathRecommender.Web).
+2025-09-11 13:13:56.170 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:13:56.172 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:13:56.174 +03:00 [ERR] Error selecting employee 4
+System.NotSupportedException: SQLite does not support expressions of type 'decimal' in ORDER BY clauses. Convert the values to a supported type, or use LINQ to Objects to order the results on the client side.
+   at Microsoft.EntityFrameworkCore.Sqlite.Query.Internal.SqliteQueryableMethodTranslatingExpressionVisitor.TranslateOrderBy(ShapedQueryExpression source, LambdaExpression keySelector, Boolean ascending)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.QueryCompilationContext.CreateQueryExecutor[TResult](Expression query)
+   at Microsoft.EntityFrameworkCore.Storage.Database.CompileQuery[TResult](Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.CompileQueryCore[TResult](IDatabase database, Expression query, IModel model, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.<>c__DisplayClass12_0`1.<ExecuteAsync>b__0()
+   at Microsoft.EntityFrameworkCore.Query.Internal.CompiledQueryCache.GetOrAddQuery[TResult](Object cacheKey, Func`1 compiler)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.ExecuteAsync[TResult](Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryable`1.GetAsyncEnumerator(CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable`1.GetAsyncEnumerator()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at CareerPathRecommender.Core.Services.RecommendationService.RecommendCoursesAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 39
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateCourseRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 118
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 22
+   at CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Web\Controllers\DashboardController.cs:line 56
+2025-09-11 13:13:56.175 +03:00 [INF] Executing JsonResult, writing value of type '<>f__AnonymousType0`2[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-09-11 13:13:56.176 +03:00 [INF] Executed action CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web) in 7.8967ms
+2025-09-11 13:13:56.176 +03:00 [INF] Executed endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:13:56.176 +03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - 200 null application/json; charset=utf-8 9.4612ms
+2025-09-11 13:13:57.944 +03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - application/x-www-form-urlencoded; charset=UTF-8 12
+2025-09-11 13:13:57.945 +03:00 [INF] Executing endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:13:57.945 +03:00 [INF] Route matched with {action = "SelectEmployee", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] SelectEmployee(Int32) on controller CareerPathRecommender.Web.Controllers.DashboardController (CareerPathRecommender.Web).
+2025-09-11 13:13:57.946 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:13:57.947 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:13:57.950 +03:00 [ERR] Error selecting employee 5
+System.NotSupportedException: SQLite does not support expressions of type 'decimal' in ORDER BY clauses. Convert the values to a supported type, or use LINQ to Objects to order the results on the client side.
+   at Microsoft.EntityFrameworkCore.Sqlite.Query.Internal.SqliteQueryableMethodTranslatingExpressionVisitor.TranslateOrderBy(ShapedQueryExpression source, LambdaExpression keySelector, Boolean ascending)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.QueryCompilationContext.CreateQueryExecutor[TResult](Expression query)
+   at Microsoft.EntityFrameworkCore.Storage.Database.CompileQuery[TResult](Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.CompileQueryCore[TResult](IDatabase database, Expression query, IModel model, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.<>c__DisplayClass12_0`1.<ExecuteAsync>b__0()
+   at Microsoft.EntityFrameworkCore.Query.Internal.CompiledQueryCache.GetOrAddQuery[TResult](Object cacheKey, Func`1 compiler)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.ExecuteAsync[TResult](Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryable`1.GetAsyncEnumerator(CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable`1.GetAsyncEnumerator()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at CareerPathRecommender.Core.Services.RecommendationService.RecommendCoursesAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 39
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateCourseRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 118
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 22
+   at CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Web\Controllers\DashboardController.cs:line 56
+2025-09-11 13:13:57.952 +03:00 [INF] Executing JsonResult, writing value of type '<>f__AnonymousType0`2[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-09-11 13:13:57.953 +03:00 [INF] Executed action CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web) in 7.7674ms
+2025-09-11 13:13:57.953 +03:00 [INF] Executed endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:13:57.953 +03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - 200 null application/json; charset=utf-8 8.5983ms
+2025-09-11 13:14:03.468 +03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5019/Dashboard/AnalyzeSkillGaps - application/x-www-form-urlencoded; charset=UTF-8 34
+2025-09-11 13:14:03.468 +03:00 [INF] Executing endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.AnalyzeSkillGaps (CareerPathRecommender.Web)'
+2025-09-11 13:14:03.468 +03:00 [INF] Route matched with {action = "AnalyzeSkillGaps", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] AnalyzeSkillGaps(Int32, System.String) on controller CareerPathRecommender.Web.Controllers.DashboardController (CareerPathRecommender.Web).
+2025-09-11 13:14:03.472 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:14:03.473 +03:00 [INF] Executing PartialViewResult, running view _SkillGapAnalysis.
+2025-09-11 13:14:03.475 +03:00 [INF] Executed PartialViewResult - view _SkillGapAnalysis executed in 2.9005ms.
+2025-09-11 13:14:03.475 +03:00 [INF] Executed action CareerPathRecommender.Web.Controllers.DashboardController.AnalyzeSkillGaps (CareerPathRecommender.Web) in 6.8824ms
+2025-09-11 13:14:03.475 +03:00 [INF] Executed endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.AnalyzeSkillGaps (CareerPathRecommender.Web)'
+2025-09-11 13:14:03.476 +03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5019/Dashboard/AnalyzeSkillGaps - 200 null text/html; charset=utf-8 7.4768ms
+2025-09-11 13:14:09.472 +03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - application/x-www-form-urlencoded; charset=UTF-8 12
+2025-09-11 13:14:09.472 +03:00 [INF] Executing endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:14:09.472 +03:00 [INF] Route matched with {action = "SelectEmployee", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] SelectEmployee(Int32) on controller CareerPathRecommender.Web.Controllers.DashboardController (CareerPathRecommender.Web).
+2025-09-11 13:14:09.475 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:14:09.476 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:14:09.480 +03:00 [ERR] Error selecting employee 2
+System.NotSupportedException: SQLite does not support expressions of type 'decimal' in ORDER BY clauses. Convert the values to a supported type, or use LINQ to Objects to order the results on the client side.
+   at Microsoft.EntityFrameworkCore.Sqlite.Query.Internal.SqliteQueryableMethodTranslatingExpressionVisitor.TranslateOrderBy(ShapedQueryExpression source, LambdaExpression keySelector, Boolean ascending)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.QueryCompilationContext.CreateQueryExecutor[TResult](Expression query)
+   at Microsoft.EntityFrameworkCore.Storage.Database.CompileQuery[TResult](Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.CompileQueryCore[TResult](IDatabase database, Expression query, IModel model, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.<>c__DisplayClass12_0`1.<ExecuteAsync>b__0()
+   at Microsoft.EntityFrameworkCore.Query.Internal.CompiledQueryCache.GetOrAddQuery[TResult](Object cacheKey, Func`1 compiler)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.ExecuteAsync[TResult](Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryable`1.GetAsyncEnumerator(CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable`1.GetAsyncEnumerator()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at CareerPathRecommender.Core.Services.RecommendationService.RecommendCoursesAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 39
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateCourseRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 118
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 22
+   at CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Web\Controllers\DashboardController.cs:line 56
+2025-09-11 13:14:09.482 +03:00 [INF] Executing JsonResult, writing value of type '<>f__AnonymousType0`2[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-09-11 13:14:09.482 +03:00 [INF] Executed action CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web) in 9.8054ms
+2025-09-11 13:14:09.482 +03:00 [INF] Executed endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:14:09.482 +03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - 200 null application/json; charset=utf-8 10.6625ms
+2025-09-11 13:14:14.009 +03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5019/Dashboard/AnalyzeSkillGaps - application/x-www-form-urlencoded; charset=UTF-8 34
+2025-09-11 13:14:14.010 +03:00 [INF] Executing endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.AnalyzeSkillGaps (CareerPathRecommender.Web)'
+2025-09-11 13:14:14.010 +03:00 [INF] Route matched with {action = "AnalyzeSkillGaps", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] AnalyzeSkillGaps(Int32, System.String) on controller CareerPathRecommender.Web.Controllers.DashboardController (CareerPathRecommender.Web).
+2025-09-11 13:14:14.012 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:14:14.013 +03:00 [INF] Executing PartialViewResult, running view _SkillGapAnalysis.
+2025-09-11 13:14:14.014 +03:00 [INF] Executed PartialViewResult - view _SkillGapAnalysis executed in 1.3097ms.
+2025-09-11 13:14:14.014 +03:00 [INF] Executed action CareerPathRecommender.Web.Controllers.DashboardController.AnalyzeSkillGaps (CareerPathRecommender.Web) in 4.204ms
+2025-09-11 13:14:14.014 +03:00 [INF] Executed endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.AnalyzeSkillGaps (CareerPathRecommender.Web)'
+2025-09-11 13:14:14.014 +03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5019/Dashboard/AnalyzeSkillGaps - 200 null text/html; charset=utf-8 5.1332ms
+2025-09-11 13:14:17.011 +03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5019/Dashboard/AnalyzeSkillGaps - application/x-www-form-urlencoded; charset=UTF-8 34
+2025-09-11 13:14:17.012 +03:00 [INF] Executing endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.AnalyzeSkillGaps (CareerPathRecommender.Web)'
+2025-09-11 13:14:17.012 +03:00 [INF] Route matched with {action = "AnalyzeSkillGaps", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] AnalyzeSkillGaps(Int32, System.String) on controller CareerPathRecommender.Web.Controllers.DashboardController (CareerPathRecommender.Web).
+2025-09-11 13:14:17.014 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:14:17.016 +03:00 [INF] Executing PartialViewResult, running view _SkillGapAnalysis.
+2025-09-11 13:14:17.019 +03:00 [INF] Executed PartialViewResult - view _SkillGapAnalysis executed in 2.7742ms.
+2025-09-11 13:14:17.019 +03:00 [INF] Executed action CareerPathRecommender.Web.Controllers.DashboardController.AnalyzeSkillGaps (CareerPathRecommender.Web) in 7.0109ms
+2025-09-11 13:14:17.019 +03:00 [INF] Executed endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.AnalyzeSkillGaps (CareerPathRecommender.Web)'
+2025-09-11 13:14:17.020 +03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5019/Dashboard/AnalyzeSkillGaps - 200 null text/html; charset=utf-8 8.4449ms
+2025-09-11 13:14:24.470 +03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5019/Dashboard/AnalyzeSkillGaps - application/x-www-form-urlencoded; charset=UTF-8 34
+2025-09-11 13:14:24.470 +03:00 [INF] Executing endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.AnalyzeSkillGaps (CareerPathRecommender.Web)'
+2025-09-11 13:14:24.471 +03:00 [INF] Route matched with {action = "AnalyzeSkillGaps", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] AnalyzeSkillGaps(Int32, System.String) on controller CareerPathRecommender.Web.Controllers.DashboardController (CareerPathRecommender.Web).
+2025-09-11 13:14:24.472 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:14:24.473 +03:00 [INF] Executing PartialViewResult, running view _SkillGapAnalysis.
+2025-09-11 13:14:24.474 +03:00 [INF] Executed PartialViewResult - view _SkillGapAnalysis executed in 0.5977ms.
+2025-09-11 13:14:24.474 +03:00 [INF] Executed action CareerPathRecommender.Web.Controllers.DashboardController.AnalyzeSkillGaps (CareerPathRecommender.Web) in 3.2693ms
+2025-09-11 13:14:24.474 +03:00 [INF] Executed endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.AnalyzeSkillGaps (CareerPathRecommender.Web)'
+2025-09-11 13:14:24.474 +03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5019/Dashboard/AnalyzeSkillGaps - 200 null text/html; charset=utf-8 3.8779ms
+2025-09-11 13:15:12.730 +03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - application/x-www-form-urlencoded; charset=UTF-8 12
+2025-09-11 13:15:12.731 +03:00 [INF] Executing endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:15:12.731 +03:00 [INF] Route matched with {action = "SelectEmployee", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] SelectEmployee(Int32) on controller CareerPathRecommender.Web.Controllers.DashboardController (CareerPathRecommender.Web).
+2025-09-11 13:15:12.733 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:15:12.735 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:15:12.737 +03:00 [ERR] Error selecting employee 1
+System.NotSupportedException: SQLite does not support expressions of type 'decimal' in ORDER BY clauses. Convert the values to a supported type, or use LINQ to Objects to order the results on the client side.
+   at Microsoft.EntityFrameworkCore.Sqlite.Query.Internal.SqliteQueryableMethodTranslatingExpressionVisitor.TranslateOrderBy(ShapedQueryExpression source, LambdaExpression keySelector, Boolean ascending)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.VisitMethodCall(MethodCallExpression methodCallExpression)
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.RelationalQueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.QueryCompilationContext.CreateQueryExecutor[TResult](Expression query)
+   at Microsoft.EntityFrameworkCore.Storage.Database.CompileQuery[TResult](Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.CompileQueryCore[TResult](IDatabase database, Expression query, IModel model, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.<>c__DisplayClass12_0`1.<ExecuteAsync>b__0()
+   at Microsoft.EntityFrameworkCore.Query.Internal.CompiledQueryCache.GetOrAddQuery[TResult](Object cacheKey, Func`1 compiler)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.ExecuteAsync[TResult](Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryable`1.GetAsyncEnumerator(CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.ConfiguredCancelableAsyncEnumerable`1.GetAsyncEnumerator()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at CareerPathRecommender.Core.Services.RecommendationService.RecommendCoursesAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 39
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateCourseRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 118
+   at CareerPathRecommender.Core.Services.RecommendationService.GenerateRecommendationsAsync(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Core\Services\RecommendationService.cs:line 22
+   at CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee(Int32 employeeId) in D:\AI Competition\CareerPathRecommender.Web\Controllers\DashboardController.cs:line 56
+2025-09-11 13:15:12.739 +03:00 [INF] Executing JsonResult, writing value of type '<>f__AnonymousType0`2[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-09-11 13:15:12.739 +03:00 [INF] Executed action CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web) in 7.8724ms
+2025-09-11 13:15:12.739 +03:00 [INF] Executed endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:15:12.739 +03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5019/Dashboard/SelectEmployee - 200 null application/json; charset=utf-8 9.27ms
+2025-09-11 13:20:04.186 +03:00 [INF] Executed DbCommand (17ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*) FROM "sqlite_master" WHERE "type" = 'table' AND "rootpage" IS NOT NULL;
+2025-09-11 13:20:04.542 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Employees" AS "e")
+2025-09-11 13:20:04.754 +03:00 [INF] User profile is available. Using 'C:\Users\alaa.osama\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-09-11 13:20:05.152 +03:00 [INF] Now listening on: https://localhost:7024
+2025-09-11 13:20:05.154 +03:00 [INF] Now listening on: http://localhost:5019
+2025-09-11 13:20:05.256 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-09-11 13:20:05.259 +03:00 [INF] Hosting environment: Development
+2025-09-11 13:20:05.260 +03:00 [INF] Content root path: D:\AI Competition\CareerPathRecommender.Web
+2025-09-11 13:20:08.421 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7024/ - null null
+2025-09-11 13:20:08.873 +03:00 [INF] Executing endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.Index (CareerPathRecommender.Web)'
+2025-09-11 13:20:08.921 +03:00 [INF] Route matched with {action = "Index", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Index() on controller CareerPathRecommender.Web.Controllers.DashboardController (CareerPathRecommender.Web).
+2025-09-11 13:20:09.082 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+FROM "Employees" AS "e"
+2025-09-11 13:20:09.210 +03:00 [INF] Executing ViewResult, running view Index.
+2025-09-11 13:20:09.401 +03:00 [INF] Executed ViewResult - view Index executed in 194.6625ms.
+2025-09-11 13:20:09.407 +03:00 [INF] Executed action CareerPathRecommender.Web.Controllers.DashboardController.Index (CareerPathRecommender.Web) in 476.7021ms
+2025-09-11 13:20:09.410 +03:00 [INF] Executed endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.Index (CareerPathRecommender.Web)'
+2025-09-11 13:20:09.423 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7024/ - 200 null text/html; charset=utf-8 1019.3896ms
+2025-09-11 13:20:09.497 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7024/lib/bootstrap/dist/css/bootstrap.min.css - null null
+2025-09-11 13:20:09.498 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7024/css/site.css?v=j6fhJSuuyLpOSLuPJU0TsDV0iNjor5S3rDnvxJrt4bg - null null
+2025-09-11 13:20:09.501 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7024/lib/jquery/dist/jquery.min.js - null null
+2025-09-11 13:20:09.504 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7024/_framework/aspnetcore-browser-refresh.js - null null
+2025-09-11 13:20:09.524 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7024/js/site.js?v=hRQyftXiu1lLX2P9Ly9xa4gHJgLeR1uGN5qegUobtGo - null null
+2025-09-11 13:20:09.614 +03:00 [INF] Sending file. Request path: '/lib/jquery/dist/jquery.min.js'. Physical path: 'D:\AI Competition\CareerPathRecommender.Web\wwwroot\lib\jquery\dist\jquery.min.js'
+2025-09-11 13:20:09.624 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7024/_framework/aspnetcore-browser-refresh.js - 200 13786 application/javascript; charset=utf-8 122.1904ms
+2025-09-11 13:20:09.623 +03:00 [INF] Sending file. Request path: '/js/site.js'. Physical path: 'D:\AI Competition\CareerPathRecommender.Web\wwwroot\js\site.js'
+2025-09-11 13:20:09.497 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7024/CareerPathRecommender.Web.styles.css?v=ZwMsEOyEUieSeG8L2UEzUBegZkf1f-ies1SPo0g54yk - null null
+2025-09-11 13:20:09.609 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7024/_vs/browserLink - null null
+2025-09-11 13:20:09.626 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7024/lib/jquery/dist/jquery.min.js - 200 87533 text/javascript 125.0761ms
+2025-09-11 13:20:09.625 +03:00 [INF] Sending file. Request path: '/lib/bootstrap/dist/css/bootstrap.min.css'. Physical path: 'D:\AI Competition\CareerPathRecommender.Web\wwwroot\lib\bootstrap\dist\css\bootstrap.min.css'
+2025-09-11 13:20:09.645 +03:00 [INF] Sending file. Request path: '/CareerPathRecommender.Web.styles.css'. Physical path: 'D:\AI Competition\CareerPathRecommender.Web\obj\Debug\net8.0\scopedcss\bundle\CareerPathRecommender.Web.styles.css'
+2025-09-11 13:20:09.637 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7024/js/site.js?v=hRQyftXiu1lLX2P9Ly9xa4gHJgLeR1uGN5qegUobtGo - 200 231 text/javascript 113.7764ms
+2025-09-11 13:20:09.674 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7024/lib/bootstrap/dist/css/bootstrap.min.css - 200 232803 text/css 176.4772ms
+2025-09-11 13:20:09.677 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7024/CareerPathRecommender.Web.styles.css?v=ZwMsEOyEUieSeG8L2UEzUBegZkf1f-ies1SPo0g54yk - 200 1143 text/css 179.0636ms
+2025-09-11 13:20:09.535 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7024/lib/bootstrap/dist/js/bootstrap.bundle.min.js - null null
+2025-09-11 13:20:09.613 +03:00 [INF] Sending file. Request path: '/css/site.css'. Physical path: 'D:\AI Competition\CareerPathRecommender.Web\wwwroot\css\site.css'
+2025-09-11 13:20:09.751 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7024/css/site.css?v=j6fhJSuuyLpOSLuPJU0TsDV0iNjor5S3rDnvxJrt4bg - 200 667 text/css 253.5354ms
+2025-09-11 13:20:09.753 +03:00 [INF] Sending file. Request path: '/lib/bootstrap/dist/js/bootstrap.bundle.min.js'. Physical path: 'D:\AI Competition\CareerPathRecommender.Web\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js'
+2025-09-11 13:20:09.775 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7024/lib/bootstrap/dist/js/bootstrap.bundle.min.js - 200 80721 text/javascript 240.6066ms
+2025-09-11 13:20:09.990 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7024/_vs/browserLink - 200 null text/javascript; charset=UTF-8 381.4027ms
+2025-09-11 13:20:10.297 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7024/Dashboard/GetEmployeeMetrics - null null
+2025-09-11 13:20:10.331 +03:00 [INF] Executing endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.GetEmployeeMetrics (CareerPathRecommender.Web)'
+2025-09-11 13:20:10.515 +03:00 [INF] Route matched with {action = "GetEmployeeMetrics", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetEmployeeMetrics() on controller CareerPathRecommender.Web.Controllers.DashboardController (CareerPathRecommender.Web).
+2025-09-11 13:20:10.743 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Employees" AS "e"
+2025-09-11 13:20:10.769 +03:00 [INF] Request starting HTTP/2 GET https://localhost:7024/favicon.ico - null null
+2025-09-11 13:20:10.785 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Courses" AS "c"
+2025-09-11 13:20:10.792 +03:00 [INF] Sending file. Request path: '/favicon.ico'. Physical path: 'D:\AI Competition\CareerPathRecommender.Web\wwwroot\favicon.ico'
+2025-09-11 13:20:10.801 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7024/favicon.ico - 200 5430 image/x-icon 31.8776ms
+2025-09-11 13:20:10.806 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Projects" AS "p"
+2025-09-11 13:20:10.889 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "EmployeeCourses" AS "e"
+WHERE "e"."Status" = 1
+2025-09-11 13:20:10.899 +03:00 [INF] Executing JsonResult, writing value of type '<>f__AnonymousType4`4[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-09-11 13:20:10.950 +03:00 [INF] Executed action CareerPathRecommender.Web.Controllers.DashboardController.GetEmployeeMetrics (CareerPathRecommender.Web) in 430.977ms
+2025-09-11 13:20:10.954 +03:00 [INF] Executed endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.GetEmployeeMetrics (CareerPathRecommender.Web)'
+2025-09-11 13:20:10.958 +03:00 [INF] Request finished HTTP/2 GET https://localhost:7024/Dashboard/GetEmployeeMetrics - 200 null application/json; charset=utf-8 661.5963ms
+2025-09-11 13:20:41.896 +03:00 [INF] Request starting HTTP/2 POST https://localhost:7024/Dashboard/SelectEmployee - application/x-www-form-urlencoded; charset=UTF-8 12
+2025-09-11 13:20:41.905 +03:00 [INF] Executing endpoint 'CareerPathRecommender.Web.Controllers.DashboardController.SelectEmployee (CareerPathRecommender.Web)'
+2025-09-11 13:20:41.914 +03:00 [INF] Route matched with {action = "SelectEmployee", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] SelectEmployee(Int32) on controller CareerPathRecommender.Web.Controllers.DashboardController (CareerPathRecommender.Web).
+2025-09-11 13:20:42.027 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"
+2025-09-11 13:20:53.643 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__employeeId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Department", "t"."Email", "t"."FirstName", "t"."LastName", "t"."Position", "t"."YearsOfExperience", "t0"."EmployeeId", "t0"."SkillId", "t0"."AcquiredDate", "t0"."Level", "t0"."Id", "t0"."Category", "t0"."Description", "t0"."Name"
+FROM (
+    SELECT "e"."Id", "e"."Department", "e"."Email", "e"."FirstName", "e"."LastName", "e"."Position", "e"."YearsOfExperience"
+    FROM "Employees" AS "e"
+    WHERE "e"."Id" = @__employeeId_0
+    LIMIT 1
+) AS "t"
+LEFT JOIN (
+    SELECT "e0"."EmployeeId", "e0"."SkillId", "e0"."AcquiredDate", "e0"."Level", "s"."Id", "s"."Category", "s"."Description", "s"."Name"
+    FROM "EmployeeSkills" AS "e0"
+    INNER JOIN "Skills" AS "s" ON "e0"."SkillId" = "s"."Id"
+) AS "t0" ON "t"."Id" = "t0"."EmployeeId"
+ORDER BY "t"."Id", "t0"."EmployeeId", "t0"."SkillId"

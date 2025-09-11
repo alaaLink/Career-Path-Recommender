@@ -1,0 +1,44 @@
+Career Path Recommender
+Problem: Employees lack visibility into career growth opportunities.
+Objective: Build a system recommending tailored learning paths, certifications, mentors, or projects.
+Deliverables:
+o Input: mocked skills profile (e.g., Linkawy360) (Linkawy360 is company internal web application has profile for each employee with data: skills , education , experience, cources, etc).
+o Output: personalized recommendations (Udemy courses, mentors, projects).
+o Recorded demo + one-page summary.
+o Bonus: Show “why recommended” (skill gap analysis).
+o Project allocation (telling this employee will match in what project).
+Rules & Guidelines:
+• Compete individually or in teams of 2–3 members.
+• Build a demo-ready prototype.
+• Prioritize UI/UX clarity and usability.
+• Data layer: Real DB/store preferred (mocked infra acceptable if short on time).
+• Auth: Basic authentication/roles layer if relevant.
+• Notifications: Use free tools like Firebase, OneSignal, email APIs.
+
+Mandatory:
+• Basic test cases.
+• Code coverage reports.
+• Error handling and logging.
+
+Extra Points:
+• Scalability (multi-tenant support, offline caching, scheduled digests, export/share features).
+• Use LLMs from Azure MSDN subscription (e.g., Azure OpenAI) for demo purposes.
+
+Deliverables:
+• Prototype: Web, mobile, or chat-based.
+• Recorded Demo: Max 5 minutes.
+• One-Page Summary: Problem & solution, tools used, architecture sketch (with infra notes), test coverage, scalability/next steps.
+
+Evaluation Criteria:
+Criteria Weight
+Creativity 20%.
+Use of AI Tools 20%.
+Practicality & Impact 20%.
+Execution & Demo 20%.
+Quality & Scalability 20%.
+
+duration 24 h
+this is a programming competition and the provided idea of the application and evaluation Criteria
+create a plan for this application to be executed with cluade cmd or windsurf
+I want to use .Net suggest architecture
+take in your consideration all the aspects and nice to have
