@@ -13,4 +13,6 @@ public class Employee : BaseEntity
 
     public virtual ICollection<EmployeeSkill> Skills { get; set; } = new List<EmployeeSkill>();
     public virtual ICollection<Recommendation> Recommendations { get; set; } = new List<Recommendation>();
+    public virtual ICollection<EmployeeCourse> Courses { get; set; } = new List<EmployeeCourse>();
+    public virtual ICollection<ProjectAssignment> ProjectAssignments { get; set; } = new List<ProjectAssignment>();
 }

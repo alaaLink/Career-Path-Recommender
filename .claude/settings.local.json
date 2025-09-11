@@ -9,7 +9,10 @@
       "Bash(dotnet build:*)",
       "Bash(dotnet remove package:*)",
       "Bash(psql:*)",
-      "Bash(docker:*)"
+      "Bash(docker:*)",
+      "Bash(dotnet ef migrations add:*)",
+      "Bash(dotnet ef migrations:*)",
+      "Bash(del Migrations*.cs)"
     ],
     "deny": [],
     "ask": []

@@ -46,10 +46,10 @@
                     {
                         var skillColor = skill.Level switch
                         {
-                            CareerPathRecommender.Core.Models.SkillLevel.Beginner => "secondary",
-                            CareerPathRecommender.Core.Models.SkillLevel.Intermediate => "warning",
-                            CareerPathRecommender.Core.Models.SkillLevel.Advanced => "success",
-                            CareerPathRecommender.Core.Models.SkillLevel.Expert => "primary",
+                            CareerPathRecommender.Domain.Enums.SkillLevel.Beginner => "secondary",
+                            CareerPathRecommender.Domain.Enums.SkillLevel.Intermediate => "warning",
+                            CareerPathRecommender.Domain.Enums.SkillLevel.Advanced => "success",
+                            CareerPathRecommender.Domain.Enums.SkillLevel.Expert => "primary",
                             _ => "secondary"
                         };
                         
@@ -91,19 +91,19 @@
                     {
                         var typeIcon = recommendation.Type switch
                         {
-                            CareerPathRecommender.Core.Models.RecommendationType.Course => "book",
-                            CareerPathRecommender.Core.Models.RecommendationType.Mentor => "user-friends",
-                            CareerPathRecommender.Core.Models.RecommendationType.Project => "project-diagram",
-                            CareerPathRecommender.Core.Models.RecommendationType.Certification => "certificate",
+                            CareerPathRecommender.Domain.Enums.RecommendationType.Course => "book",
+                            CareerPathRecommender.Domain.Enums.RecommendationType.Mentor => "user-friends",
+                            CareerPathRecommender.Domain.Enums.RecommendationType.Project => "project-diagram",
+                            CareerPathRecommender.Domain.Enums.RecommendationType.Certification => "certificate",
                             _ => "lightbulb"
                         };
                         
                         var typeColor = recommendation.Type switch
                         {
-                            CareerPathRecommender.Core.Models.RecommendationType.Course => "primary",
-                            CareerPathRecommender.Core.Models.RecommendationType.Mentor => "success",
-                            CareerPathRecommender.Core.Models.RecommendationType.Project => "warning",
-                            CareerPathRecommender.Core.Models.RecommendationType.Certification => "info",
+                            CareerPathRecommender.Domain.Enums.RecommendationType.Course => "primary",
+                            CareerPathRecommender.Domain.Enums.RecommendationType.Mentor => "success",
+                            CareerPathRecommender.Domain.Enums.RecommendationType.Project => "warning",
+                            CareerPathRecommender.Domain.Enums.RecommendationType.Certification => "info",
                             _ => "secondary"
                         };
 

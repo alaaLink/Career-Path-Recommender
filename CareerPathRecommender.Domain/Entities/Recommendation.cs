@@ -13,6 +13,7 @@ public class Recommendation : BaseEntity
     public decimal ConfidenceScore { get; set; }
     public DateTime CreatedDate { get; set; }
     public bool IsAccepted { get; set; }
+    public bool IsViewed { get; set; }
     public DateTime? AcceptedDate { get; set; }
 
     // Optional foreign keys

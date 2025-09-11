@@ -10,3 +10,4 @@ D:\AI Competition\CareerPathRecommender.Core\obj\Debug\net8.0\CareerPathRecommen
 D:\AI Competition\CareerPathRecommender.Core\obj\Debug\net8.0\refint\CareerPathRecommender.Core.dll
 D:\AI Competition\CareerPathRecommender.Core\obj\Debug\net8.0\CareerPathRecommender.Core.pdb
 D:\AI Competition\CareerPathRecommender.Core\obj\Debug\net8.0\ref\CareerPathRecommender.Core.dll
+D:\AI Competition\CareerPathRecommender.Core\obj\Debug\net8.0\CareerPathRecommender.Core.sourcelink.json

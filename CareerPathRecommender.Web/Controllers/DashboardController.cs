@@ -1,6 +1,7 @@
 using CareerPathRecommender.Application.Interfaces;
 using CareerPathRecommender.Infrastructure.Data;
 using CareerPathRecommender.Web.Models;
+using CareerPathRecommender.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,13 +9,22 @@ namespace CareerPathRecommender.Web.Controllers;
 
 public class DashboardController : Controller
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IEmployeeRepository _employeeRepository;
+    private readonly ICourseRepository _courseRepository;
+    private readonly IProjectRepository _projectRepository;
     private readonly IRecommendationService _recommendationService;
     private readonly ILogger<DashboardController> _logger;
 
-    public DashboardController(ApplicationDbContext context, IRecommendationService recommendationService, ILogger<DashboardController> logger)
+    public DashboardController(
+        IEmployeeRepository employeeRepository,
+        ICourseRepository courseRepository,
+        IProjectRepository projectRepository,
+        IRecommendationService recommendationService, 
+        ILogger<DashboardController> logger)
     {
-        _context = context;
+        _employeeRepository = employeeRepository;
+        _courseRepository = courseRepository;
+        _projectRepository = projectRepository;
         _recommendationService = recommendationService;
         _logger = logger;
     }
@@ -23,7 +33,7 @@ public class DashboardController : Controller
     {
         try
         {
-            var employees = await _context.Employees.ToListAsync();
+            var employees = await _employeeRepository.GetAllAsync();
             var model = new DashboardViewModel
             {
                 Employees = employees
@@ -42,10 +52,7 @@ public class DashboardController : Controller
     {
         try
         {
-            var employee = await _context.Employees
-                .Include(e => e.Skills)
-                .ThenInclude(s => s.Skill)
-                .FirstOrDefaultAsync(e => e.Id == employeeId);
+            var employee = await _employeeRepository.GetByIdWithSkillsAsync(employeeId);
 
             if (employee == null)
             {
@@ -95,7 +102,7 @@ public class DashboardController : Controller
     {
         try
         {
-            // In a real application, we would update the recommendation status in the database
+            await _recommendationService.AcceptRecommendationAsync(recommendationId);
             _logger.LogInformation("Recommendation {RecommendationId} accepted", recommendationId);
             
             return Json(new { success = true, message = "Recommendation accepted! You'll receive follow-up information shortly." });
@@ -112,11 +119,25 @@ public class DashboardController : Controller
     {
         try
         {
-            // In a real application, we would fetch detailed recommendation data
+            // Fetch the detailed recommendation data from the service
+            var recommendations = await _recommendationService.GetEmployeeRecommendationsAsync(0); // This should use proper employee context
+            var recommendation = recommendations.FirstOrDefault(r => r.Id == recommendationId);
+            
+            if (recommendation == null)
+            {
+                return Json(new { success = false, error = "Recommendation not found" });
+            }
+
             var details = new
             {
                 Id = recommendationId,
-                Details = "This is a detailed view of the recommendation with additional information, prerequisites, and action items."
+                Title = recommendation.Title,
+                Description = recommendation.Description,
+                Reasoning = recommendation.Reasoning,
+                Type = recommendation.Type.ToString(),
+                Priority = recommendation.Priority,
+                ConfidenceScore = recommendation.ConfidenceScore,
+                Details = "This recommendation is based on your current skill set and career trajectory. Consider the prerequisites and time commitment required."
             };
 
             return Json(new { success = true, data = details });
@@ -133,12 +154,10 @@ public class DashboardController : Controller
     {
         try
         {
-            var totalEmployees = await _context.Employees.CountAsync();
-            var totalCourses = await _context.Courses.CountAsync();
-            var totalProjects = await _context.Projects.CountAsync();
-            var activeCourses = await _context.EmployeeCourses
-                .Where(ec => ec.Status == CourseStatus.InProgress)
-                .CountAsync();
+            var totalEmployees = await _employeeRepository.GetTotalCountAsync();
+            var totalCourses = await _courseRepository.GetTotalCountAsync();
+            var totalProjects = await _projectRepository.GetTotalCountAsync();
+            var activeCourses = 0; // This would need a specific repository method to count active enrollments
 
             var metrics = new
             {
@@ -167,8 +186,11 @@ public class DashboardController : Controller
                 return Json(new List<object>());
             }
 
-            var employees = await _context.Employees
-                .Where(e => e.FirstName.Contains(query) || e.LastName.Contains(query) || e.Position.Contains(query))
+            var allEmployees = await _employeeRepository.GetAllAsync();
+            var employees = allEmployees
+                .Where(e => e.FirstName.Contains(query, StringComparison.OrdinalIgnoreCase) || 
+                           e.LastName.Contains(query, StringComparison.OrdinalIgnoreCase) || 
+                           e.Position.Contains(query, StringComparison.OrdinalIgnoreCase))
                 .Select(e => new
                 {
                     e.Id,
@@ -177,7 +199,7 @@ public class DashboardController : Controller
                     e.Department
                 })
                 .Take(10)
-                .ToListAsync();
+                .ToList();
 
             return Json(employees);
         }

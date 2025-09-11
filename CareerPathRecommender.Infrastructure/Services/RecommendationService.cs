@@ -9,12 +9,23 @@ namespace CareerPathRecommender.Infrastructure.Services;
 
 public class RecommendationService : IRecommendationService
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IEmployeeRepository _employeeRepository;
+    private readonly ICourseRepository _courseRepository;
+    private readonly IProjectRepository _projectRepository;
+    private readonly IRecommendationRepository _recommendationRepository;
     private readonly IAIService _aiService;
 
-    public RecommendationService(ApplicationDbContext context, IAIService aiService)
+    public RecommendationService(
+        IEmployeeRepository employeeRepository,
+        ICourseRepository courseRepository,
+        IProjectRepository projectRepository,
+        IRecommendationRepository recommendationRepository,
+        IAIService aiService)
     {
-        _context = context;
+        _employeeRepository = employeeRepository;
+        _courseRepository = courseRepository;
+        _projectRepository = projectRepository;
+        _recommendationRepository = recommendationRepository;
         _aiService = aiService;
     }
 
@@ -36,45 +47,36 @@ public class RecommendationService : IRecommendationService
 
     public async Task<RecommendationDto> AcceptRecommendationAsync(int recommendationId, CancellationToken cancellationToken = default)
     {
-        var recommendation = await _context.Recommendations
-            .FirstOrDefaultAsync(r => r.Id == recommendationId, cancellationToken);
+        var recommendation = await _recommendationRepository.GetByIdAsync(recommendationId, cancellationToken);
 
         if (recommendation == null)
             throw new ArgumentException($"Recommendation with ID {recommendationId} not found");
 
-        recommendation.IsAccepted = true;
-        recommendation.AcceptedDate = DateTime.UtcNow;
-        
-        await _context.SaveChangesAsync(cancellationToken);
+        await _recommendationRepository.MarkAsAcceptedAsync(recommendationId, cancellationToken);
 
         return MapToDto(recommendation);
     }
 
     public async Task<IEnumerable<RecommendationDto>> GetEmployeeRecommendationsAsync(int employeeId, CancellationToken cancellationToken = default)
     {
-        var recommendations = await _context.Recommendations
-            .Where(r => r.EmployeeId == employeeId)
-            .OrderByDescending(r => r.Priority)
-            .ThenByDescending(r => r.ConfidenceScore)
-            .ToListAsync(cancellationToken);
-
+        var recommendations = await _recommendationRepository.GetByEmployeeIdAsync(employeeId, cancellationToken);
         return recommendations.Select(MapToDto);
     }
 
     private async Task<IEnumerable<RecommendationDto>> GenerateCourseRecommendationsAsync(int employeeId, CancellationToken cancellationToken)
     {
-        var employee = await GetEmployeeWithSkillsAsync(employeeId, cancellationToken);
-        var courses = await _context.Courses
-            .OrderByDescending(c => c.Rating)
-            .Take(3)
-            .ToListAsync(cancellationToken);
+        var employee = await _employeeRepository.GetByIdWithSkillsAsync(employeeId, cancellationToken);
+        if (employee == null) 
+            throw new ArgumentException($"Employee with ID {employeeId} not found");
 
+        var courses = await _courseRepository.GetTopRatedAsync(3, cancellationToken);
         var recommendations = new List<RecommendationDto>();
 
         foreach (var course in courses)
         {
+            var courseDto = MapToCourseDto(course);
             var reasoning = await _aiService.GenerateRecommendationReasoningAsync(
-                MapToEmployeeDto(employee), course, cancellationToken);
+                MapToEmployeeDto(employee), courseDto, cancellationToken);
             
             var recommendation = new Recommendation
             {
@@ -89,25 +91,23 @@ public class RecommendationService : IRecommendationService
                 CourseId = course.Id
             };
 
-            _context.Recommendations.Add(recommendation);
-            recommendations.Add(MapToDto(recommendation));
+            var savedRecommendation = await _recommendationRepository.AddAsync(recommendation, cancellationToken);
+            recommendations.Add(MapToDto(savedRecommendation));
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
         return recommendations;
     }
 
     private async Task<IEnumerable<RecommendationDto>> GenerateMentorRecommendationsAsync(int employeeId, CancellationToken cancellationToken)
     {
-        var employee = await GetEmployeeWithSkillsAsync(employeeId, cancellationToken);
-        var mentors = await _context.Employees
-            .Where(e => e.Id != employeeId && e.YearsOfExperience > employee.YearsOfExperience + 2)
-            .Take(2)
-            .ToListAsync(cancellationToken);
+        var employee = await _employeeRepository.GetByIdWithSkillsAsync(employeeId, cancellationToken);
+        if (employee == null) 
+            throw new ArgumentException($"Employee with ID {employeeId} not found");
 
+        var mentors = await _employeeRepository.GetMentorCandidatesAsync(employeeId, cancellationToken);
         var recommendations = new List<RecommendationDto>();
 
-        foreach (var mentor in mentors)
+        foreach (var mentor in mentors.Take(2))
         {
             var reasoning = await _aiService.GenerateMentorMatchReasoningAsync(
                 MapToEmployeeDto(employee), MapToEmployeeDto(mentor), cancellationToken);
@@ -125,26 +125,23 @@ public class RecommendationService : IRecommendationService
                 MentorEmployeeId = mentor.Id
             };
 
-            _context.Recommendations.Add(recommendation);
-            recommendations.Add(MapToDto(recommendation));
+            var savedRecommendation = await _recommendationRepository.AddAsync(recommendation, cancellationToken);
+            recommendations.Add(MapToDto(savedRecommendation));
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
         return recommendations;
     }
 
     private async Task<IEnumerable<RecommendationDto>> GenerateProjectRecommendationsAsync(int employeeId, CancellationToken cancellationToken)
     {
-        var employee = await GetEmployeeWithSkillsAsync(employeeId, cancellationToken);
-        var projects = await _context.Projects
-            .Include(p => p.RequiredSkills)
-            .Where(p => p.Status == ProjectStatus.Planning || p.Status == ProjectStatus.Active)
-            .Take(2)
-            .ToListAsync(cancellationToken);
+        var employee = await _employeeRepository.GetByIdWithSkillsAsync(employeeId, cancellationToken);
+        if (employee == null) 
+            throw new ArgumentException($"Employee with ID {employeeId} not found");
 
+        var projects = await _projectRepository.GetAvailableProjectsAsync(cancellationToken);
         var recommendations = new List<RecommendationDto>();
 
-        foreach (var project in projects)
+        foreach (var project in projects.Take(2))
         {
             var reasoning = await _aiService.GenerateProjectMatchReasoningAsync(
                 MapToEmployeeDto(employee), project, cancellationToken);
@@ -162,22 +159,58 @@ public class RecommendationService : IRecommendationService
                 ProjectId = project.Id
             };
 
-            _context.Recommendations.Add(recommendation);
-            recommendations.Add(MapToDto(recommendation));
+            var savedRecommendation = await _recommendationRepository.AddAsync(recommendation, cancellationToken);
+            recommendations.Add(MapToDto(savedRecommendation));
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
         return recommendations;
     }
 
-    private async Task<Employee> GetEmployeeWithSkillsAsync(int employeeId, CancellationToken cancellationToken)
+    public async Task<SkillGapAnalysisDto> AnalyzeSkillGapsAsync(int employeeId, string targetPosition, CancellationToken cancellationToken = default)
     {
-        return await _context.Employees
-            .Include(e => e.Skills)
-            .ThenInclude(s => s.Skill)
-            .FirstOrDefaultAsync(e => e.Id == employeeId, cancellationToken) 
-            ?? throw new ArgumentException($"Employee with ID {employeeId} not found");
+        var employee = await _employeeRepository.GetByIdWithSkillsAsync(employeeId, cancellationToken);
+        if (employee == null) 
+            throw new ArgumentException($"Employee with ID {employeeId} not found");
+        
+        // Mock implementation - in real world this would analyze skills vs target position
+        var missingSkills = new List<SkillGapDto>
+        {
+            new() { 
+                SkillName = "Leadership", 
+                CurrentLevel = SkillLevel.Beginner, 
+                RequiredLevel = SkillLevel.Advanced, 
+                Priority = 5,
+                Reasoning = "Leadership skills are critical for senior positions"
+            },
+            new() { 
+                SkillName = "Cloud Architecture", 
+                CurrentLevel = SkillLevel.Beginner, 
+                RequiredLevel = SkillLevel.Expert, 
+                Priority = 4,
+                Reasoning = "Cloud expertise is essential for modern development"
+            }
+        };
+
+        var skillsToImprove = new List<SkillGapDto>
+        {
+            new() { 
+                SkillName = "C#", 
+                CurrentLevel = SkillLevel.Intermediate, 
+                RequiredLevel = SkillLevel.Advanced, 
+                Priority = 3,
+                Reasoning = "Advanced C# knowledge needed for complex projects"
+            }
+        };
+
+        return new SkillGapAnalysisDto
+        {
+            MissingSkills = missingSkills,
+            SkillsToImprove = skillsToImprove,
+            RecommendedLearningPath = "Focus on leadership development and cloud certifications",
+            EstimatedTimeToTargetMonths = 12
+        };
     }
+
 
     private int CalculateCoursePriority(Course course)
     {
@@ -185,6 +218,22 @@ public class RecommendationService : IRecommendationService
         if (course.Rating >= 4.5m) return 4;
         if (course.Rating >= 4.0m) return 3;
         return 2;
+    }
+
+    private CourseDto MapToCourseDto(Course course)
+    {
+        return new CourseDto
+        {
+            Id = course.Id,
+            Title = course.Title,
+            Provider = course.Provider,
+            Category = course.Category,
+            DurationHours = course.DurationHours,
+            Rating = course.Rating,
+            Price = course.Price,
+            Url = course.Url,
+            Description = course.Description
+        };
     }
 
     private RecommendationDto MapToDto(Recommendation recommendation)

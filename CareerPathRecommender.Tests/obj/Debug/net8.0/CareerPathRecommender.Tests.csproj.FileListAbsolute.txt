@@ -113,6 +113,7 @@ D:\AI Competition\CareerPathRecommender.Tests\obj\Debug\net8.0\CareerPathRecomme
 D:\AI Competition\CareerPathRecommender.Tests\obj\Debug\net8.0\CareerPathRecommender.Tests.AssemblyInfoInputs.cache
 D:\AI Competition\CareerPathRecommender.Tests\obj\Debug\net8.0\CareerPathRecommender.Tests.AssemblyInfo.cs
 D:\AI Competition\CareerPathRecommender.Tests\obj\Debug\net8.0\CareerPathRecommender.Tests.csproj.CoreCompileInputs.cache
+D:\AI Competition\CareerPathRecommender.Tests\obj\Debug\net8.0\CareerPathRecommender.Tests.sourcelink.json
 D:\AI Competition\CareerPathRecommender.Tests\obj\Debug\net8.0\CareerPa.07D6EDE1.Up2Date
 D:\AI Competition\CareerPathRecommender.Tests\obj\Debug\net8.0\CareerPathRecommender.Tests.dll
 D:\AI Competition\CareerPathRecommender.Tests\obj\Debug\net8.0\refint\CareerPathRecommender.Tests.dll

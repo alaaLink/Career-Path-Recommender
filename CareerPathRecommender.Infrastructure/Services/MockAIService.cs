@@ -5,26 +5,35 @@ namespace CareerPathRecommender.Infrastructure.Services;
 
 public class MockAIService : IAIService
 {
-    public Task<string> GenerateRecommendationReasoningAsync(EmployeeDto employee, object item, CancellationToken cancellationToken = default)
+    public async Task<string> GenerateRecommendationReasoningAsync(EmployeeDto employee, object item, CancellationToken cancellationToken = default)
     {
+        // Simulate AI processing time
+        await Task.Delay(Random.Shared.Next(100, 500), cancellationToken);
+        
         var reasoning = item switch
         {
             CourseDto course => GenerateCourseReasoning(employee, course),
             _ => "AI analysis suggests this recommendation aligns well with your career goals."
         };
-        return Task.FromResult(reasoning);
+        return reasoning;
     }
 
-    public Task<string> GenerateMentorMatchReasoningAsync(EmployeeDto employee, EmployeeDto mentor, CancellationToken cancellationToken = default)
+    public async Task<string> GenerateMentorMatchReasoningAsync(EmployeeDto employee, EmployeeDto mentor, CancellationToken cancellationToken = default)
     {
+        // Simulate AI processing time
+        await Task.Delay(Random.Shared.Next(150, 600), cancellationToken);
+        
         var reasoning = GenerateMentorReasoning(employee, mentor);
-        return Task.FromResult(reasoning);
+        return reasoning;
     }
 
-    public Task<string> GenerateProjectMatchReasoningAsync(EmployeeDto employee, object project, CancellationToken cancellationToken = default)
+    public async Task<string> GenerateProjectMatchReasoningAsync(EmployeeDto employee, object project, CancellationToken cancellationToken = default)
     {
+        // Simulate AI processing time
+        await Task.Delay(Random.Shared.Next(200, 700), cancellationToken);
+        
         var reasoning = GenerateProjectReasoning(employee, project);
-        return Task.FromResult(reasoning);
+        return reasoning;
     }
 
     private string GenerateCourseReasoning(EmployeeDto employee, CourseDto course)

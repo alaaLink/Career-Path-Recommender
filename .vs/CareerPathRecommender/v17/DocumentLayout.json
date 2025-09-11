@@ -3,12 +3,16 @@
   "WorkspaceRootPath": "D:\\AI Competition\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{07BDED61-612D-4475-ABF9-45CB3FFDB46A}|CareerPathRecommender.Web\\CareerPathRecommender.Web.csproj|d:\\ai competition\\careerpathrecommender.web\\controllers\\dashboardcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{07BDED61-612D-4475-ABF9-45CB3FFDB46A}|CareerPathRecommender.Web\\CareerPathRecommender.Web.csproj|solutionrelative:careerpathrecommender.web\\controllers\\dashboardcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{07BDED61-612D-4475-ABF9-45CB3FFDB46A}|CareerPathRecommender.Web\\CareerPathRecommender.Web.csproj|d:\\ai competition\\careerpathrecommender.web\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{07BDED61-612D-4475-ABF9-45CB3FFDB46A}|CareerPathRecommender.Web\\CareerPathRecommender.Web.csproj|solutionrelative:careerpathrecommender.web\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{07BDED61-612D-4475-ABF9-45CB3FFDB46A}|CareerPathRecommender.Web\\CareerPathRecommender.Web.csproj|d:\\ai competition\\careerpathrecommender.web\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{07BDED61-612D-4475-ABF9-45CB3FFDB46A}|CareerPathRecommender.Web\\CareerPathRecommender.Web.csproj|solutionrelative:careerpathrecommender.web\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{07BDED61-612D-4475-ABF9-45CB3FFDB46A}|CareerPathRecommender.Web\\CareerPathRecommender.Web.csproj|d:\\ai competition\\careerpathrecommender.web\\controllers\\dashboardcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{07BDED61-612D-4475-ABF9-45CB3FFDB46A}|CareerPathRecommender.Web\\CareerPathRecommender.Web.csproj|solutionrelative:careerpathrecommender.web\\controllers\\dashboardcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{B439D7FF-E824-4D7C-9F00-A82173477EBF}|CareerPathRecommender.Application\\CareerPathRecommender.Application.csproj|d:\\ai competition\\careerpathrecommender.application\\interfaces\\irecommendationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -20,10 +24,6 @@
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{07BDED61-612D-4475-ABF9-45CB3FFDB46A}|CareerPathRecommender.Web\\CareerPathRecommender.Web.csproj|d:\\ai competition\\careerpathrecommender.web\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{07BDED61-612D-4475-ABF9-45CB3FFDB46A}|CareerPathRecommender.Web\\CareerPathRecommender.Web.csproj|solutionrelative:careerpathrecommender.web\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\AI Competition\\CareerPathRecommender.Core\\Services\\MockAIService.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -49,7 +49,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 11,
+          "SelectedChildIndex": 6,
           "Children": [
             {
               "$type": "Bookmark",
@@ -64,21 +64,24 @@
               "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
             },
             {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{e5c86464-96be-4d7c-9a8b-abcb3bbf5f92}"
+            },
+            {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "IRecommendationService.cs",
               "DocumentMoniker": "D:\\AI Competition\\CareerPathRecommender.Application\\Interfaces\\IRecommendationService.cs",
               "RelativeDocumentMoniker": "CareerPathRecommender.Application\\Interfaces\\IRecommendationService.cs",
               "ToolTip": "D:\\AI Competition\\CareerPathRecommender.Application\\Interfaces\\IRecommendationService.cs",
               "RelativeToolTip": "CareerPathRecommender.Application\\Interfaces\\IRecommendationService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAACIAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAACFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-11T11:51:18.752Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-11T11:51:18.752Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "GetEmployeeQuery.cs",
               "DocumentMoniker": "D:\\AI Competition\\CareerPathRecommender.Application\\UseCases\\GetEmployeeQuery.cs",
               "RelativeDocumentMoniker": "CareerPathRecommender.Application\\UseCases\\GetEmployeeQuery.cs",
@@ -86,25 +89,24 @@
               "RelativeToolTip": "CareerPathRecommender.Application\\UseCases\\GetEmployeeQuery.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-11T11:51:05.238Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-11T11:51:05.238Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\AI Competition\\CareerPathRecommender.Web\\Program.cs",
               "RelativeDocumentMoniker": "CareerPathRecommender.Web\\Program.cs",
               "ToolTip": "D:\\AI Competition\\CareerPathRecommender.Web\\Program.cs",
               "RelativeToolTip": "CareerPathRecommender.Web\\Program.cs",
-              "ViewState": "AgIAAEUAAAAAAAAAAAAtwGgAAAAdAAAAAAAAAA==",
+              "ViewState": "AgIAAIIAAAAAAAAAAAAcwKYAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-11T10:23:07.228Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "Microsoft.Common.CurrentVersion.targets",
               "DocumentMoniker": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
               "ToolTip": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
@@ -126,13 +128,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 1,
               "Title": "appsettings.json",
               "DocumentMoniker": "D:\\AI Competition\\CareerPathRecommender.Web\\appsettings.json",
               "RelativeDocumentMoniker": "CareerPathRecommender.Web\\appsettings.json",
               "ToolTip": "D:\\AI Competition\\CareerPathRecommender.Web\\appsettings.json",
               "RelativeToolTip": "CareerPathRecommender.Web\\appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAABvAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
               "WhenOpened": "2025-09-11T10:10:49.868Z"
             },
@@ -146,7 +148,8 @@
               "RelativeToolTip": "CareerPathRecommender.Core\\Services\\RecommendationService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-11T10:08:41.25Z"
+              "WhenOpened": "2025-09-11T10:08:41.25Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -162,16 +165,15 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
               "Title": "DashboardController.cs",
               "DocumentMoniker": "D:\\AI Competition\\CareerPathRecommender.Web\\Controllers\\DashboardController.cs",
               "RelativeDocumentMoniker": "CareerPathRecommender.Web\\Controllers\\DashboardController.cs",
               "ToolTip": "D:\\AI Competition\\CareerPathRecommender.Web\\Controllers\\DashboardController.cs",
               "RelativeToolTip": "CareerPathRecommender.Web\\Controllers\\DashboardController.cs",
-              "ViewState": "AgIAAGkAAAAAAAAAAAApwIsAAAA2AAAAAAAAAA==",
+              "ViewState": "AgIAACsAAAAAAAAAAAApwE4AAAAOAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-11T10:02:01.43Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-11T10:02:01.43Z"
             },
             {
               "$type": "Document",

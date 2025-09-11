@@ -10,4 +10,7 @@ public class Course : BaseEntity
     public decimal Price { get; set; }
     public string Url { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+    
+    public virtual ICollection<EmployeeCourse> EmployeeCourses { get; set; } = new List<EmployeeCourse>();
+    public virtual ICollection<Recommendation> Recommendations { get; set; } = new List<Recommendation>();
 }

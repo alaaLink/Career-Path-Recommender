@@ -20,7 +20,7 @@ builder.Host.UseSerilog();
 // Add services to the container.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
-        b => b.MigrationsAssembly("CareerPathRecommender.Web")));
+        b => b.MigrationsAssembly("CareerPathRecommender.Infrastructure")));
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => 
 {
@@ -34,6 +34,13 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
+// Add repository services
+builder.Services.AddScoped<IEmployeeRepository, CareerPathRecommender.Infrastructure.Repositories.EmployeeRepository>();
+builder.Services.AddScoped<ICourseRepository, CareerPathRecommender.Infrastructure.Repositories.CourseRepository>();
+builder.Services.AddScoped<IProjectRepository, CareerPathRecommender.Infrastructure.Repositories.ProjectRepository>();
+builder.Services.AddScoped<IRecommendationRepository, CareerPathRecommender.Infrastructure.Repositories.RecommendationRepository>();
+builder.Services.AddScoped<ISkillRepository, CareerPathRecommender.Infrastructure.Repositories.SkillRepository>();
+
 // Add custom services - using free mock AI service instead of paid Azure OpenAI
 builder.Services.AddScoped<IAIService, MockAIService>();
 builder.Services.AddScoped<IRecommendationService, CareerPathRecommender.Infrastructure.Services.RecommendationService>();
@@ -44,11 +51,17 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var employeeRepository = scope.ServiceProvider.GetRequiredService<IEmployeeRepository>();
+    var courseRepository = scope.ServiceProvider.GetRequiredService<ICourseRepository>();
+    var projectRepository = scope.ServiceProvider.GetRequiredService<IProjectRepository>();
+    var skillRepository = scope.ServiceProvider.GetRequiredService<ISkillRepository>();
+    
     await context.Database.MigrateAsync();
     
-    if (!context.Employees.Any())
+    var totalEmployees = await employeeRepository.GetTotalCountAsync();
+    if (totalEmployees == 0)
     {
-        await SeedDataAsync(context);
+        await SeedDataAsync(employeeRepository, courseRepository, projectRepository, skillRepository);
     }
 }
 
@@ -72,7 +85,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Dashboard}/{action=Index}/{id?}");
 
-async Task SeedDataAsync(ApplicationDbContext context)
+async Task SeedDataAsync(IEmployeeRepository employeeRepository, ICourseRepository courseRepository, IProjectRepository projectRepository, ISkillRepository skillRepository)
 {
     // Add sample skills
     var skills = new List<Skill>
@@ -89,8 +102,12 @@ async Task SeedDataAsync(ApplicationDbContext context)
         new() { Name = "Kubernetes", Category = "DevOps", Description = "Container orchestration" }
     };
     
-    context.Skills.AddRange(skills);
-    await context.SaveChangesAsync();
+    var savedSkills = new List<Skill>();
+    foreach (var skill in skills)
+    {
+        var savedSkill = await skillRepository.AddAsync(skill);
+        savedSkills.Add(savedSkill);
+    }
     
     // Add sample courses
     var courses = new List<Course>
@@ -102,8 +119,12 @@ async Task SeedDataAsync(ApplicationDbContext context)
         new() { Title = "Docker Mastery", Provider = "YouTube", Category = "DevOps", DurationHours = 8, Rating = 4.3m, Price = 0m, Url = "https://youtube.com/docker", Description = "Free Docker tutorial series" }
     };
     
-    context.Courses.AddRange(courses);
-    await context.SaveChangesAsync();
+    var savedCourses = new List<Course>();
+    foreach (var course in courses)
+    {
+        var savedCourse = await courseRepository.AddAsync(course);
+        savedCourses.Add(savedCourse);
+    }
     
     // Add sample employees
     var employees = new List<Employee>
@@ -115,25 +136,33 @@ async Task SeedDataAsync(ApplicationDbContext context)
         new() { FirstName = "David", LastName = "Wilson", Email = "david.wilson@company.com", Position = "DevOps Engineer", Department = "Engineering", YearsOfExperience = 6 }
     };
     
-    context.Employees.AddRange(employees);
-    await context.SaveChangesAsync();
+    var savedEmployees = new List<Employee>();
+    foreach (var employee in employees)
+    {
+        var savedEmployee = await employeeRepository.AddAsync(employee);
+        savedEmployees.Add(savedEmployee);
+    }
     
-    // Add employee skills
+    // Add employee skills using actual saved IDs
     var employeeSkills = new List<EmployeeSkill>
     {
-        // John Doe skills
-        new() { EmployeeId = 1, SkillId = 1, Level = SkillLevel.Intermediate, AcquiredDate = DateTime.Now.AddMonths(-12) },
-        new() { EmployeeId = 1, SkillId = 2, Level = SkillLevel.Beginner, AcquiredDate = DateTime.Now.AddMonths(-6) },
-        new() { EmployeeId = 1, SkillId = 4, Level = SkillLevel.Intermediate, AcquiredDate = DateTime.Now.AddMonths(-18) },
-        new() { EmployeeId = 1, SkillId = 5, Level = SkillLevel.Intermediate, AcquiredDate = DateTime.Now.AddMonths(-24) },
+        // John Doe (savedEmployees[0]) skills
+        new() { EmployeeId = savedEmployees[0].Id, SkillId = savedSkills[0].Id, Level = SkillLevel.Intermediate, AcquiredDate = DateTime.Now.AddMonths(-12) }, // C#
+        new() { EmployeeId = savedEmployees[0].Id, SkillId = savedSkills[1].Id, Level = SkillLevel.Beginner, AcquiredDate = DateTime.Now.AddMonths(-6) }, // JavaScript
+        new() { EmployeeId = savedEmployees[0].Id, SkillId = savedSkills[3].Id, Level = SkillLevel.Intermediate, AcquiredDate = DateTime.Now.AddMonths(-18) }, // ASP.NET Core
+        new() { EmployeeId = savedEmployees[0].Id, SkillId = savedSkills[4].Id, Level = SkillLevel.Intermediate, AcquiredDate = DateTime.Now.AddMonths(-24) }, // SQL Server
         
-        // Sarah Johnson skills
-        new() { EmployeeId = 2, SkillId = 1, Level = SkillLevel.Expert, AcquiredDate = DateTime.Now.AddMonths(-36) },
-        new() { EmployeeId = 2, SkillId = 2, Level = SkillLevel.Advanced, AcquiredDate = DateTime.Now.AddMonths(-30) },
-        new() { EmployeeId = 2, SkillId = 3, Level = SkillLevel.Advanced, AcquiredDate = DateTime.Now.AddMonths(-18) },
-        new() { EmployeeId = 2, SkillId = 7, Level = SkillLevel.Intermediate, AcquiredDate = DateTime.Now.AddMonths(-12) }
+        // Sarah Johnson (savedEmployees[1]) skills
+        new() { EmployeeId = savedEmployees[1].Id, SkillId = savedSkills[0].Id, Level = SkillLevel.Expert, AcquiredDate = DateTime.Now.AddMonths(-36) }, // C#
+        new() { EmployeeId = savedEmployees[1].Id, SkillId = savedSkills[1].Id, Level = SkillLevel.Advanced, AcquiredDate = DateTime.Now.AddMonths(-30) }, // JavaScript
+        new() { EmployeeId = savedEmployees[1].Id, SkillId = savedSkills[2].Id, Level = SkillLevel.Advanced, AcquiredDate = DateTime.Now.AddMonths(-18) }, // React
+        new() { EmployeeId = savedEmployees[1].Id, SkillId = savedSkills[6].Id, Level = SkillLevel.Intermediate, AcquiredDate = DateTime.Now.AddMonths(-12) } // Leadership
     };
     
+    // Note: EmployeeSkills is a junction table - would need IEmployeeSkillRepository for full async pattern
+    // For now, using context directly since it's a simple many-to-many relationship
+    var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     context.EmployeeSkills.AddRange(employeeSkills);
     await context.SaveChangesAsync();
     
@@ -145,26 +174,31 @@ async Task SeedDataAsync(ApplicationDbContext context)
         new() { Name = "Cloud Migration", Description = "Migrate legacy systems to Azure cloud platform", StartDate = DateTime.Now.AddDays(45), Status = ProjectStatus.Planning, Department = "Engineering", MaxTeamSize = 4 }
     };
     
-    context.Projects.AddRange(projects);
-    await context.SaveChangesAsync();
+    var savedProjects = new List<Project>();
+    foreach (var project in projects)
+    {
+        var savedProject = await projectRepository.AddAsync(project);
+        savedProjects.Add(savedProject);
+    }
     
-    // Add project skills
+    // Add project skills using actual saved IDs
     var projectSkills = new List<ProjectSkill>
     {
         // E-commerce Platform requirements
-        new() { ProjectId = 1, SkillId = 1, RequiredLevel = SkillLevel.Advanced, IsRequired = true },
-        new() { ProjectId = 1, SkillId = 3, RequiredLevel = SkillLevel.Intermediate, IsRequired = true },
-        new() { ProjectId = 1, SkillId = 5, RequiredLevel = SkillLevel.Intermediate, IsRequired = false },
+        new() { ProjectId = savedProjects[0].Id, SkillId = savedSkills[0].Id, RequiredLevel = SkillLevel.Advanced, IsRequired = true }, // C#
+        new() { ProjectId = savedProjects[0].Id, SkillId = savedSkills[2].Id, RequiredLevel = SkillLevel.Intermediate, IsRequired = true }, // React
+        new() { ProjectId = savedProjects[0].Id, SkillId = savedSkills[4].Id, RequiredLevel = SkillLevel.Intermediate, IsRequired = false }, // SQL Server
         
         // Mobile App Redesign requirements
-        new() { ProjectId = 2, SkillId = 2, RequiredLevel = SkillLevel.Advanced, IsRequired = true },
-        new() { ProjectId = 2, SkillId = 3, RequiredLevel = SkillLevel.Expert, IsRequired = true },
+        new() { ProjectId = savedProjects[1].Id, SkillId = savedSkills[1].Id, RequiredLevel = SkillLevel.Advanced, IsRequired = true }, // JavaScript
+        new() { ProjectId = savedProjects[1].Id, SkillId = savedSkills[2].Id, RequiredLevel = SkillLevel.Expert, IsRequired = true }, // React
         
         // Cloud Migration requirements
-        new() { ProjectId = 3, SkillId = 6, RequiredLevel = SkillLevel.Advanced, IsRequired = true },
-        new() { ProjectId = 3, SkillId = 9, RequiredLevel = SkillLevel.Intermediate, IsRequired = false }
+        new() { ProjectId = savedProjects[2].Id, SkillId = savedSkills[5].Id, RequiredLevel = SkillLevel.Advanced, IsRequired = true }, // Azure
+        new() { ProjectId = savedProjects[2].Id, SkillId = savedSkills[8].Id, RequiredLevel = SkillLevel.Intermediate, IsRequired = false } // Docker
     };
     
+    // ProjectSkills is also a junction table - using context directly
     context.ProjectSkills.AddRange(projectSkills);
     await context.SaveChangesAsync();
 }

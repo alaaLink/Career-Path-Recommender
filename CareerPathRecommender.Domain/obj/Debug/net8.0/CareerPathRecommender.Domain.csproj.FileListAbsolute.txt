@@ -5,6 +5,7 @@ D:\AI Competition\CareerPathRecommender.Domain\obj\Debug\net8.0\CareerPathRecomm
 D:\AI Competition\CareerPathRecommender.Domain\obj\Debug\net8.0\CareerPathRecommender.Domain.AssemblyInfoInputs.cache
 D:\AI Competition\CareerPathRecommender.Domain\obj\Debug\net8.0\CareerPathRecommender.Domain.AssemblyInfo.cs
 D:\AI Competition\CareerPathRecommender.Domain\obj\Debug\net8.0\CareerPathRecommender.Domain.csproj.CoreCompileInputs.cache
+D:\AI Competition\CareerPathRecommender.Domain\obj\Debug\net8.0\CareerPathRecommender.Domain.sourcelink.json
 D:\AI Competition\CareerPathRecommender.Domain\obj\Debug\net8.0\CareerPathRecommender.Domain.dll
 D:\AI Competition\CareerPathRecommender.Domain\obj\Debug\net8.0\refint\CareerPathRecommender.Domain.dll
 D:\AI Competition\CareerPathRecommender.Domain\obj\Debug\net8.0\CareerPathRecommender.Domain.pdb

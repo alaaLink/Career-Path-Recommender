@@ -8,6 +8,7 @@ D:\AI Competition\CareerPathRecommender.Application\obj\Debug\net8.0\CareerPathR
 D:\AI Competition\CareerPathRecommender.Application\obj\Debug\net8.0\CareerPathRecommender.Application.AssemblyInfoInputs.cache
 D:\AI Competition\CareerPathRecommender.Application\obj\Debug\net8.0\CareerPathRecommender.Application.AssemblyInfo.cs
 D:\AI Competition\CareerPathRecommender.Application\obj\Debug\net8.0\CareerPathRecommender.Application.csproj.CoreCompileInputs.cache
+D:\AI Competition\CareerPathRecommender.Application\obj\Debug\net8.0\CareerPathRecommender.Application.sourcelink.json
 D:\AI Competition\CareerPathRecommender.Application\obj\Debug\net8.0\CareerPa.66CB46FF.Up2Date
 D:\AI Competition\CareerPathRecommender.Application\obj\Debug\net8.0\CareerPathRecommender.Application.dll
 D:\AI Competition\CareerPathRecommender.Application\obj\Debug\net8.0\refint\CareerPathRecommender.Application.dll

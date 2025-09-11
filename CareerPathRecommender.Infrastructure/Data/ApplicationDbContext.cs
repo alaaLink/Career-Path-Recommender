@@ -19,6 +19,7 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     public DbSet<EmployeeSkill> EmployeeSkills { get; set; }
     public DbSet<ProjectSkill> ProjectSkills { get; set; }
     public DbSet<ProjectAssignment> ProjectAssignments { get; set; }
+    public DbSet<EmployeeCourse> EmployeeCourses { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -32,7 +33,7 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
             
         modelBuilder.Entity<EmployeeSkill>()
             .HasOne(es => es.Skill)
-            .WithMany()
+            .WithMany(s => s.EmployeeSkills)
             .HasForeignKey(es => es.SkillId);
             
         modelBuilder.Entity<ProjectSkill>()
@@ -42,7 +43,7 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
             
         modelBuilder.Entity<ProjectSkill>()
             .HasOne(ps => ps.Skill)
-            .WithMany()
+            .WithMany(s => s.ProjectSkills)
             .HasForeignKey(ps => ps.SkillId);
             
         modelBuilder.Entity<Recommendation>()
@@ -52,7 +53,7 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
             
         modelBuilder.Entity<Recommendation>()
             .HasOne(r => r.Course)
-            .WithMany()
+            .WithMany(c => c.Recommendations)
             .HasForeignKey(r => r.CourseId)
             .OnDelete(DeleteBehavior.SetNull);
             
@@ -64,12 +65,25 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
             
         modelBuilder.Entity<ProjectAssignment>()
             .HasOne(pa => pa.Employee)
-            .WithMany()
+            .WithMany(e => e.ProjectAssignments)
             .HasForeignKey(pa => pa.EmployeeId);
             
         modelBuilder.Entity<ProjectAssignment>()
             .HasOne(pa => pa.Project)
             .WithMany(p => p.Assignments)
             .HasForeignKey(pa => pa.ProjectId);
+            
+        modelBuilder.Entity<EmployeeCourse>()
+            .HasKey(ec => new { ec.EmployeeId, ec.CourseId });
+            
+        modelBuilder.Entity<EmployeeCourse>()
+            .HasOne(ec => ec.Employee)
+            .WithMany(e => e.Courses)
+            .HasForeignKey(ec => ec.EmployeeId);
+            
+        modelBuilder.Entity<EmployeeCourse>()
+            .HasOne(ec => ec.Course)
+            .WithMany(c => c.EmployeeCourses)
+            .HasForeignKey(ec => ec.CourseId);
     }
 }
