@@ -19,7 +19,7 @@ builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
         b => b.MigrationsAssembly("CareerPathRecommender.Infrastructure")));
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => 
@@ -83,7 +83,7 @@ app.MapRazorPages();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Dashboard}/{action=Index}/{id?}");
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
 async Task SeedDataAsync(IEmployeeRepository employeeRepository, ICourseRepository courseRepository, IProjectRepository projectRepository, ISkillRepository skillRepository)
 {

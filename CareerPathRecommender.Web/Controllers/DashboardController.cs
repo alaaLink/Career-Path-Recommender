@@ -3,10 +3,12 @@ using CareerPathRecommender.Infrastructure.Data;
 using CareerPathRecommender.Web.Models;
 using CareerPathRecommender.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace CareerPathRecommender.Web.Controllers;
 
+[Authorize]
 public class DashboardController : Controller
 {
     private readonly IEmployeeRepository _employeeRepository;

@@ -1,0 +1,233 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Create Account";
+    Layout = "_AuthLayout";
+}
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-logo">
+                <i class="fas fa-rocket"></i>
+            </div>
+            <h1 class="auth-title">Join Career Path</h1>
+            <p class="auth-subtitle">Start your journey to career excellence</p>
+        </div>
+
+        <form asp-action="Register" method="post" class="auth-form" novalidate>
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label asp-for="FirstName" class="form-label">
+                        <i class="fas fa-user"></i>
+                        First Name
+                    </label>
+                    <input asp-for="FirstName" class="form-control" placeholder="Enter your first name" />
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="LastName" class="form-label">
+                        <i class="fas fa-user"></i>
+                        Last Name
+                    </label>
+                    <input asp-for="LastName" class="form-control" placeholder="Enter your last name" />
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Email" class="form-label">
+                    <i class="fas fa-envelope"></i>
+                    Email Address
+                </label>
+                <input asp-for="Email" class="form-control" placeholder="Enter your email address" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label asp-for="Position" class="form-label">
+                        <i class="fas fa-briefcase"></i>
+                        Position
+                    </label>
+                    <input asp-for="Position" class="form-control" placeholder="e.g., Software Developer" />
+                    <span asp-validation-for="Position" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="Department" class="form-label">
+                        <i class="fas fa-building"></i>
+                        Department
+                    </label>
+                    <input asp-for="Department" class="form-control" placeholder="e.g., Engineering" />
+                    <span asp-validation-for="Department" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="YearsOfExperience" class="form-label">
+                    <i class="fas fa-chart-line"></i>
+                    Years of Experience
+                </label>
+                <select asp-for="YearsOfExperience" class="form-control">
+                    <option value="">Select your experience level</option>
+                    <option value="0">0 - Entry Level</option>
+                    <option value="1">1 Year</option>
+                    <option value="2">2 Years</option>
+                    <option value="3">3 Years</option>
+                    <option value="4">4 Years</option>
+                    <option value="5">5 Years</option>
+                    <option value="6">6-10 Years</option>
+                    <option value="11">11-15 Years</option>
+                    <option value="16">16+ Years</option>
+                </select>
+                <span asp-validation-for="YearsOfExperience" class="text-danger"></span>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label asp-for="Password" class="form-label">
+                        <i class="fas fa-lock"></i>
+                        Password
+                    </label>
+                    <div class="password-input">
+                        <input asp-for="Password" class="form-control" placeholder="Create a strong password" />
+                        <button type="button" class="password-toggle" onclick="togglePassword('Password')">
+                            <i class="fas fa-eye" id="Password-eye"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                    <div class="password-strength">
+                        <div class="strength-meter">
+                            <div class="strength-bar" id="strength-bar"></div>
+                        </div>
+                        <span class="strength-text" id="strength-text">Password strength</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="ConfirmPassword" class="form-label">
+                        <i class="fas fa-lock"></i>
+                        Confirm Password
+                    </label>
+                    <div class="password-input">
+                        <input asp-for="ConfirmPassword" class="form-control" placeholder="Confirm your password" />
+                        <button type="button" class="password-toggle" onclick="togglePassword('ConfirmPassword')">
+                            <i class="fas fa-eye" id="ConfirmPassword-eye"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="terms-checkbox">
+                    <input type="checkbox" id="terms" required>
+                    <label for="terms">
+                        I agree to the <a href="#" class="terms-link">Terms of Service</a> and <a href="#" class="terms-link">Privacy Policy</a>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-auth">
+                <i class="fas fa-user-plus"></i>
+                Create Account
+                <div class="btn-loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Already have an account? <a asp-action="Login" class="auth-link">Sign in here</a></p>
+        </div>
+    </div>
+    
+    <div class="auth-features">
+        <div class="feature-item">
+            <i class="fas fa-brain"></i>
+            <h3>AI-Powered Recommendations</h3>
+            <p>Get personalized career guidance powered by intelligent algorithms</p>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-chart-bar"></i>
+            <h3>Skill Gap Analysis</h3>
+            <p>Identify areas for improvement and track your progress</p>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-users"></i>
+            <h3>Mentor Matching</h3>
+            <p>Connect with experienced professionals in your field</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Password strength checker
+        document.getElementById('Password').addEventListener('input', function() {
+            const password = this.value;
+            const strengthBar = document.getElementById('strength-bar');
+            const strengthText = document.getElementById('strength-text');
+            
+            let strength = 0;
+            let text = 'Weak';
+            let color = '#ff4757';
+            
+            if (password.length >= 6) strength++;
+            if (password.match(/[a-z]/)) strength++;
+            if (password.match(/[A-Z]/)) strength++;
+            if (password.match(/[0-9]/)) strength++;
+            if (password.match(/[^a-zA-Z0-9]/)) strength++;
+            
+            switch(strength) {
+                case 0:
+                case 1:
+                    text = 'Weak';
+                    color = '#ff4757';
+                    break;
+                case 2:
+                case 3:
+                    text = 'Medium';
+                    color = '#ffa502';
+                    break;
+                case 4:
+                case 5:
+                    text = 'Strong';
+                    color = '#2ed573';
+                    break;
+            }
+            
+            strengthBar.style.width = (strength * 20) + '%';
+            strengthBar.style.backgroundColor = color;
+            strengthText.textContent = text;
+            strengthText.style.color = color;
+        });
+        
+        // Toggle password visibility
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const eye = document.getElementById(fieldId + '-eye');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                eye.classList.remove('fa-eye');
+                eye.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                eye.classList.remove('fa-eye-slash');
+                eye.classList.add('fa-eye');
+            }
+        }
+        
+        // Form submission loading state
+        document.querySelector('.auth-form').addEventListener('submit', function() {
+            const button = document.querySelector('.btn-auth');
+            button.classList.add('loading');
+            button.disabled = true;
+        });
+    </script>
+}
