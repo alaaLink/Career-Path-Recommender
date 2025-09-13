@@ -147,16 +147,16 @@ async Task SeedDataAsync(IEmployeeRepository employeeRepository, ICourseReposito
     var employeeSkills = new List<EmployeeSkill>
     {
         // John Doe (savedEmployees[0]) skills
-        new() { EmployeeId = savedEmployees[0].Id, SkillId = savedSkills[0].Id, Level = SkillLevel.Intermediate, AcquiredDate = DateTime.Now.AddMonths(-12) }, // C#
-        new() { EmployeeId = savedEmployees[0].Id, SkillId = savedSkills[1].Id, Level = SkillLevel.Beginner, AcquiredDate = DateTime.Now.AddMonths(-6) }, // JavaScript
-        new() { EmployeeId = savedEmployees[0].Id, SkillId = savedSkills[3].Id, Level = SkillLevel.Intermediate, AcquiredDate = DateTime.Now.AddMonths(-18) }, // ASP.NET Core
-        new() { EmployeeId = savedEmployees[0].Id, SkillId = savedSkills[4].Id, Level = SkillLevel.Intermediate, AcquiredDate = DateTime.Now.AddMonths(-24) }, // SQL Server
+        new() { EmployeeId = savedEmployees[0].Id, SkillId = savedSkills[0].Id, Level = SkillLevel.Intermediate, AcquiredDate = DateTime.UtcNow.AddMonths(-12) }, // C#
+        new() { EmployeeId = savedEmployees[0].Id, SkillId = savedSkills[1].Id, Level = SkillLevel.Beginner, AcquiredDate = DateTime.UtcNow.AddMonths(-6) }, // JavaScript
+        new() { EmployeeId = savedEmployees[0].Id, SkillId = savedSkills[3].Id, Level = SkillLevel.Intermediate, AcquiredDate = DateTime.UtcNow.AddMonths(-18) }, // ASP.NET Core
+        new() { EmployeeId = savedEmployees[0].Id, SkillId = savedSkills[4].Id, Level = SkillLevel.Intermediate, AcquiredDate = DateTime.UtcNow.AddMonths(-24) }, // SQL Server
         
         // Sarah Johnson (savedEmployees[1]) skills
-        new() { EmployeeId = savedEmployees[1].Id, SkillId = savedSkills[0].Id, Level = SkillLevel.Expert, AcquiredDate = DateTime.Now.AddMonths(-36) }, // C#
-        new() { EmployeeId = savedEmployees[1].Id, SkillId = savedSkills[1].Id, Level = SkillLevel.Advanced, AcquiredDate = DateTime.Now.AddMonths(-30) }, // JavaScript
-        new() { EmployeeId = savedEmployees[1].Id, SkillId = savedSkills[2].Id, Level = SkillLevel.Advanced, AcquiredDate = DateTime.Now.AddMonths(-18) }, // React
-        new() { EmployeeId = savedEmployees[1].Id, SkillId = savedSkills[6].Id, Level = SkillLevel.Intermediate, AcquiredDate = DateTime.Now.AddMonths(-12) } // Leadership
+        new() { EmployeeId = savedEmployees[1].Id, SkillId = savedSkills[0].Id, Level = SkillLevel.Expert, AcquiredDate = DateTime.UtcNow.AddMonths(-36) }, // C#
+        new() { EmployeeId = savedEmployees[1].Id, SkillId = savedSkills[1].Id, Level = SkillLevel.Advanced, AcquiredDate = DateTime.UtcNow.AddMonths(-30) }, // JavaScript
+        new() { EmployeeId = savedEmployees[1].Id, SkillId = savedSkills[2].Id, Level = SkillLevel.Advanced, AcquiredDate = DateTime.UtcNow.AddMonths(-18) }, // React
+        new() { EmployeeId = savedEmployees[1].Id, SkillId = savedSkills[6].Id, Level = SkillLevel.Intermediate, AcquiredDate = DateTime.UtcNow.AddMonths(-12) } // Leadership
     };
     
     // Note: EmployeeSkills is a junction table - would need IEmployeeSkillRepository for full async pattern
