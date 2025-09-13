@@ -19,8 +19,4 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\CareerPathRecommender.Core\CareerPathRecommender.Core.csproj" />
-  </ItemGroup>
-
 </Project>

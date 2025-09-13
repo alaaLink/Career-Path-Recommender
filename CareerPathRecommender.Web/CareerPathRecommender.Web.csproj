@@ -3,7 +3,6 @@
   <ItemGroup>
     <ProjectReference Include="..\CareerPathRecommender.Application\CareerPathRecommender.Application.csproj" />
     <ProjectReference Include="..\CareerPathRecommender.Infrastructure\CareerPathRecommender.Infrastructure.csproj" />
-    <ProjectReference Include="..\CareerPathRecommender.Core\CareerPathRecommender.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
