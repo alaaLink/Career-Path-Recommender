@@ -44,7 +44,7 @@
                     <div class="card-header bg-gradient p-4" style="background: var(--primary-gradient);">
                         <div class="text-center">
                             <div class="avatar-container mx-auto mb-3" style="width: 80px; height: 80px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-user-circle fa-4x "></i>
+                                <i class="fas fa-user-circle fa-4x text-white"></i>
                             </div>
                             <h5 class="mb-1 fw-bold">@Model.SelectedEmployee!.FullName</h5>
                             <small class="opacity-75">@Model.SelectedEmployee.Position</small>
@@ -74,13 +74,13 @@
                         <!-- Quick Stats -->
                         <div class="row g-2 mb-4">
                             <div class="col-6">
-                                <div class="stat-card-mini text-center p-2">
+                                <div class="stat-card-mini text-center">
                                     <div class="fw-bold text-primary text-truncate" title="@Model.SelectedEmployee.Department">@Model.SelectedEmployee.Department</div>
                                     <small class="text-muted">Department</small>
                                 </div>
                             </div>
                             <div class="col-6">
-                                <div class="stat-card-mini text-center p-2">
+                                <div class="stat-card-mini text-center">
                                     <div class="fw-bold text-success">@Model.SelectedEmployee.YearsOfExperience yrs</div>
                                     <small class="text-muted">Experience</small>
                                 </div>
@@ -241,7 +241,7 @@
                                                 <i class="fas fa-@typeIcon"></i>
                                             </div>
                                             <div>
-                                                <h5 class="mb-0 text-white fw-bold">@recommendation.Title</h5>
+                                                <h6 class="mb-0 text-white fw-bold">@recommendation.Title</h6>
                                                 <small class="text-white-50">@recommendation.Type</small>
                                             </div>
                                         </div>
@@ -264,17 +264,17 @@
                                 </div>
 
                                 <!-- Card Body -->
-                                <div class="card-body-modern p-4">
-                                    <p class="text-muted mb-3 lh-lg">@recommendation.Description</p>
+                                <div class="card-body-modern p-3">
+                                    <p class="text-muted mb-2 lh-base">@recommendation.Description</p>
 
                                     <!-- Enhanced AI Reasoning Box -->
-                                    <div class="ai-reasoning-modern mb-4">
-                                        <div class="reasoning-header mb-2">
+                                    <div class="ai-reasoning-modern mb-3">
+                                        <div class="reasoning-header mb-1">
                                             <div class="d-flex align-items-center">
                                                 <div class="ai-icon me-2">
                                                     <i class="fas fa-brain"></i>
                                                 </div>
-                                                <span class="fw-bold text-dark">AI Analysis</span>
+                                                <span class="fw-bold text-dark small me-2">AI Analysis</span>
                                                 <div class="reasoning-line ms-auto"></div>
                                             </div>
                                         </div>
@@ -284,7 +284,7 @@
                                     </div>
 
                                     <!-- Enhanced Metrics Row -->
-                                    <div class="metrics-row mb-4">
+                                    <div class="metrics-row mb-3">
                                         <div class="row g-3">
                                             <div class="col-4">
                                                 <div class="metric-card text-center">
@@ -317,7 +317,7 @@
                                     </div>
 
                                     <!-- Enhanced Action Buttons -->
-                                    <div class="action-buttons d-flex flex-wrap gap-2 mb-3">
+                                    <div class="action-buttons d-flex flex-wrap gap-2 mb-2">
                                         <button class="btn btn-success btn-modern flex-grow-1" onclick="acceptRecommendation(@recommendation.Id)">
                                             <i class="fas fa-check me-1"></i>
                                             <span>Accept & Start</span>
@@ -617,25 +617,24 @@
     </script>
 
     <style>
-        .stat-card-mini {
-            background: var(--gray-50);
-            border: 1px solid var(--gray-200);
-            border-radius: var(--radius-md);
-            transition: all var(--transition-normal);
+        /* Page-specific styles */
+        .profile-card {
+            max-height: calc(100vh - 4rem);
+            overflow-y: auto;
+            position: sticky;
+            top: 2rem;
         }
 
-            .stat-card-mini:hover {
-                background: white;
-                box-shadow: var(--shadow-sm);
-            }
-
-        .skill-item .progress {
-            border-radius: var(--radius-sm);
-            background: var(--gray-200);
+        .profile-card .card-body {
+            flex: 1;
+            overflow-y: auto;
         }
 
-        .empty-state {
-            padding: 4rem 2rem;
+        .skill-item .fw-medium {
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .list-view .recommendation-card-modern {
@@ -648,57 +647,6 @@
             max-width: 200px;
         }
 
-        .breadcrumb {
-            background: none;
-            padding: 0;
-            margin-bottom: 1rem;
-        }
-
-        .breadcrumb-item + .breadcrumb-item::before {
-            content: ">";
-            color: var(--gray-400);
-        }
-
-        .profile-sidebar {
-            position: relative;
-        }
-
-        .profile-card {
-            max-height: calc(100vh - 4rem);
-            overflow-y: auto;
-            position: sticky;
-            top: 2rem;
-        }
-
-            .profile-card .card-body {
-                flex: 1;
-                overflow-y: auto;
-            }
-
-        .skill-item {
-            min-height: auto;
-        }
-
-            .skill-item .fw-medium {
-                max-width: 120px;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-            }
-
-        .stat-card-mini .fw-bold {
-            font-size: 0.875rem;
-            line-height: 1.2;
-            word-break: break-word;
-        }
-
-        /* Button text wrapping */
-        .btn-sm span {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
         @@media (max-width: 992px) {
             .profile-card {
                 position: relative;
@@ -706,23 +654,11 @@
                 max-height: none;
                 overflow-y: visible;
             }
-
-            .profile-sidebar {
-                margin-bottom: 2rem;
-            }
         }
 
         @@media (max-width: 576px) {
-            .stat-card-mini .fw-bold {
-                font-size: 0.75rem;
-            }
-
             .skill-item .fw-medium {
                 max-width: 80px;
-            }
-
-            .btn-sm span {
-                display: none;
             }
         }
     </style>
