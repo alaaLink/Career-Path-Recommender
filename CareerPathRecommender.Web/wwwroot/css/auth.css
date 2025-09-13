@@ -372,13 +372,23 @@
     overflow: hidden;
 }
 
-.btn-auth:hover {
+.btn-auth:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
 }
 
-.btn-auth:active {
+.btn-auth:active:not(:disabled) {
     transform: translateY(0);
+}
+
+.btn-auth:disabled,
+.btn-auth.btn-disabled {
+    background: #cbd5e0;
+    color: #a0aec0;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    opacity: 0.6;
 }
 
 .btn-auth.loading {

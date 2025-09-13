@@ -124,14 +124,15 @@
 
             <div class="form-group">
                 <div class="terms-checkbox">
-                    <input type="checkbox" id="terms" required>
+                    <input asp-for="AcceptTerms" type="checkbox" id="terms" required>
                     <label for="terms">
                         I agree to the <a href="#" class="terms-link">Terms of Service</a> and <a href="#" class="terms-link">Privacy Policy</a>
                     </label>
                 </div>
+                <span asp-validation-for="AcceptTerms" class="text-danger"></span>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-auth">
+            <button type="submit" class="btn btn-primary btn-auth" id="createAccountBtn" disabled>
                 <i class="fas fa-user-plus"></i>
                 Create Account
                 <div class="btn-loading">
@@ -222,6 +223,51 @@
                 eye.classList.add('fa-eye');
             }
         }
+        
+        // Form validation function
+        function validateForm() {
+            const firstName = document.getElementById('FirstName').value.trim();
+            const lastName = document.getElementById('LastName').value.trim();
+            const email = document.getElementById('Email').value.trim();
+            const position = document.getElementById('Position').value.trim();
+            const department = document.getElementById('Department').value.trim();
+            const yearsOfExperience = document.getElementById('YearsOfExperience').value;
+            const password = document.getElementById('Password').value;
+            const confirmPassword = document.getElementById('ConfirmPassword').value;
+            const acceptTerms = document.getElementById('terms').checked;
+            
+            const isFormValid = firstName && lastName && email && position && 
+                              department && yearsOfExperience && password && 
+                              confirmPassword && acceptTerms && password === confirmPassword;
+            
+            const createAccountBtn = document.getElementById('createAccountBtn');
+            createAccountBtn.disabled = !isFormValid;
+            
+            if (isFormValid) {
+                createAccountBtn.classList.remove('btn-disabled');
+            } else {
+                createAccountBtn.classList.add('btn-disabled');
+            }
+        }
+        
+        // Add event listeners to all form fields
+        document.addEventListener('DOMContentLoaded', function() {
+            const formFields = ['FirstName', 'LastName', 'Email', 'Position', 'Department', 'YearsOfExperience', 'Password', 'ConfirmPassword'];
+            
+            formFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('input', validateForm);
+                    field.addEventListener('change', validateForm);
+                }
+            });
+            
+            // Terms checkbox handler
+            document.getElementById('terms').addEventListener('change', validateForm);
+            
+            // Initial validation
+            validateForm();
+        });
         
         // Form submission loading state
         document.querySelector('.auth-form').addEventListener('submit', function() {

@@ -44,4 +44,8 @@ public class RegisterViewModel
     [Display(Name = "Years of Experience")]
     [Range(0, 50, ErrorMessage = "Years of experience must be between 0 and 50")]
     public int YearsOfExperience { get; set; }
+
+    [Required(ErrorMessage = "You must accept the terms and conditions")]
+    [Display(Name = "Accept Terms")]
+    public bool AcceptTerms { get; set; }
 }

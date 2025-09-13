@@ -14,9 +14,28 @@
             <p class="auth-subtitle">Continue your career journey</p>
         </div>
 
+        @if (ViewBag.ShowResendConfirmation == true)
+        {
+            <div class="alert alert-warning" role="alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Email Confirmation Required</strong>
+                <p class="mb-2">You must confirm your email address before you can log in.</p>
+                <form asp-action="ResendEmailConfirmation" asp-controller="Account" method="post" class="d-inline" onsubmit="console.log('Form submitted!'); return true;">
+                    <input type="hidden" name="email" value="@ViewBag.Email" />
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-sm btn-outline-warning" onclick="console.log('Button clicked!'); console.log('Email:', '@ViewBag.Email');">
+                        <i class="fas fa-paper-plane"></i>
+                        Resend Confirmation Email
+                    </button>
+                </form>
+            </div>
+        }
         <form asp-action="Login" method="post" class="auth-form" novalidate>
             <input asp-for="ReturnUrl" type="hidden" />
             <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+            
+            
+            
             
             <div class="form-group">
                 <label asp-for="Email" class="form-label">
@@ -63,18 +82,34 @@
         </div>
 
         <div class="social-login">
-            <button type="button" class="btn btn-social btn-google" disabled>
+            <a asp-action="ExternalLogin" asp-route-provider="Google" asp-route-returnUrl="@ViewData["ReturnUrl"]" class="btn btn-social btn-google">
                 <i class="fab fa-google"></i>
-                Continue with Google
-            </button>
-            <button type="button" class="btn btn-social btn-microsoft" disabled>
-                <i class="fab fa-microsoft"></i>
-                Continue with Microsoft
-            </button>
+                Login with Google
+            </a>
         </div>
 
-        <div class="auth-footer">
-            <p>Don't have an account? <a asp-action="Register" class="auth-link">Create one here</a></p>
+            <div class="auth-footer">
+                <p>Don't have an account? <a asp-action="Register" class="auth-link">Create one here</a></p>
+                <p><a asp-action="ForgotPassword" class="auth-link">Forgot your password?</a></p>
+            </div>
+        </div>
+
+        <div class="auth-features">
+            <div class="feature-item">
+                <i class="fas fa-graduation-cap"></i>
+                <h3>Personalized Learning</h3>
+                <p>Discover courses tailored to your career goals and skill level</p>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-project-diagram"></i>
+                <h3>Project Matching</h3>
+                <p>Find projects that align with your skills and interests</p>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-trophy"></i>
+                <h3>Career Growth</h3>
+                <p>Track your progress and celebrate your achievements</p>
+            </div>
         </div>
     </div>
     
