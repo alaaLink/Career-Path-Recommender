@@ -1,8 +1,6 @@
-using Microsoft.EntityFrameworkCore;
-using CareerPathRecommender.Infrastructure.Data;
-using CareerPathRecommender.Domain.Entities;
-using CareerPathRecommender.Application.Interfaces;
 using CareerPathRecommender.Application.DTOs;
+using CareerPathRecommender.Application.Interfaces;
+using CareerPathRecommender.Domain.Entities;
 using CareerPathRecommender.Domain.Enums;
 
 namespace CareerPathRecommender.Infrastructure.Services;

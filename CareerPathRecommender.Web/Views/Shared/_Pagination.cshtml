@@ -1,0 +1,115 @@
+@model CareerPathRecommender.Web.Models.PaginationInfo
+
+@if (Model.TotalPages > 1)
+{
+    <nav aria-label="Pagination" class="d-flex justify-content-between align-items-center mt-4">
+        <!-- Page Info -->
+        <div class="pagination-info">
+            <small class="text-muted">
+                Showing <strong>@Model.StartItem</strong> to <strong>@Model.EndItem</strong> of <strong>@Model.TotalItems</strong> results
+            </small>
+        </div>
+
+        <!-- Pagination Controls -->
+        <ul class="pagination pagination-modern mb-0">
+            <!-- Previous Button -->
+            <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                <a class="page-link" href="javascript:void(0)" data-page="@(Model.CurrentPage - 1)"
+                   aria-label="Previous" @(!Model.HasPreviousPage ? "tabindex=-1" : "")>
+                    <i class="fas fa-chevron-left"></i>
+                    <span class="d-none d-sm-inline ms-1">Previous</span>
+                </a>
+            </li>
+
+            <!-- Page Numbers -->
+            @foreach (var pageNumber in Model.GetPageNumbers())
+            {
+                <li class="page-item @(pageNumber == Model.CurrentPage ? "active" : "")">
+                    <a class="page-link" href="javascript:void(0)" data-page="@pageNumber">
+                        @pageNumber
+                    </a>
+                </li>
+            }
+
+            <!-- Next Button -->
+            <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                <a class="page-link" href="javascript:void(0)" data-page="@(Model.CurrentPage + 1)"
+                   aria-label="Next" @(!Model.HasNextPage ? "tabindex=-1" : "")>
+                    <span class="d-none d-sm-inline me-1">Next</span>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+}
+
+<style>
+.pagination-modern {
+    --bs-pagination-padding-x: 0.75rem;
+    --bs-pagination-padding-y: 0.5rem;
+    --bs-pagination-font-size: 0.875rem;
+    --bs-pagination-color: var(--gray-600);
+    --bs-pagination-bg: white;
+    --bs-pagination-border-width: 1px;
+    --bs-pagination-border-color: var(--gray-300);
+    --bs-pagination-border-radius: var(--radius-lg);
+    --bs-pagination-hover-color: var(--gray-700);
+    --bs-pagination-hover-bg: var(--gray-100);
+    --bs-pagination-hover-border-color: var(--gray-300);
+    --bs-pagination-focus-color: var(--gray-700);
+    --bs-pagination-focus-bg: var(--gray-100);
+    --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+    --bs-pagination-active-color: white;
+    --bs-pagination-active-bg: #667eea;
+    --bs-pagination-active-border-color: #667eea;
+    --bs-pagination-disabled-color: var(--gray-400);
+    --bs-pagination-disabled-bg: var(--gray-100);
+    --bs-pagination-disabled-border-color: var(--gray-300);
+}
+
+.pagination-modern .page-link {
+    border-radius: var(--radius-md);
+    margin: 0 0.125rem;
+    font-weight: 500;
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.pagination-modern .page-link:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.pagination-modern .page-item.active .page-link {
+    background: var(--primary-gradient);
+    border-color: transparent;
+    box-shadow: var(--shadow-md);
+}
+
+.pagination-modern .page-item.disabled .page-link {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.pagination-info {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+}
+
+@@media (max-width: 576px) {
+    .pagination-modern {
+        justify-content: center;
+    }
+
+    .pagination-info {
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .pagination-modern .page-link {
+        padding: 0.5rem 0.75rem;
+    }
+}
+</style>

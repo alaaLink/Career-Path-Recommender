@@ -10,9 +10,9 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h1 class="display-4 text-primary">
+                    <h3 class="display-6 text-primary">
                         <i class="fas fa-rocket"></i> Career Development Dashboard
-                    </h1>
+                    </h3>
                     <p class="lead text-muted">AI-powered personalized career recommendations</p>
                 </div>
                 <div class="text-end">
@@ -40,68 +40,152 @@
         <div class="col-12">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-users"></i> Select Employee Profile</h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-users"></i> Select Employee Profile</h5>
+                        <span class="badge bg-white text-primary">
+                            @Model.Employees.Count() @(string.IsNullOrEmpty(Model.SearchTerm) ? "Total" : "Found")
+                        </span>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        @foreach (var employee in Model.Employees)
-                        {
-                            <div class="col-md-3 mb-3">
-                                <div class="card employee-card h-100" style="cursor: pointer;" onclick="selectEmployee(@employee.Id)">
-                                    <div class="card-body text-center">
-                                        <div class="position-relative mb-3">
-                                            <i class="fas fa-user-circle fa-4x text-primary"></i>
-                                            @if (employee.YearsOfExperience >= 5)
-                                            {
-                                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">
-                                                    Senior
-                                                </span>
-                                            }
+                    <!-- Search Bar -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <form method="get" action="@Url.Action("Index", "Dashboard")">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-search"></i>
+                                    </span>
+                                    <input type="text"
+                                           class="form-control"
+                                           name="searchTerm"
+                                           value="@Model.SearchTerm"
+                                           placeholder="Search employees by name, position, or department...">
+                                    @if (!string.IsNullOrEmpty(Model.SearchTerm))
+                                    {
+                                        <a href="@Url.Action("Index", "Dashboard")" class="btn btn-outline-secondary" title="Clear search">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                    }
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search me-1"></i>Search
+                                    </button>
+                                </div>
+                                @if (!string.IsNullOrEmpty(Model.SearchTerm))
+                                {
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-filter me-1"></i>
+                                            Showing results for "<strong>@Model.SearchTerm</strong>"
+                                            (@Model.Employees.Count() of @ViewBag.TotalEmployees employees)
+                                        </small>
+                                    </div>
+                                }
+                            </form>
+                        </div>
+                    </div>
+
+                    @if (!Model.Employees.Any())
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-user-slash fa-4x text-muted mb-3"></i>
+                            <h4 class="text-muted">No employees found</h4>
+                            <p class="text-muted">
+                                @if (!string.IsNullOrEmpty(Model.SearchTerm))
+                                {
+                                    <span>No employees match your search for "<strong>@Model.SearchTerm</strong>".</span>
+
+                                    <br />
+                                    <a href="@Url.Action("Index", "Dashboard")" class="btn btn-primary mt-2">
+                                        <i class="fas fa-arrow-left me-1"></i>View All Employees
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span>No employees are currently registered in the system.</span>
+                                }
+                            </p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row">
+                            @foreach (var employee in Model.Employees)
+                            {
+                                <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                                    <div class="card employee-card h-100" style="cursor: pointer;" onclick="viewEmployeeRecommendations(@employee.Id)">
+                                        <div class="card-body text-center mx-4">
+                                            <div class="position-relative mb-3">
+                                                <i class="fas fa-user-circle fa-4x text-primary"></i>
+                                                @if (employee.YearsOfExperience >= 10)
+                                                {
+                                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">
+                                                        <i class="fas fa-star"></i> Expert
+                                                    </span>
+                                                }
+                                                else if (employee.YearsOfExperience >= 5)
+                                                {
+                                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">
+                                                        <i class="fas fa-crown"></i> Senior
+                                                    </span>
+                                                }
+                                            </div>
+                                            <h6 class="card-title mb-1">@employee.FullName</h6>
+                                            <p class="card-text text-muted mb-1">@employee.Position</p>
+                                            <small class="text-muted">@employee.Department • @employee.YearsOfExperience yrs</small>
+
+                                            <!-- Action overlay on hover -->
+                                            <div class="card-overlay">
+                                                <div class="overlay-content">
+                                                    <i class="fas fa-brain fa-2x mb-2"></i>
+                                                    <div class="fw-bold">View AI Recommendations</div>
+                                                    <small>Click to see personalized career suggestions</small>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <h6 class="card-title mb-1">@employee.FullName</h6>
-                                        <p class="card-text text-muted mb-1">@employee.Position</p>
-                                        <small class="text-muted">@employee.Department • @employee.YearsOfExperience yrs</small>
                                     </div>
                                 </div>
+                            }
+                        </div>
+
+                        <!-- Employee Pagination -->
+                        @if (Model.EmployeesPagination.TotalPages > 1)
+                        {
+                            <div class="employee-pagination">
+                                <partial name="_Pagination" model="Model.EmployeesPagination" />
                             </div>
                         }
-                    </div>
+                    }
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Selected Employee Profile & Recommendations -->
-    <div id="employeeProfile" style="display: none;">
-        <!-- Content will be loaded here via AJAX -->
-    </div>
-
-    <!-- Skill Gap Analysis -->
-    <div id="skillGapSection" class="row mb-4" style="display: none;">
+    <!-- Quick Actions Bar -->
+    <div class="row mb-4">
         <div class="col-12">
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0"><i class="fas fa-chart-line"></i> Career Path Analysis</h5>
-                </div>
                 <div class="card-body">
-                    <form id="skillGapForm">
-                        <div class="row align-items-end">
-                            <div class="col-md-8">
-                                <label for="targetPosition" class="form-label fw-bold">Target Position:</label>
-                                <input type="text" class="form-control form-control-lg" id="targetPosition" 
-                                       placeholder="e.g., Senior Software Engineer, Tech Lead, Engineering Manager" required />
-                                <small class="form-text text-muted">Enter the position you want to transition to</small>
-                            </div>
-                            <div class="col-md-4">
-                                <button type="submit" class="btn btn-warning btn-lg w-100" id="analyzeBtn">
-                                    <i class="fas fa-analytics"></i> Analyze Career Path
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="mb-0">
+                                <i class="fas fa-rocket text-primary me-2"></i>
+                                Ready to explore career recommendations?
+                            </h5>
+                            <p class="text-muted mb-0">
+                                Select an employee above to view AI-powered career path recommendations
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="d-flex gap-2 justify-content-end">
+                                <button class="btn btn-outline-primary btn-sm" onclick="showQuickTour()">
+                                    <i class="fas fa-question-circle me-1"></i>Quick Tour
+                                </button>
+                                <button class="btn btn-outline-info btn-sm" onclick="showAnalytics()">
+                                    <i class="fas fa-chart-bar me-1"></i>Analytics
                                 </button>
                             </div>
                         </div>
-                    </form>
-                    
-                    <div id="skillGapResults" class="mt-4">
-                        <!-- Skill gap analysis results will be loaded here -->
                     </div>
                 </div>
             </div>
@@ -131,189 +215,260 @@
 </div>
 
 @section Scripts {
-<script>
-    let currentEmployeeId = null;
+    <script>
+        let currentEmployeeId = null;
 
-    // Load metrics on page load
-    $(document).ready(function() {
-        loadMetrics();
-        
-        // Add hover effects to employee cards
-        $('.employee-card').hover(
-            function() { $(this).addClass('shadow-lg').css('transform', 'translateY(-5px)'); },
-            function() { $(this).removeClass('shadow-lg').css('transform', 'translateY(0)'); }
-        );
-    });
+        // Load metrics on page load
+        $(document).ready(function() {
+            loadMetrics();
 
-    function loadMetrics() {
-        $.get('@Url.Action("GetEmployeeMetrics", "Dashboard")')
-            .done(function(data) {
-                $('#totalCourses').text(data.totalCourses);
-                $('#totalProjects').text(data.totalProjects);
-            });
-    }
-
-    function selectEmployee(employeeId) {
-        currentEmployeeId = employeeId;
-        
-        // Show loading state
-        $('#employeeProfile').html('<div class="text-center p-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-3">Generating personalized recommendations...</p></div>').show();
-        
-        $.post('@Url.Action("SelectEmployee", "Dashboard")', { employeeId: employeeId })
-            .done(function(data) {
-                $('#employeeProfile').html(data).show();
-                $('#skillGapSection').show();
-                
-                // Smooth scroll to profile
-                $('html, body').animate({
-                    scrollTop: $('#employeeProfile').offset().top - 20
-                }, 500);
-                
-                // Add animations
-                $('.recommendation-card').hide().each(function(index) {
-                    $(this).delay(index * 200).fadeIn();
-                });
-            })
-            .fail(function() {
-                showError('Failed to load employee data. Please try again.');
-            });
-    }
-
-    // Skill Gap Analysis Form
-    $('#skillGapForm').on('submit', function(e) {
-        e.preventDefault();
-        
-        if (!currentEmployeeId) {
-            showError('Please select an employee first.');
-            return;
-        }
-        
-        const targetPosition = $('#targetPosition').val();
-        const $btn = $('#analyzeBtn');
-        
-        // Show loading state
-        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Analyzing...');
-        
-        $.post('@Url.Action("AnalyzeSkillGaps", "Dashboard")', { 
-            employeeId: currentEmployeeId, 
-            targetPosition: targetPosition 
-        })
-        .done(function(data) {
-            $('#skillGapResults').html(data).hide().slideDown();
-            
-            // Animate skill gaps
-            $('.skill-gap-item').hide().each(function(index) {
-                $(this).delay(index * 100).fadeIn();
-            });
-        })
-        .fail(function() {
-            showError('Failed to analyze skill gaps. Please try again.');
-        })
-        .always(function() {
-            $btn.prop('disabled', false).html('<i class="fas fa-analytics"></i> Analyze Career Path');
+            // Add hover effects to employee cards
+            $('.employee-card').hover(
+                function() { $(this).addClass('shadow-lg').css('transform', 'translateY(-5px)'); },
+                function() { $(this).removeClass('shadow-lg').css('transform', 'translateY(0)'); }
+            );
         });
-    });
 
-    function acceptRecommendation(recommendationId) {
-        $.post('@Url.Action("AcceptRecommendation", "Dashboard")', { recommendationId: recommendationId })
-            .done(function(response) {
-                if (response.success) {
-                    showSuccess(response.message);
-                    $(`#rec-${recommendationId}`).addClass('accepted').find('.accept-btn').prop('disabled', true).text('Accepted');
-                } else {
-                    showError(response.error);
-                }
+        function loadMetrics() {
+            $.get('@Url.Action("GetEmployeeMetrics", "Dashboard")')
+                .done(function(data) {
+                    $('#totalCourses').text(data.totalCourses);
+                    $('#totalProjects').text(data.totalProjects);
+                });
+        }
+
+        function viewEmployeeRecommendations(employeeId) {
+            // Show loading state on the clicked card
+            const $card = $(`[onclick="viewEmployeeRecommendations(${employeeId})"]`);
+            const originalContent = $card.html();
+
+            $card.html(`
+                <div class="card-body text-center p-4">
+                    <div class="spinner-border text-primary mb-3" role="status"></div>
+                    <div class="fw-bold">Loading...</div>
+                    <small class="text-muted">Preparing recommendations</small>
+                </div>
+            `);
+
+            // Navigate to recommendations page
+            window.location.href = '@Url.Action("Recommendations", "Dashboard")?employeeId=' + employeeId;
+        }
+
+        // Keep the old function for backward compatibility (if needed elsewhere)
+        function selectEmployee(employeeId) {
+            viewEmployeeRecommendations(employeeId);
+        }
+
+        // Quick action functions
+        function showQuickTour() {
+            showSuccess('Quick tour feature coming soon! Click on any employee card to see their personalized recommendations.');
+        }
+
+        function showAnalytics() {
+            showSuccess('Analytics dashboard coming soon! This will show overall career development trends.');
+        }
+
+        function showSuccess(message) {
+            $('#successMessage').text(message);
+            new bootstrap.Modal(document.getElementById('successModal')).show();
+        }
+
+        function showError(message) {
+            // Simple error handling - in production would use proper toast notifications
+            alert('Error: ' + message);
+        }
+
+        // Employee Pagination Handler
+        $(document).on('click', '.employee-pagination .page-link', function(e) {
+            e.preventDefault();
+            const page = $(this).data('page');
+
+            if (page && !$(this).parent().hasClass('disabled') && !$(this).parent().hasClass('active')) {
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('page', page);
+
+                // Show loading state
+                $('.employee-pagination').html('<div class="text-center"><div class="spinner-border spinner-border-sm text-primary" role="status"></div></div>');
+
+                window.location.href = currentUrl.toString();
+            }
+        });
+
+        // Load more recommendations function
+        function loadRecommendationPage(employeeId, page) {
+            $.post('@Url.Action("SelectEmployee", "Dashboard")', {
+                employeeId: employeeId,
+                recPage: page,
+                recPageSize: 6
+            })
+            .done(function(data) {
+                $('#employeeProfile').html(data);
+
+                // Add animations for new cards
+                $('.recommendation-card-modern').hide().each(function(index) {
+                    $(this).delay(index * 150).fadeIn();
+                });
+
+                // Initialize confidence circles
+                initializeConfidenceCircles();
             })
             .fail(function() {
-                showError('Failed to accept recommendation. Please try again.');
+                showError('Failed to load recommendations. Please try again.');
             });
-    }
+        }
 
-    function viewRecommendationDetails(recommendationId) {
-        $.get('@Url.Action("GetRecommendationDetails", "Dashboard")', { recommendationId: recommendationId })
-            .done(function(response) {
-                if (response.success) {
-                    // Show details in modal or expand card
-                    alert('Details: ' + response.data.details); // Simple implementation for demo
-                } else {
-                    showError(response.error);
+        // Recommendation pagination handler
+        $(document).on('click', '.rec-page-link', function(e) {
+            e.preventDefault();
+            const page = $(this).data('page');
+            const employeeId = $('.recommendations-pagination').data('employee-id');
+
+            if (page && !$(this).parent().hasClass('disabled') && !$(this).parent().hasClass('active')) {
+                // Show loading state
+                $('.recommendations-pagination').html('<div class="text-center p-3"><div class="spinner-border spinner-border-sm text-primary" role="status"></div></div>');
+
+                loadRecommendationPage(employeeId, page);
+            }
+        });
+
+        // Initialize confidence circles and animations
+        function initializeConfidenceCircles() {
+            $('.confidence-circle').each(function() {
+                const confidence = $(this).data('confidence');
+                $(this).css('--confidence-height', confidence + '%');
+            });
+
+            // Add stagger animation to recommendation cards
+            $('.recommendation-card-modern').each(function(index) {
+                $(this).css('animation-delay', (index * 0.1) + 's');
+            });
+        }
+
+        // Initialize on document ready
+        $(document).ready(function() {
+            // ... existing code ...
+
+            // Initialize confidence circles when page loads
+            initializeConfidenceCircles();
+        });
+    </script>
+
+    <style>
+        .employee-card {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .employee-card:hover {
+                border-color: #0d6efd;
+                transform: translateY(-5px);
+            }
+
+                .employee-card:hover .card-overlay {
+                    opacity: 1;
+                    visibility: visible;
                 }
-            });
-    }
 
-    function showSuccess(message) {
-        $('#successMessage').text(message);
-        new bootstrap.Modal(document.getElementById('successModal')).show();
-    }
+        .card-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(102, 126, 234, 0.95);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            border-radius: inherit;
+        }
 
-    function showError(message) {
-        // Simple error handling - in production would use proper toast notifications
-        alert('Error: ' + message);
-    }
-</script>
+        .overlay-content {
+            text-align: center;
+            padding: 1rem;
+        }
 
-<style>
-    .employee-card {
-        transition: all 0.3s ease;
-        border: 2px solid transparent;
-    }
-    
-    .employee-card:hover {
-        border-color: #0d6efd;
-        transform: translateY(-5px);
-    }
-    
-    .recommendation-card {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border: 1px solid #dee2e6;
-        border-radius: 10px;
-        transition: all 0.3s ease;
-    }
-    
-    .recommendation-card:hover {
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        transform: translateY(-3px);
-    }
-    
-    .recommendation-card.accepted {
-        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-        border-color: #28a745;
-    }
-    
-    .skill-gap-item {
-        background: white;
-        border-left: 4px solid #007bff;
-        transition: all 0.3s ease;
-    }
-    
-    .skill-gap-item:hover {
-        border-left-color: #28a745;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-    
-    .priority-5 { border-left-color: #dc3545 !important; }
-    .priority-4 { border-left-color: #fd7e14 !important; }
-    .priority-3 { border-left-color: #ffc107 !important; }
-    .priority-2 { border-left-color: #20c997 !important; }
-    .priority-1 { border-left-color: #6f42c1 !important; }
-    
-    .fade-in {
-        animation: fadeIn 0.8s ease-in;
-    }
-    
-    @@keyframes fadeIn {
-        from { opacity: 0; transform: translateY(30px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .card {
-        border: none;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    
-    .progress-ring {
-        width: 60px;
-        height: 60px;
-    }
-</style>
+        .card-overlay .fas {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .recommendation-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+            .recommendation-card:hover {
+                box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+                transform: translateY(-3px);
+            }
+
+            .recommendation-card.accepted {
+                background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+                border-color: #28a745;
+            }
+
+        .skill-gap-item {
+            background: white;
+            border-left: 4px solid #007bff;
+            transition: all 0.3s ease;
+        }
+
+            .skill-gap-item:hover {
+                border-left-color: #28a745;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            }
+
+        .priority-5 {
+            border-left-color: #dc3545 !important;
+        }
+
+        .priority-4 {
+            border-left-color: #fd7e14 !important;
+        }
+
+        .priority-3 {
+            border-left-color: #ffc107 !important;
+        }
+
+        .priority-2 {
+            border-left-color: #20c997 !important;
+        }
+
+        .priority-1 {
+            border-left-color: #6f42c1 !important;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-in;
+        }
+
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-ring {
+            width: 60px;
+            height: 60px;
+        }
+    </style>
 }
