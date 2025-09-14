@@ -165,7 +165,7 @@ public class AccountController : Controller
                     Email = model.Email,
                     Position = model.Position,
                     Department = model.Department,
-                    YearsOfExperience = model.YearsOfExperience
+                    YearsOfExperience = model.YearsOfExperience??0
                 };
 
                 await _employeeRepository.AddAsync(employee);

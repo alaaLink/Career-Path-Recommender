@@ -14,7 +14,7 @@
             <p class="auth-subtitle">Start your journey to career excellence</p>
         </div>
 
-        <form asp-action="Register" method="post" class="auth-form" novalidate>
+        <form asp-action="Register" method="post" class="auth-form" id="registerForm">
             <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
             
             <div class="form-row">
@@ -72,7 +72,7 @@
                     Years of Experience
                 </label>
                 <div class="experience-select-wrapper">
-                    <select asp-for="YearsOfExperience" class="form-control experience-select" id="experienceSelect">
+                    <select asp-for="YearsOfExperience" class="form-control experience-select" id="YearsOfExperience">
                         <option value="">Select your experience level</option>
                         <optgroup label="Entry Level">
                             <option value="0">Less than 1 year</option>
@@ -288,7 +288,7 @@
             }
         }
         
-        // Form validation function
+        // Form validation to enable button when all fields are filled
         function validateForm() {
             const firstName = document.getElementById('FirstName').value.trim();
             const lastName = document.getElementById('LastName').value.trim();
@@ -300,24 +300,20 @@
             const confirmPassword = document.getElementById('ConfirmPassword').value;
             const acceptTerms = document.getElementById('terms').checked;
             
-            const isFormValid = firstName && lastName && email && position && 
-                              department && yearsOfExperience && password && 
-                              confirmPassword && acceptTerms && password === confirmPassword;
+            const allFieldsFilled = firstName && lastName && email && position && 
+                                  department && yearsOfExperience && password && confirmPassword;
+            const passwordsMatch = password === confirmPassword;
+            
+            const isFormValid = allFieldsFilled && acceptTerms && passwordsMatch;
             
             const createAccountBtn = document.getElementById('createAccountBtn');
             createAccountBtn.disabled = !isFormValid;
-            
-            if (isFormValid) {
-                createAccountBtn.classList.remove('btn-disabled');
-            } else {
-                createAccountBtn.classList.add('btn-disabled');
-            }
         }
         
-        // Add event listeners to all form fields
         document.addEventListener('DOMContentLoaded', function() {
             const formFields = ['FirstName', 'LastName', 'Email', 'Position', 'Department', 'YearsOfExperience', 'Password', 'ConfirmPassword'];
             
+            // Add event listeners to all form fields
             formFields.forEach(fieldId => {
                 const field = document.getElementById(fieldId);
                 if (field) {
@@ -326,16 +322,17 @@
                 }
             });
             
-            // Terms checkbox handler
+            // Terms checkbox listener
             document.getElementById('terms').addEventListener('change', validateForm);
             
-            // Experience select handler
-            const experienceSelect = document.getElementById('experienceSelect');
+            // Experience select and badge functionality
+            const experienceSelect = document.getElementById('YearsOfExperience');
             const experienceBadge = document.getElementById('experienceBadge');
             
             if (experienceSelect && experienceBadge) {
                 experienceSelect.addEventListener('change', function() {
                     updateExperienceBadge(this.value);
+                    validateForm();
                 });
                 
                 // Initialize badge if a value is already selected
@@ -344,7 +341,7 @@
                 }
             }
             
-            // Initial validation
+            // Initial validation check
             validateForm();
         });
         
