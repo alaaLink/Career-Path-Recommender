@@ -5,6 +5,13 @@ using CareerPathRecommender.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using iText.Kernel.Pdf;
+using iText.Layout;
+using iText.Layout.Element;
+using iText.Layout.Properties;
+using iText.Kernel.Colors;
+using iText.IO.Font.Constants;
+using iText.Kernel.Font;
 
 namespace CareerPathRecommender.Web.Controllers;
 
@@ -473,5 +480,239 @@ public class DashboardController : Controller
         };
 
         return await _employeeRepository.CreateSkillAsync(newSkill);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> EditProfile()
+    {
+        try
+        {
+            // Get current user's employee record
+            var userEmail = User.Identity?.Name;
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var employee = await _employeeRepository.GetByEmailAsync(userEmail);
+            if (employee == null)
+            {
+                TempData["ErrorMessage"] = "Employee profile not found. Please contact administrator.";
+                return RedirectToAction("Index");
+            }
+
+            // Get employee with skills for the profile view
+            var employeeWithSkills = await _employeeRepository.GetByIdWithSkillsAsync(employee.Id);
+
+            return View(employeeWithSkills);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading profile for user {UserEmail}", User.Identity?.Name);
+            TempData["ErrorMessage"] = "Failed to load profile. Please try again.";
+            return RedirectToAction("Index");
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ExportRecommendationsPDF(int employeeId, int page = 1, int pageSize = 6)
+    {
+        try
+        {
+            var employee = await _employeeRepository.GetByIdWithSkillsAsync(employeeId);
+            if (employee == null)
+            {
+                return NotFound("Employee not found");
+            }
+
+            // Get ALL recommendations first
+            var allRecommendations = await _recommendationService.GenerateRecommendationsAsync(employeeId);
+
+            // Apply the same pagination as the UI
+            var paginatedRecommendations = allRecommendations
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            // Generate actual PDF using iText7 with only the current page recommendations
+            var pdfBytes = GenerateActualPDF(employee, paginatedRecommendations);
+
+            var fileName = $"Career-Recommendations-{employee.FullName.Replace(" ", "-")}-Page{page}-{DateTime.Now:yyyy-MM-dd}.pdf";
+
+            return File(pdfBytes, "application/pdf", fileName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error exporting recommendations PDF for employee {EmployeeId}", employeeId);
+            return BadRequest("Failed to generate PDF report");
+        }
+    }
+
+    private byte[] GenerateActualPDF(Domain.Entities.Employee employee, IEnumerable<Application.DTOs.RecommendationDto> recommendations)
+    {
+        using var memoryStream = new MemoryStream();
+        using var writer = new PdfWriter(memoryStream);
+        using var pdf = new PdfDocument(writer);
+        using var document = new Document(pdf);
+
+        // Define fonts and colors
+        var titleFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
+        var headerFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
+        var normalFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
+        var primaryColor = ColorConstants.BLUE;
+        var grayColor = ColorConstants.GRAY;
+
+        // Title
+        var title = new Paragraph("CAREER RECOMMENDATIONS REPORT")
+            .SetFont(titleFont)
+            .SetFontSize(20)
+            .SetFontColor(primaryColor)
+            .SetTextAlignment(TextAlignment.CENTER)
+            .SetMarginBottom(10);
+        document.Add(title);
+
+        var subtitle = new Paragraph("Personalized AI-Generated Career Development Plan")
+            .SetFont(normalFont)
+            .SetFontSize(12)
+            .SetFontColor(grayColor)
+            .SetTextAlignment(TextAlignment.CENTER)
+            .SetMarginBottom(20);
+        document.Add(subtitle);
+
+        var generatedDate = new Paragraph($"Generated on {DateTime.Now:MMMM dd, yyyy} at {DateTime.Now:HH:mm}")
+            .SetFont(normalFont)
+            .SetFontSize(10)
+            .SetFontColor(grayColor)
+            .SetTextAlignment(TextAlignment.CENTER)
+            .SetMarginBottom(30);
+        document.Add(generatedDate);
+
+        // Employee Information
+        var empHeader = new Paragraph("EMPLOYEE PROFILE")
+            .SetFont(headerFont)
+            .SetFontSize(14)
+            .SetFontColor(primaryColor)
+            .SetMarginBottom(10);
+        document.Add(empHeader);
+
+        var empTable = new Table(2);
+        empTable.SetWidth(UnitValue.CreatePercentValue(100));
+
+        empTable.AddCell(new Cell().Add(new Paragraph($"Name: {employee.FullName}").SetFont(normalFont)));
+        empTable.AddCell(new Cell().Add(new Paragraph($"Experience: {employee.YearsOfExperience} years").SetFont(normalFont)));
+        empTable.AddCell(new Cell().Add(new Paragraph($"Position: {employee.Position}").SetFont(normalFont)));
+        empTable.AddCell(new Cell().Add(new Paragraph($"Email: {employee.Email}").SetFont(normalFont)));
+        empTable.AddCell(new Cell().Add(new Paragraph($"Department: {employee.Department}").SetFont(normalFont)));
+        empTable.AddCell(new Cell().Add(new Paragraph($"Skills Count: {employee.Skills.Count()} skills").SetFont(normalFont)));
+
+        empTable.SetMarginBottom(20);
+        document.Add(empTable);
+
+        // Summary Statistics
+        var statsHeader = new Paragraph("SUMMARY STATISTICS")
+            .SetFont(headerFont)
+            .SetFontSize(14)
+            .SetFontColor(primaryColor)
+            .SetMarginBottom(10);
+        document.Add(statsHeader);
+
+        var statsTable = new Table(4);
+        statsTable.SetWidth(UnitValue.CreatePercentValue(100));
+
+        statsTable.AddHeaderCell(new Cell().Add(new Paragraph("Total Recommendations").SetFont(headerFont).SetFontSize(10)));
+        statsTable.AddHeaderCell(new Cell().Add(new Paragraph("High Priority").SetFont(headerFont).SetFontSize(10)));
+        statsTable.AddHeaderCell(new Cell().Add(new Paragraph("Avg Confidence").SetFont(headerFont).SetFontSize(10)));
+        statsTable.AddHeaderCell(new Cell().Add(new Paragraph("Categories").SetFont(headerFont).SetFontSize(10)));
+
+        statsTable.AddCell(new Cell().Add(new Paragraph($"{recommendations.Count()}").SetFont(normalFont).SetTextAlignment(TextAlignment.CENTER)));
+        statsTable.AddCell(new Cell().Add(new Paragraph($"{recommendations.Count(r => r.Priority >= 4)}").SetFont(normalFont).SetTextAlignment(TextAlignment.CENTER)));
+        statsTable.AddCell(new Cell().Add(new Paragraph($"{(recommendations.Any() ? recommendations.Average(r => (double)r.ConfidenceScore * 100) : 0):F0}%").SetFont(normalFont).SetTextAlignment(TextAlignment.CENTER)));
+        statsTable.AddCell(new Cell().Add(new Paragraph($"{recommendations.GroupBy(r => r.Type).Count()}").SetFont(normalFont).SetTextAlignment(TextAlignment.CENTER)));
+
+        statsTable.SetMarginBottom(30);
+        document.Add(statsTable);
+
+        // Detailed Recommendations
+        var recHeader = new Paragraph("DETAILED RECOMMENDATIONS")
+            .SetFont(headerFont)
+            .SetFontSize(14)
+            .SetFontColor(primaryColor)
+            .SetMarginBottom(15);
+        document.Add(recHeader);
+
+        foreach (var recommendation in recommendations.OrderByDescending(r => r.Priority))
+        {
+            // Recommendation Title
+            var recTitle = new Paragraph($"{recommendation.Title} [{recommendation.Type}]")
+                .SetFont(headerFont)
+                .SetFontSize(12)
+                .SetFontColor(primaryColor)
+                .SetMarginBottom(5);
+            document.Add(recTitle);
+
+            // Priority and Confidence
+            var stars = new string('★', recommendation.Priority) + new string('☆', 5 - recommendation.Priority);
+            var priorityText = new Paragraph($"Priority: {stars} ({recommendation.Priority}/5) | Confidence: {(int)(recommendation.ConfidenceScore * 100)}%")
+                .SetFont(normalFont)
+                .SetFontSize(10)
+                .SetFontColor(grayColor)
+                .SetMarginBottom(8);
+            document.Add(priorityText);
+
+            // Description
+            var description = new Paragraph($"Description: {recommendation.Description}")
+                .SetFont(normalFont)
+                .SetFontSize(10)
+                .SetMarginBottom(8);
+            document.Add(description);
+
+            // AI Analysis
+            var reasoningHeader = new Paragraph("AI Analysis:")
+                .SetFont(headerFont)
+                .SetFontSize(10)
+                .SetMarginBottom(3);
+            document.Add(reasoningHeader);
+
+            var reasoning = new Paragraph(recommendation.Reasoning)
+                .SetFont(normalFont)
+                .SetFontSize(9)
+                .SetMarginLeft(20)
+                .SetMarginBottom(5);
+            document.Add(reasoning);
+
+            // Generated date
+            var genDate = new Paragraph($"Generated: {recommendation.CreatedDate:MMM dd, yyyy}")
+                .SetFont(normalFont)
+                .SetFontSize(8)
+                .SetFontColor(grayColor)
+                .SetMarginBottom(20);
+            document.Add(genDate);
+        }
+
+        // Footer
+        var footer = new Paragraph("CAREER PATH RECOMMENDER SYSTEM")
+            .SetFont(headerFont)
+            .SetFontSize(10)
+            .SetFontColor(primaryColor)
+            .SetTextAlignment(TextAlignment.CENTER)
+            .SetMarginTop(30);
+        document.Add(footer);
+
+        var footerText = new Paragraph("This report was generated using AI-powered analysis of your skills, experience, and career goals.")
+            .SetFont(normalFont)
+            .SetFontSize(9)
+            .SetTextAlignment(TextAlignment.CENTER)
+            .SetMarginBottom(5);
+        document.Add(footerText);
+
+        var copyright = new Paragraph($"© {DateTime.Now.Year} Career Path Recommender. All rights reserved.")
+            .SetFont(normalFont)
+            .SetFontSize(8)
+            .SetFontColor(grayColor)
+            .SetTextAlignment(TextAlignment.CENTER);
+        document.Add(copyright);
+
+        document.Close();
+        return memoryStream.ToArray();
     }
 }

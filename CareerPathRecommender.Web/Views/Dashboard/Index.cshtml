@@ -354,12 +354,6 @@
     </script>
 
     <style>
-        /* Force white background for dashboard regardless of dark mode */
-        body, html, .container-fluid, .card, .card-body, .card-header, .auth-main, main {
-            background-color: #ffffff !important;
-            color: #212529 !important;
-        }
-
         /* Override dark mode for specific elements */
         .text-muted {
             color: #6c757d !important;
@@ -416,10 +410,7 @@
         }
 
         @@media (prefers-color-scheme: dark) {
-            body, html, .container-fluid, .card, .card-body, .card-header, .auth-main, main {
-                background-color: #ffffff !important;
-                color: #212529 !important;
-            }
+
 
             .card {
                 background-color: #ffffff !important;
