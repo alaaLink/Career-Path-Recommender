@@ -1,7 +1,8 @@
-using System.Text;
-using System.Text.Json;
+using CareerPathRecommender.Application.Constants;
 using CareerPathRecommender.Application.Interfaces;
 using Microsoft.Extensions.Configuration;
+using System.Text;
+using System.Text.Json;
 
 namespace CareerPathRecommender.Infrastructure.Services
 {
@@ -17,7 +18,7 @@ namespace CareerPathRecommender.Infrastructure.Services
             apiUrl = _configuration["OpenAiUrl"] ?? throw new InvalidOperationException("OpenAI API key is not configured in appsettings.json");
         }
 
-        public async Task<string> GetResponseAsync(string message)
+        public async Task<string> GetResponseAsync(string userMessage, string systemMessage = ChatbotConsts.DefaultSystemMessage)
         {
             try
             {
@@ -27,8 +28,8 @@ namespace CareerPathRecommender.Infrastructure.Services
                     model = "CairoICT-AI",
                     messages = new[]
                     {
-                        new { role = "system", content = "You are a helpful career path assistant. Provide concise and helpful responses about career development, skills, and professional growth." },
-                        new { role = "user", content = message }
+                        new { role = "system", content = systemMessage },
+                        new { role = "user", content = userMessage }
                     },
                     max_tokens = 500,
                     temperature = 1,
