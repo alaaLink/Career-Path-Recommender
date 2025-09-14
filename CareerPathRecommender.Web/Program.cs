@@ -63,15 +63,18 @@ builder.Services.AddScoped<ISkillRepository, SkillRepository>();
 builder.Services.AddScoped<IRecommendationRepository, RecommendationRepository>();
 
 // Register services with caching decorator pattern
-builder.Services.AddScoped<CareerPathRecommender.Infrastructure.Services.RecommendationService>();
-builder.Services.AddScoped<CareerPathRecommender.Application.Interfaces.IRecommendationService>(provider =>
+builder.Services.AddScoped<RecommendationService>();
+builder.Services.AddScoped<IRecommendationService>(provider =>
 {
-    var innerService = provider.GetRequiredService<CareerPathRecommender.Infrastructure.Services.RecommendationService>();
+    var innerService = provider.GetRequiredService<RecommendationService>();
     var cache = provider.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>();
-    var logger = provider.GetRequiredService<Microsoft.Extensions.Logging.ILogger<CareerPathRecommender.Infrastructure.Services.CachedRecommendationService>>();
-    return new CareerPathRecommender.Infrastructure.Services.CachedRecommendationService(innerService, cache, logger);
+    var logger = provider.GetRequiredService<ILogger<CachedRecommendationService>>();
+    return new CachedRecommendationService(innerService, cache, logger);
 });
-builder.Services.AddScoped<IAIService, CareerPathRecommender.Infrastructure.Services.MockAIService>();
+builder.Services.AddScoped<IAIService,MockAIService>();
+
+// Register HttpClient for ChatbotService
+builder.Services.AddHttpClient<IChatbotService, ChatbotService>();
 
 // Configure Mailjet settings
 builder.Services.Configure<MailjetSettings>(builder.Configuration.GetSection("Mailjet"));

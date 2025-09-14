@@ -108,7 +108,7 @@ namespace CareerPathRecommender.Infrastructure.Services
             systemMessage.AppendLine($"You are a career path assistant in SoftWare Development. Here are some {recommendationType} recommendations:");
             foreach (var recommendation in recommendations)
             {
-                systemMessage.AppendLine($"Title: {recommendation.Title}-Description: {recommendation.Description}");
+                systemMessage.AppendLine($"Title: {recommendation.Title} - Description: {recommendation.Description}");
             }
             systemMessage.AppendLine($"return a links from web (mostly from youtube) for every recommendation, then the usual response of you");
             return systemMessage.ToString();
