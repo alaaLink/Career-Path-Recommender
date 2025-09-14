@@ -474,4 +474,36 @@ public class DashboardController : Controller
 
         return await _employeeRepository.CreateSkillAsync(newSkill);
     }
+
+    [HttpGet]
+    public async Task<IActionResult> EditProfile()
+    {
+        try
+        {
+            // Get current user's employee record
+            var userEmail = User.Identity?.Name;
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var employee = await _employeeRepository.GetByEmailAsync(userEmail);
+            if (employee == null)
+            {
+                TempData["ErrorMessage"] = "Employee profile not found. Please contact administrator.";
+                return RedirectToAction("Index");
+            }
+
+            // Get employee with skills for the profile view
+            var employeeWithSkills = await _employeeRepository.GetByIdWithSkillsAsync(employee.Id);
+
+            return View(employeeWithSkills);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading profile for user {UserEmail}", User.Identity?.Name);
+            TempData["ErrorMessage"] = "Failed to load profile. Please try again.";
+            return RedirectToAction("Index");
+        }
+    }
 }
