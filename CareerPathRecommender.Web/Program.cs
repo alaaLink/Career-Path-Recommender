@@ -6,6 +6,8 @@ using CareerPathRecommender.Infrastructure.Services;
 using Serilog;
 using CareerPathRecommender.Domain.Entities;
 using CareerPathRecommender.Domain.Enums;
+using CareerPathRecommender.Application.Interfaces;
+using CareerPathRecommender.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,10 +42,25 @@ builder.Services.AddScoped<ICourseRepository, CareerPathRecommender.Infrastructu
 builder.Services.AddScoped<IProjectRepository, CareerPathRecommender.Infrastructure.Repositories.ProjectRepository>();
 builder.Services.AddScoped<IRecommendationRepository, CareerPathRecommender.Infrastructure.Repositories.RecommendationRepository>();
 builder.Services.AddScoped<ISkillRepository, CareerPathRecommender.Infrastructure.Repositories.SkillRepository>();
+builder.Services.AddScoped<IEmployeeSkillRepository, CareerPathRecommender.Infrastructure.Repositories.EmployeeSkillRepository>();
 
 // Add custom services - using free mock AI service instead of paid Azure OpenAI
 builder.Services.AddScoped<IAIService, MockAIService>();
 builder.Services.AddScoped<IRecommendationService, CareerPathRecommender.Infrastructure.Services.RecommendationService>();
+
+// Add Chatbot service
+builder.Services.AddHttpClient();
+
+// Use MockChatbotService by default. Replace with ChatbotService when you have OpenAI API key
+builder.Services.AddScoped<IChatbotService, ChatbotService>();
+
+// Uncomment and add your OpenAI API key to appsettings.json to use the real ChatbotService
+// builder.Services.AddScoped<IChatbotService>(sp => 
+//     new ChatbotService(
+//         sp.GetRequiredService<HttpClient>(),
+//         sp.GetRequiredService<IConfiguration>()
+//     )
+// );
 
 var app = builder.Build();
 

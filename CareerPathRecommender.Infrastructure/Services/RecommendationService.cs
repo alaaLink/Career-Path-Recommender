@@ -13,6 +13,7 @@ public class RecommendationService : IRecommendationService
     private readonly ICourseRepository _courseRepository;
     private readonly IProjectRepository _projectRepository;
     private readonly IRecommendationRepository _recommendationRepository;
+    private readonly ISkillRepository _skillRepository;
     private readonly IAIService _aiService;
 
     public RecommendationService(
@@ -20,13 +21,15 @@ public class RecommendationService : IRecommendationService
         ICourseRepository courseRepository,
         IProjectRepository projectRepository,
         IRecommendationRepository recommendationRepository,
-        IAIService aiService)
+        IAIService aiService,
+        ISkillRepository skillRepository)
     {
         _employeeRepository = employeeRepository;
         _courseRepository = courseRepository;
         _projectRepository = projectRepository;
         _recommendationRepository = recommendationRepository;
         _aiService = aiService;
+        _skillRepository = skillRepository;
     }
 
     public async Task<IEnumerable<RecommendationDto>> GenerateRecommendationsAsync(int employeeId, CancellationToken cancellationToken = default)
@@ -171,6 +174,9 @@ public class RecommendationService : IRecommendationService
         var employee = await _employeeRepository.GetByIdWithSkillsAsync(employeeId, cancellationToken);
         if (employee == null) 
             throw new ArgumentException($"Employee with ID {employeeId} not found");
+        
+
+        //var skills = await _skillRepository.GetAllAsync(cancellationToken);
         
         // Mock implementation - in real world this would analyze skills vs target position
         var missingSkills = new List<SkillGapDto>

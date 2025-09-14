@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/CareerPathRecommender.Web.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
     <header>
@@ -35,6 +36,11 @@
                         <li class="nav-item">
                             <a class="nav-link" href="#" title="Coming Soon">
                                 <i class="fas fa-users me-1"></i>Teams
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Chatbot" asp-action="Index" title="AI Assistant">
+                                <i class="fas fa-robot me-1"></i>AI Assistant
                             </a>
                         </li>
                     </ul>
