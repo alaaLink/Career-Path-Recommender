@@ -1,10 +1,59 @@
 @model CareerPathRecommender.Application.DTOs.SkillGapAnalysisDto
 
 <div class="fade-in">
-    <h6 class="mb-4">
-        <i class="fas fa-chart-bar text-info"></i>
-        Career Path Analysis Results
-    </h6>
+    <!-- Analysis Header -->
+    <div class="analysis-header mb-4 p-4 rounded" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <div class="row align-items-center">
+            <div class="col-md-10">
+                <h5 class="mb-1">
+                    <i class="fas fa-user-graduate me-2"></i>
+                    Career Path Analysis for @Model.EmployeeName
+                </h5>
+                <p class="mb-2 opacity-75">
+                    @Model.CurrentPosition → @Model.TargetPosition
+                </p>
+                <div class="d-flex gap-3">
+                    <small><i class="fas fa-calendar me-1"></i>Analyzed: @Model.AnalysisDate.ToString("MMM dd, yyyy")</small>
+                    <small><i class="fas fa-clock me-1"></i>@Model.YearsOfExperience years experience</small>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="readiness-circle position-relative d-inline-block" style="width: 80px; height: 80px;">
+                    <svg width="80" height="80" class="position-absolute">
+                        <circle cx="40" cy="40" r="35" stroke="rgba(255,255,255,0.3)" stroke-width="4" fill="none"/>
+                        <circle cx="40" cy="40" r="35" stroke="white" stroke-width="4" fill="none"
+                                stroke-dasharray="@(220 * (Model.OverallReadiness / 100))"
+                                stroke-dashoffset="0"
+                                transform="rotate(-90 40 40)"/>
+                    </svg>
+                    <div class="position-absolute top-50 start-50 translate-middle text-center">
+                        <div class="h5 mb-0">@Model.OverallReadiness.ToString("F0")%</div>
+                        <small style="font-size: 0.7rem;">Ready</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row mt-3 text-center">
+            <div class="col-3">
+                <div class="h6 mb-0">@Model.SkillsMet/@Model.TotalSkillsRequired</div>
+                <small class="opacity-75">Skills Met</small>
+            </div>
+            <div class="col-3">
+                <div class="h6 mb-0 text-warning">@Model.HighPriorityGaps</div>
+                <small class="opacity-75">High Priority</small>
+            </div>
+            <div class="col-3">
+                <div class="h6 mb-0 text-info">@Model.EstimatedTimeToTargetMonths</div>
+                <small class="opacity-75">Months</small>
+            </div>
+            <div class="col-3">
+                <div class="h6 mb-0 text-success">@Model.MilestoneTimeline.Count</div>
+                <small class="opacity-75">Milestones</small>
+            </div>
+        </div>
+    </div>
     
     <div class="row">
         <!-- Missing Skills -->
@@ -26,22 +75,55 @@
                     {
                         <div class="skill-gap-item p-3 mb-3 rounded shadow-sm priority-@gap.Priority" style="border-left: 4px solid;">
                             <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <h6 class="mb-1 fw-bold">@gap.SkillName</h6>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <h6 class="mb-1 fw-bold">@gap.SkillName</h6>
+                                            <span class="badge bg-light text-dark small">@gap.Category</span>
+                                        </div>
+                                        <div >
+                                            <div class="d-flex align-items-center">
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    <i class="fas fa-star @(i <= gap.Priority ? "text-warning" : "text-muted")" style="font-size: 0.8rem;"></i>
+                                                }
+                                            </div>
+                                            <small class="text-muted">Priority @gap.Priority</small>
+                                        </div>
+                                    </div>
+
                                     <div class="d-flex align-items-center gap-2 mb-2">
                                         <span class="badge bg-secondary">Current: @gap.CurrentLevel</span>
                                         <i class="fas fa-arrow-right text-muted"></i>
                                         <span class="badge bg-success">Target: @gap.RequiredLevel</span>
+                                        <span class="badge bg-info">~@gap.EstimatedLearningTimeMonths months</span>
                                     </div>
-                                </div>
-                                <div class="text-end">
-                                    <div class="d-flex align-items-center">
-                                        @for (int i = 1; i <= 5; i++)
-                                        {
-                                            <i class="fas fa-star @(i <= gap.Priority ? "text-warning" : "text-muted")" style="font-size: 0.8rem;"></i>
-                                        }
+
+                                    <div class="importance-bar mb-2">
+                                        <div class="progress" style="height: 4px;">
+                                            <div class="progress-bar bg-gradient" style="width: @(gap.ImportanceScore * 100)%; background: linear-gradient(90deg, #28a745 0%, #20c997 100%);"></div>
+                                        </div>
+                                        <small class="text-muted">Importance: @gap.ImportanceScore.ToString("P0")</small>
                                     </div>
-                                    <small class="text-muted">Priority</small>
+
+                                    @if (gap.RecommendedResources.Any())
+                                    {
+                                        <div class="resources-section mb-2">
+                                            <small class="text-muted d-block mb-1">
+                                                <i class="fas fa-book me-1"></i>Recommended Resources:
+                                            </small>
+                                            <div class="d-flex flex-wrap gap-1">
+                                                @foreach (var resource in gap.RecommendedResources.Take(2))
+                                                {
+                                                    <span class="badge bg-outline-primary small">@resource</span>
+                                                }
+                                                @if (gap.RecommendedResources.Count() > 2)
+                                                {
+                                                    <span class="badge bg-outline-secondary small">+@(gap.RecommendedResources.Count() - 2) more</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
                                 </div>
                             </div>
                             <p class="small text-muted mb-0">
@@ -170,49 +252,93 @@
                         }
                     </div>
                     
-                    <!-- Action Items -->
+                    <!-- Dynamic Action Items -->
                     <div class="mt-4 p-3 bg-primary bg-opacity-10 rounded">
                         <h6 class="text-primary">
-                            <i class="fas fa-tasks"></i> Next Steps
+                            <i class="fas fa-tasks"></i> Immediate Action Items
                         </h6>
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="d-flex align-items-center mb-2">
-                                    <i class="fas fa-play-circle text-success me-2"></i>
-                                    <span>Start with highest priority skills</span>
-                                </div>
-                                <div class="d-flex align-items-center mb-2">
-                                    <i class="fas fa-user-friends text-info me-2"></i>
-                                    <span>Connect with mentors in target role</span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="d-flex align-items-center mb-2">
-                                    <i class="fas fa-bookmark text-warning me-2"></i>
-                                    <span>Enroll in recommended courses</span>
-                                </div>
-                                <div class="d-flex align-items-center mb-2">
-                                    <i class="fas fa-project-diagram text-primary me-2"></i>
-                                    <span>Seek relevant project assignments</span>
-                                </div>
-                            </div>
+                            @if (Model.NextActionItems.Any())
+                            {
+                                @foreach (var (item, index) in Model.NextActionItems.Select((item, index) => (item, index)))
+                                {
+                                    <div class="col-md-6 mb-2">
+                                        <div class="d-flex align-items-start">
+                                            <div class="me-2 mt-1">
+                                                <span class="badge bg-primary rounded-circle" style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem;">
+                                                    @(index + 1)
+                                                </span>
+                                            </div>
+                                            <span class="small">@item</span>
+                                        </div>
+                                    </div>
+                                }
+                            }
                         </div>
                     </div>
                     
-                    <!-- Progress Timeline -->
-                    <div class="mt-4">
-                        <h6 class="mb-3">
-                            <i class="fas fa-calendar-alt text-info"></i> Estimated Timeline
-                        </h6>
-                        <div class="progress mb-2" style="height: 8px;">
-                            <div class="progress-bar bg-gradient" style="width: 33%; background: linear-gradient(90deg, #28a745 0%, #20c997 100%);"></div>
+                    <!-- Dynamic Milestone Timeline -->
+                    @if (Model.MilestoneTimeline.Any())
+                    {
+                        <div class="mt-4">
+                            <h6 class="mb-3">
+                                <i class="fas fa-map-marked-alt text-info"></i> Career Development Milestones
+                            </h6>
+                            <div class="timeline-container">
+                                @foreach (var (milestone, index) in Model.MilestoneTimeline.Select((m, i) => (m, i)))
+                                {
+                                    <div class="milestone-item d-flex mb-4">
+                                        <div class="milestone-marker me-3 position-relative">
+                                            <div class="milestone-circle bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                                 style="width: 40px; height: 40px; font-size: 0.8rem;">
+                                                @milestone.Month
+                                            </div>
+                                            @if (index < Model.MilestoneTimeline.Count - 1)
+                                            {
+                                                <div class="milestone-line bg-primary position-absolute"
+                                                     style="width: 2px; height: 60px; left: 19px; top: 40px; opacity: 0.3;"></div>
+                                            }
+                                        </div>
+                                        <div class="milestone-content flex-grow-1">
+                                            <h6 class="mb-1 text-primary">@milestone.Title</h6>
+                                            <p class="mb-2 text-muted small">@milestone.Description</p>
+                                            @if (milestone.SkillsToComplete.Any())
+                                            {
+                                                <div class="skills-badges">
+                                                    @foreach (var skill in milestone.SkillsToComplete)
+                                                    {
+                                                        <span class="badge bg-light text-dark me-1 mb-1">
+                                                            <i class="fas fa-check-circle text-success me-1"></i>@skill
+                                                        </span>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
                         </div>
-                        <div class="d-flex justify-content-between small text-muted">
-                            <span>Start (Month 0)</span>
-                            <span>Mid-point (Month @(Model.EstimatedTimeToTargetMonths / 2))</span>
-                            <span>Target Achievement (Month @Model.EstimatedTimeToTargetMonths)</span>
+
+                        <!-- Overall Progress Bar -->
+                        <div class="mt-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-chart-line text-success"></i> Overall Progress Timeline
+                                </h6>
+                                <span class="badge bg-success">@Model.EstimatedTimeToTargetMonths months to target</span>
+                            </div>
+                            <div class="progress mb-2" style="height: 12px; border-radius: 6px;">
+                                <div class="progress-bar bg-gradient position-relative"
+                                     style="width: 15%; background: linear-gradient(90deg, #28a745 0%, #20c997 100%);">
+                                    <small class="position-absolute text-white" style="left: 10px; font-size: 0.7rem; line-height: 12px;">Start</small>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between small text-muted">
+                                <span><i class="fas fa-play-circle text-success me-1"></i>Today</span>
+                                <span><i class="fas fa-flag-checkered text-primary me-1"></i>Month @Model.EstimatedTimeToTargetMonths</span>
+                            </div>
                         </div>
-                    </div>
+                    }
                 </div>
             </div>
         </div>

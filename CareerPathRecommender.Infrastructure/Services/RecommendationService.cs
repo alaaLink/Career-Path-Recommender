@@ -3,6 +3,7 @@ using CareerPathRecommender.Application.Interfaces;
 using CareerPathRecommender.Domain.Entities;
 using CareerPathRecommender.Domain.Enums;
 using Microsoft.Extensions.Logging;
+using System.Text;
 
 namespace CareerPathRecommender.Infrastructure.Services;
 
@@ -289,45 +290,394 @@ public class RecommendationService : IRecommendationService
         if (employee == null)
             throw new ArgumentException($"Employee with ID {employeeId} not found");
 
-        // Mock implementation - in real world this would analyze skills vs target position
-        var missingSkills = new List<SkillGapDto>
-        {
-            new() {
-                SkillName = "Leadership",
-                CurrentLevel = SkillLevel.Beginner,
-                RequiredLevel = SkillLevel.Advanced,
-                Priority = 5,
-                Reasoning = "Leadership skills are critical for senior positions"
-            },
-            new() {
-                SkillName = "Cloud Architecture",
-                CurrentLevel = SkillLevel.Beginner,
-                RequiredLevel = SkillLevel.Expert,
-                Priority = 4,
-                Reasoning = "Cloud expertise is essential for modern development"
-            }
-        };
+        // Create dictionary of employee's current skills
+        var employeeSkillsDict = employee.Skills.ToDictionary(es => es.Skill.Name, es => es.Level);
 
-        var skillsToImprove = new List<SkillGapDto>
+        // Define skill requirements for different target positions
+        var targetSkillRequirements = GetTargetPositionSkillRequirements(targetPosition);
+
+        var missingSkills = new List<SkillGapDto>();
+        var skillsToImprove = new List<SkillGapDto>();
+
+        // Analyze each required skill
+        foreach (var requirement in targetSkillRequirements)
         {
-            new() {
-                SkillName = "C#",
-                CurrentLevel = SkillLevel.Intermediate,
-                RequiredLevel = SkillLevel.Advanced,
-                Priority = 3,
-                Reasoning = "Advanced C# knowledge needed for complex projects"
+            var currentLevel = employeeSkillsDict.TryGetValue(requirement.Key, out var level) ? level : SkillLevel.Beginner;
+            var requiredLevel = requirement.Value;
+
+            if (currentLevel < requiredLevel)
+            {
+                var skillGap = new SkillGapDto
+                {
+                    SkillName = requirement.Key,
+                    CurrentLevel = currentLevel,
+                    RequiredLevel = requiredLevel,
+                    Priority = CalculateSkillPriority(requirement.Key, currentLevel, requiredLevel),
+                    Reasoning = GenerateSkillGapReasoning(requirement.Key, currentLevel, requiredLevel, targetPosition),
+                    Category = GetSkillCategory(requirement.Key),
+                    EstimatedLearningTimeMonths = CalculateSkillLearningTime(currentLevel, requiredLevel),
+                    RecommendedResources = GetRecommendedResources(requirement.Key),
+                    ImportanceScore = CalculateImportanceScore(requirement.Key, targetPosition)
+                };
+
+                if (currentLevel == SkillLevel.Beginner)
+                {
+                    missingSkills.Add(skillGap);
+                }
+                else
+                {
+                    skillsToImprove.Add(skillGap);
+                }
             }
-        };
+        }
+
+        // Generate personalized learning path
+        var learningPath = GenerateLearningPath(missingSkills, skillsToImprove, targetPosition, employee.YearsOfExperience);
+        var estimatedMonths = CalculateEstimatedTimeToTarget(missingSkills, skillsToImprove);
+        var milestones = GenerateMilestoneTimeline(missingSkills, skillsToImprove, estimatedMonths);
+        var actionItems = GenerateActionItems(missingSkills, skillsToImprove);
+
+        var totalRequired = targetSkillRequirements.Count;
+        var skillsMet = targetSkillRequirements.Count - missingSkills.Count() - skillsToImprove.Count();
+        var readiness = totalRequired > 0 ? (decimal)skillsMet / totalRequired * 100 : 100;
 
         return new SkillGapAnalysisDto
         {
-            MissingSkills = missingSkills,
-            SkillsToImprove = skillsToImprove,
-            RecommendedLearningPath = "Focus on leadership development and cloud certifications",
-            EstimatedTimeToTargetMonths = 12
+            MissingSkills = missingSkills.OrderByDescending(s => s.Priority),
+            SkillsToImprove = skillsToImprove.OrderByDescending(s => s.Priority),
+            RecommendedLearningPath = learningPath,
+            EstimatedTimeToTargetMonths = estimatedMonths,
+            TargetPosition = targetPosition,
+            EmployeeName = $"{employee.FirstName} {employee.LastName}",
+            CurrentPosition = employee.Position,
+            YearsOfExperience = employee.YearsOfExperience,
+            AnalysisDate = DateTime.UtcNow,
+            OverallReadiness = readiness,
+            TotalSkillsRequired = totalRequired,
+            SkillsMet = skillsMet,
+            HighPriorityGaps = missingSkills.Count(s => s.Priority >= 4) + skillsToImprove.Count(s => s.Priority >= 4),
+            NextActionItems = actionItems,
+            MilestoneTimeline = milestones
         };
     }
 
+
+    private Dictionary<string, SkillLevel> GetTargetPositionSkillRequirements(string targetPosition)
+    {
+        var requirements = new Dictionary<string, SkillLevel>();
+
+        switch (targetPosition.ToLower())
+        {
+            case var p when p.Contains("senior") && (p.Contains("developer") || p.Contains("engineer")):
+                requirements = new Dictionary<string, SkillLevel>
+                {
+                    ["C#"] = SkillLevel.Advanced,
+                    ["JavaScript"] = SkillLevel.Advanced,
+                    ["SQL"] = SkillLevel.Advanced,
+                    ["Cloud Computing"] = SkillLevel.Intermediate,
+                    ["System Design"] = SkillLevel.Advanced,
+                    ["Leadership"] = SkillLevel.Intermediate,
+                    ["Mentoring"] = SkillLevel.Intermediate,
+                    ["Problem Solving"] = SkillLevel.Advanced
+                };
+                break;
+
+            case var p when p.Contains("lead") || p.Contains("team lead"):
+                requirements = new Dictionary<string, SkillLevel>
+                {
+                    ["Leadership"] = SkillLevel.Advanced,
+                    ["Project Management"] = SkillLevel.Advanced,
+                    ["Communication"] = SkillLevel.Advanced,
+                    ["Mentoring"] = SkillLevel.Advanced,
+                    ["Technical Architecture"] = SkillLevel.Advanced,
+                    ["C#"] = SkillLevel.Expert,
+                    ["System Design"] = SkillLevel.Expert
+                };
+                break;
+
+            case var p when p.Contains("manager") || p.Contains("engineering manager"):
+                requirements = new Dictionary<string, SkillLevel>
+                {
+                    ["Leadership"] = SkillLevel.Expert,
+                    ["Project Management"] = SkillLevel.Expert,
+                    ["Team Management"] = SkillLevel.Expert,
+                    ["Strategic Planning"] = SkillLevel.Advanced,
+                    ["Budgeting"] = SkillLevel.Intermediate,
+                    ["Communication"] = SkillLevel.Expert,
+                    ["Performance Management"] = SkillLevel.Advanced
+                };
+                break;
+
+            case var p when p.Contains("architect"):
+                requirements = new Dictionary<string, SkillLevel>
+                {
+                    ["System Design"] = SkillLevel.Expert,
+                    ["Technical Architecture"] = SkillLevel.Expert,
+                    ["Cloud Computing"] = SkillLevel.Expert,
+                    ["Microservices"] = SkillLevel.Advanced,
+                    ["Database Design"] = SkillLevel.Advanced,
+                    ["Security"] = SkillLevel.Advanced,
+                    ["Performance Optimization"] = SkillLevel.Advanced
+                };
+                break;
+
+            case var p when p.Contains("full stack"):
+                requirements = new Dictionary<string, SkillLevel>
+                {
+                    ["C#"] = SkillLevel.Advanced,
+                    ["JavaScript"] = SkillLevel.Advanced,
+                    ["React"] = SkillLevel.Advanced,
+                    ["SQL"] = SkillLevel.Advanced,
+                    ["HTML/CSS"] = SkillLevel.Advanced,
+                    ["API Development"] = SkillLevel.Advanced,
+                    ["Database Design"] = SkillLevel.Intermediate
+                };
+                break;
+
+            default:
+                // Default requirements for general developer positions
+                requirements = new Dictionary<string, SkillLevel>
+                {
+                    ["C#"] = SkillLevel.Intermediate,
+                    ["JavaScript"] = SkillLevel.Intermediate,
+                    ["SQL"] = SkillLevel.Intermediate,
+                    ["Problem Solving"] = SkillLevel.Intermediate,
+                    ["Communication"] = SkillLevel.Intermediate
+                };
+                break;
+        }
+
+        return requirements;
+    }
+
+    private int CalculateSkillPriority(string skillName, SkillLevel currentLevel, SkillLevel requiredLevel)
+    {
+        var levelGap = (int)requiredLevel - (int)currentLevel;
+
+        // Critical skills get higher priority
+        var criticalSkills = new[] { "Leadership", "Communication", "System Design", "Technical Architecture" };
+        var isCritical = criticalSkills.Any(cs => skillName.Contains(cs, StringComparison.OrdinalIgnoreCase));
+
+        return levelGap switch
+        {
+            >= 3 when isCritical => 5,
+            >= 3 => 4,
+            2 when isCritical => 4,
+            2 => 3,
+            1 when isCritical => 3,
+            1 => 2,
+            _ => 1
+        };
+    }
+
+    private string GenerateSkillGapReasoning(string skillName, SkillLevel currentLevel, SkillLevel requiredLevel, string targetPosition)
+    {
+        var levelGap = (int)requiredLevel - (int)currentLevel;
+
+        return skillName.ToLower() switch
+        {
+            var s when s.Contains("leadership") =>
+                $"Strong leadership skills are essential for {targetPosition}. Moving from {currentLevel} to {requiredLevel} will enable you to guide teams effectively.",
+
+            var s when s.Contains("communication") =>
+                $"Excellent communication is crucial in {targetPosition} roles. Enhancing from {currentLevel} to {requiredLevel} will improve stakeholder interactions.",
+
+            var s when s.Contains("system design") || s.Contains("architecture") =>
+                $"System design expertise is fundamental for {targetPosition}. Advancing from {currentLevel} to {requiredLevel} will allow you to architect scalable solutions.",
+
+            var s when s.Contains("c#") || s.Contains("javascript") =>
+                $"Advanced {skillName} proficiency is required for {targetPosition}. Growing from {currentLevel} to {requiredLevel} will enhance your technical capabilities.",
+
+            var s when s.Contains("cloud") =>
+                $"Cloud computing skills are increasingly important in modern {targetPosition} roles. Upgrading from {currentLevel} to {requiredLevel} will keep you competitive.",
+
+            _ => $"{skillName} proficiency at {requiredLevel} level is needed for {targetPosition}. Current {currentLevel} level needs improvement to meet role expectations."
+        };
+    }
+
+    private string GenerateLearningPath(IEnumerable<SkillGapDto> missingSkills, IEnumerable<SkillGapDto> skillsToImprove, string targetPosition, int yearsOfExperience)
+    {
+        var path = new StringBuilder();
+
+        path.AppendLine($"**Phase 1: Foundation Building (Months 1-3)**");
+        path.AppendLine("• Start with highest priority missing skills");
+        path.AppendLine("• Focus on fundamental concepts and practical application");
+        path.AppendLine("• Complete online courses and tutorials");
+        path.AppendLine();
+
+        if (missingSkills.Any())
+        {
+            path.AppendLine("**Critical Skills to Acquire:**");
+            foreach (var skill in missingSkills.OrderByDescending(s => s.Priority).Take(3))
+            {
+                path.AppendLine($"• {skill.SkillName}: {skill.CurrentLevel} → {skill.RequiredLevel}");
+            }
+            path.AppendLine();
+        }
+
+        path.AppendLine($"**Phase 2: Skill Enhancement (Months 4-6)**");
+        path.AppendLine("• Work on improving existing skills");
+        path.AppendLine("• Seek challenging projects that utilize target skills");
+        path.AppendLine("• Consider mentorship opportunities");
+        path.AppendLine();
+
+        if (skillsToImprove.Any())
+        {
+            path.AppendLine("**Skills to Enhance:**");
+            foreach (var skill in skillsToImprove.OrderByDescending(s => s.Priority).Take(3))
+            {
+                path.AppendLine($"• {skill.SkillName}: {skill.CurrentLevel} → {skill.RequiredLevel}");
+            }
+            path.AppendLine();
+        }
+
+        path.AppendLine($"**Phase 3: Mastery & Application (Months 7+)**");
+        path.AppendLine("• Apply learned skills in real-world scenarios");
+        path.AppendLine("• Lead projects that demonstrate your capabilities");
+        path.AppendLine("• Share knowledge through mentoring or presentations");
+        path.AppendLine("• Prepare for role transition or promotion");
+
+        return path.ToString();
+    }
+
+    private int CalculateEstimatedTimeToTarget(IEnumerable<SkillGapDto> missingSkills, IEnumerable<SkillGapDto> skillsToImprove)
+    {
+        var totalMissingGaps = missingSkills.Sum(s => (int)s.RequiredLevel - (int)s.CurrentLevel);
+        var totalImprovementGaps = skillsToImprove.Sum(s => (int)s.RequiredLevel - (int)s.CurrentLevel);
+
+        // Estimate 2 months per skill level gap for missing skills, 1 month for improvements
+        var estimatedMonths = (totalMissingGaps * 2) + (totalImprovementGaps * 1);
+
+        // Minimum 3 months, maximum 24 months
+        return Math.Max(3, Math.Min(24, estimatedMonths));
+    }
+
+    private string GetSkillCategory(string skillName)
+    {
+        return skillName.ToLower() switch
+        {
+            var s when s.Contains("c#") || s.Contains("javascript") || s.Contains("sql") => "Programming",
+            var s when s.Contains("leadership") || s.Contains("communication") || s.Contains("management") => "Soft Skills",
+            var s when s.Contains("cloud") || s.Contains("architecture") || s.Contains("design") => "Architecture & Cloud",
+            var s when s.Contains("project") => "Project Management",
+            _ => "Technical"
+        };
+    }
+
+    private int CalculateSkillLearningTime(SkillLevel currentLevel, SkillLevel requiredLevel)
+    {
+        var levelGap = (int)requiredLevel - (int)currentLevel;
+        return levelGap switch
+        {
+            1 => 2,
+            2 => 4,
+            3 => 6,
+            _ => 8
+        };
+    }
+
+    private List<string> GetRecommendedResources(string skillName)
+    {
+        return skillName.ToLower() switch
+        {
+            var s when s.Contains("c#") => new List<string> { "Microsoft Learn C# Path", "Pluralsight C# Courses", "C# in Depth Book" },
+            var s when s.Contains("javascript") => new List<string> { "MDN JavaScript Guide", "freeCodeCamp", "You Don't Know JS Series" },
+            var s when s.Contains("leadership") => new List<string> { "LinkedIn Leadership Courses", "Harvard Business Review", "The 7 Habits of Highly Effective People" },
+            var s when s.Contains("cloud") => new List<string> { "Azure Fundamentals", "AWS Cloud Practitioner", "Google Cloud Platform Training" },
+            var s when s.Contains("sql") => new List<string> { "SQL Server Documentation", "W3Schools SQL Tutorial", "PostgreSQL Tutorial" },
+            _ => new List<string> { "Online Courses", "Documentation", "Hands-on Practice" }
+        };
+    }
+
+    private decimal CalculateImportanceScore(string skillName, string targetPosition)
+    {
+        var baseScore = 0.5m;
+
+        if (targetPosition.ToLower().Contains("senior") || targetPosition.ToLower().Contains("lead"))
+        {
+            if (skillName.ToLower().Contains("leadership") || skillName.ToLower().Contains("communication"))
+                return 0.9m;
+        }
+
+        if (targetPosition.ToLower().Contains("architect"))
+        {
+            if (skillName.ToLower().Contains("design") || skillName.ToLower().Contains("architecture"))
+                return 0.95m;
+        }
+
+        return skillName.ToLower() switch
+        {
+            var s when s.Contains("c#") || s.Contains("javascript") => 0.8m,
+            var s when s.Contains("leadership") => 0.75m,
+            var s when s.Contains("cloud") => 0.85m,
+            _ => baseScore
+        };
+    }
+
+    private List<CareerMilestoneDto> GenerateMilestoneTimeline(IEnumerable<SkillGapDto> missingSkills, IEnumerable<SkillGapDto> skillsToImprove, int totalMonths)
+    {
+        var milestones = new List<CareerMilestoneDto>();
+        var allSkills = missingSkills.Concat(skillsToImprove).OrderByDescending(s => s.Priority).ToList();
+
+        var quarterLength = Math.Max(3, totalMonths / 4);
+
+        milestones.Add(new CareerMilestoneDto
+        {
+            Month = quarterLength,
+            Title = "Foundation Phase Complete",
+            Description = "Complete basic skill development and start practical application",
+            SkillsToComplete = allSkills.Where(s => s.Priority >= 4).Select(s => s.SkillName).Take(3).ToList()
+        });
+
+        milestones.Add(new CareerMilestoneDto
+        {
+            Month = quarterLength * 2,
+            Title = "Intermediate Proficiency",
+            Description = "Demonstrate improved skills in real projects",
+            SkillsToComplete = allSkills.Skip(3).Take(3).Select(s => s.SkillName).ToList()
+        });
+
+        milestones.Add(new CareerMilestoneDto
+        {
+            Month = quarterLength * 3,
+            Title = "Advanced Application",
+            Description = "Lead initiatives using newly acquired skills",
+            SkillsToComplete = allSkills.Skip(6).Take(2).Select(s => s.SkillName).ToList()
+        });
+
+        milestones.Add(new CareerMilestoneDto
+        {
+            Month = totalMonths,
+            Title = "Ready for Target Role",
+            Description = "All skill gaps addressed, prepared for role transition",
+            SkillsToComplete = new List<string> { "All target skills mastered" }
+        });
+
+        return milestones;
+    }
+
+    private List<string> GenerateActionItems(IEnumerable<SkillGapDto> missingSkills, IEnumerable<SkillGapDto> skillsToImprove)
+    {
+        var items = new List<string>();
+
+        if (missingSkills.Any())
+        {
+            var topMissing = missingSkills.OrderByDescending(s => s.Priority).First();
+            items.Add($"Start learning {topMissing.SkillName} immediately - this is your highest priority gap");
+        }
+
+        if (skillsToImprove.Any())
+        {
+            var topImprove = skillsToImprove.OrderByDescending(s => s.Priority).First();
+            items.Add($"Find a mentor or advanced course for {topImprove.SkillName}");
+        }
+
+        items.Add("Schedule weekly review sessions to track progress");
+        items.Add("Set up practice projects to apply new skills");
+        items.Add("Join relevant professional communities or forums");
+
+        return items;
+    }
 
     private int CalculateCoursePriority(Course course)
     {

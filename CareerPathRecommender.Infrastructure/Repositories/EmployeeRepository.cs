@@ -98,4 +98,36 @@ public class EmployeeRepository : IEmployeeRepository
     {
         return await _context.Employees.CountAsync(cancellationToken);
     }
+
+    public async Task<Skill?> GetSkillByNameAsync(string name, CancellationToken cancellationToken = default)
+    {
+        return await _context.Skills
+            .FirstOrDefaultAsync(s => s.Name.ToLower() == name.ToLower(), cancellationToken);
+    }
+
+    public async Task<Skill> CreateSkillAsync(Skill skill, CancellationToken cancellationToken = default)
+    {
+        _context.Skills.Add(skill);
+        await _context.SaveChangesAsync(cancellationToken);
+        return skill;
+    }
+
+    public async Task<EmployeeSkill> AddEmployeeSkillAsync(EmployeeSkill employeeSkill, CancellationToken cancellationToken = default)
+    {
+        _context.EmployeeSkills.Add(employeeSkill);
+        await _context.SaveChangesAsync(cancellationToken);
+        return employeeSkill;
+    }
+
+    public async Task RemoveEmployeeSkillAsync(int employeeId, int skillId, CancellationToken cancellationToken = default)
+    {
+        var employeeSkill = await _context.EmployeeSkills
+            .FirstOrDefaultAsync(es => es.EmployeeId == employeeId && es.SkillId == skillId, cancellationToken);
+
+        if (employeeSkill != null)
+        {
+            _context.EmployeeSkills.Remove(employeeSkill);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+    }
 }

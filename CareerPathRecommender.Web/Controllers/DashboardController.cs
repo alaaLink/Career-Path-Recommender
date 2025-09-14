@@ -297,4 +297,181 @@ public class DashboardController : Controller
             return Json(new { success = false, error = "Search failed" });
         }
     }
+
+    [HttpPost]
+    public async Task<IActionResult> UpdateExperience(int employeeId, int yearsOfExperience)
+    {
+        try
+        {
+            if (yearsOfExperience < 0 || yearsOfExperience > 50)
+            {
+                return Json(new { success = false, message = "Years of experience must be between 0 and 50" });
+            }
+
+            var employee = await _employeeRepository.GetByIdAsync(employeeId);
+            if (employee == null)
+            {
+                return Json(new { success = false, message = "Employee not found" });
+            }
+
+            employee.YearsOfExperience = yearsOfExperience;
+            await _employeeRepository.UpdateAsync(employee);
+
+            _logger.LogInformation("Updated experience for employee {EmployeeId} to {YearsOfExperience} years",
+                employeeId, yearsOfExperience);
+
+            return Json(new { success = true, message = "Experience updated successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating experience for employee {EmployeeId}", employeeId);
+            return Json(new { success = false, message = "Failed to update experience" });
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AddEmployeeSkill(int employeeId, string skillName, string category, int level, string description = null)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(skillName))
+            {
+                return Json(new { success = false, message = "Skill name is required" });
+            }
+
+            var employee = await _employeeRepository.GetByIdWithSkillsAsync(employeeId);
+            if (employee == null)
+            {
+                return Json(new { success = false, message = "Employee not found" });
+            }
+
+            // Check if employee already has this skill
+            var existingSkill = employee.Skills.FirstOrDefault(s =>
+                s.Skill.Name.Equals(skillName, StringComparison.OrdinalIgnoreCase));
+
+            if (existingSkill != null)
+            {
+                return Json(new { success = false, message = "Employee already has this skill" });
+            }
+
+            // Create or find the skill
+            var skill = await GetOrCreateSkillAsync(skillName, category, description);
+
+            // Add the skill to the employee
+            var employeeSkill = new CareerPathRecommender.Domain.Entities.EmployeeSkill
+            {
+                EmployeeId = employeeId,
+                SkillId = skill.Id,
+                Level = (SkillLevel)level,
+                AcquiredDate = DateTime.UtcNow
+            };
+
+            await _employeeRepository.AddEmployeeSkillAsync(employeeSkill);
+
+            _logger.LogInformation("Added skill {SkillName} at level {Level} to employee {EmployeeId}",
+                skillName, level, employeeId);
+
+            // Return skill info for UI update
+            var skillInfo = new
+            {
+                id = skill.Id,
+                name = skillName,
+                level = level,
+                levelName = ((SkillLevel)level).ToString()
+            };
+
+            return Json(new { success = true, message = "Skill added successfully", skill = skillInfo });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error adding skill {SkillName} to employee {EmployeeId}", skillName, employeeId);
+            return Json(new { success = false, message = "Failed to add skill" });
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> UpdatePersonalInfo(int id, string firstName, string lastName, string position, string department)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName) ||
+                string.IsNullOrWhiteSpace(position) || string.IsNullOrWhiteSpace(department))
+            {
+                return Json(new { success = false, message = "All fields are required" });
+            }
+
+            var employee = await _employeeRepository.GetByIdAsync(id);
+            if (employee == null)
+            {
+                return Json(new { success = false, message = "Employee not found" });
+            }
+
+            // Update employee information
+            employee.FirstName = firstName;
+            employee.LastName = lastName;
+            employee.Position = position;
+            employee.Department = department;
+
+            await _employeeRepository.UpdateAsync(employee);
+
+            _logger.LogInformation("Updated personal information for employee {EmployeeId}", id);
+
+            return Json(new { success = true, message = "Personal information updated successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating personal information for employee {EmployeeId}", id);
+            return Json(new { success = false, message = "Failed to update personal information" });
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> RemoveEmployeeSkill(int employeeId, int skillId)
+    {
+        try
+        {
+            var employee = await _employeeRepository.GetByIdWithSkillsAsync(employeeId);
+            if (employee == null)
+            {
+                return Json(new { success = false, message = "Employee not found" });
+            }
+
+            var employeeSkill = employee.Skills.FirstOrDefault(s => s.SkillId == skillId);
+            if (employeeSkill == null)
+            {
+                return Json(new { success = false, message = "Skill not found for this employee" });
+            }
+
+            await _employeeRepository.RemoveEmployeeSkillAsync(employeeId, skillId);
+
+            _logger.LogInformation("Removed skill {SkillId} from employee {EmployeeId}", skillId, employeeId);
+
+            return Json(new { success = true, message = "Skill removed successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error removing skill {SkillId} from employee {EmployeeId}", skillId, employeeId);
+            return Json(new { success = false, message = "Failed to remove skill" });
+        }
+    }
+
+    private async Task<CareerPathRecommender.Domain.Entities.Skill> GetOrCreateSkillAsync(string name, string category, string description)
+    {
+        // Try to find existing skill
+        var existingSkill = await _employeeRepository.GetSkillByNameAsync(name);
+        if (existingSkill != null)
+        {
+            return existingSkill;
+        }
+
+        // Create new skill
+        var newSkill = new CareerPathRecommender.Domain.Entities.Skill
+        {
+            Name = name,
+            Category = category,
+            Description = description ?? $"{name} skill"
+        };
+
+        return await _employeeRepository.CreateSkillAsync(newSkill);
+    }
 }
