@@ -3,10 +3,12 @@ using CareerPathRecommender.Infrastructure.Data;
 using CareerPathRecommender.Web.Models;
 using CareerPathRecommender.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace CareerPathRecommender.Web.Controllers;
 
+[Authorize]
 public class DashboardController : Controller
 {
     private readonly IEmployeeRepository _employeeRepository;
@@ -29,15 +31,46 @@ public class DashboardController : Controller
         _logger = logger;
     }
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string searchTerm = "", int page = 1, int pageSize = 12)
     {
         try
         {
-            var employees = await _employeeRepository.GetAllAsync();
+            var allEmployees = await _employeeRepository.GetAllAsync();
+
+            // Apply search filter if search term is provided
+            var filteredEmployees = allEmployees;
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                filteredEmployees = allEmployees.Where(e =>
+                    e.FirstName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    e.LastName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    e.Position.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    e.Department.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            // Calculate pagination
+            var totalEmployees = filteredEmployees.Count();
+            var paginatedEmployees = filteredEmployees
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
             var model = new DashboardViewModel
             {
-                Employees = employees
+                Employees = paginatedEmployees,
+                SearchTerm = searchTerm,
+                EmployeesPagination = new PaginationInfo
+                {
+                    CurrentPage = page,
+                    PageSize = pageSize,
+                    TotalItems = totalEmployees
+                }
             };
+
+            // Pass total count to ViewBag for search results display
+            ViewBag.TotalEmployees = allEmployees.Count();
+
             return View(model);
         }
         catch (Exception ex)
@@ -48,7 +81,7 @@ public class DashboardController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> SelectEmployee(int employeeId)
+    public async Task<IActionResult> SelectEmployee(int employeeId, int recPage = 1, int recPageSize = 6)
     {
         try
         {
@@ -59,12 +92,25 @@ public class DashboardController : Controller
                 return NotFound();
             }
 
-            var recommendations = await _recommendationService.GenerateRecommendationsAsync(employeeId);
+            var allRecommendations = await _recommendationService.GenerateRecommendationsAsync(employeeId);
+
+            // Apply pagination to recommendations
+            var totalRecommendations = allRecommendations.Count();
+            var paginatedRecommendations = allRecommendations
+                .Skip((recPage - 1) * recPageSize)
+                .Take(recPageSize)
+                .ToList();
 
             var model = new DashboardViewModel
             {
                 SelectedEmployee = employee,
-                Recommendations = recommendations.ToList()
+                Recommendations = paginatedRecommendations,
+                RecommendationsPagination = new PaginationInfo
+                {
+                    CurrentPage = recPage,
+                    PageSize = recPageSize,
+                    TotalItems = totalRecommendations
+                }
             };
 
             return PartialView("_EmployeeProfile", model);
@@ -177,6 +223,48 @@ public class DashboardController : Controller
     }
 
     [HttpGet]
+    public async Task<IActionResult> Recommendations(int employeeId, int recPage = 1, int recPageSize = 6)
+    {
+        try
+        {
+            var employee = await _employeeRepository.GetByIdWithSkillsAsync(employeeId);
+
+            if (employee == null)
+            {
+                return RedirectToAction("Index");
+            }
+
+            var allRecommendations = await _recommendationService.GenerateRecommendationsAsync(employeeId);
+
+            // Apply pagination to recommendations
+            var totalRecommendations = allRecommendations.Count();
+            var paginatedRecommendations = allRecommendations
+                .Skip((recPage - 1) * recPageSize)
+                .Take(recPageSize)
+                .ToList();
+
+            var model = new DashboardViewModel
+            {
+                SelectedEmployee = employee,
+                Recommendations = paginatedRecommendations,
+                RecommendationsPagination = new PaginationInfo
+                {
+                    CurrentPage = recPage,
+                    PageSize = recPageSize,
+                    TotalItems = totalRecommendations
+                }
+            };
+
+            return View(model);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading recommendations for employee {EmployeeId}", employeeId);
+            return RedirectToAction("Index");
+        }
+    }
+
+    [HttpGet]
     public async Task<IActionResult> SearchEmployees(string query)
     {
         try
@@ -188,8 +276,8 @@ public class DashboardController : Controller
 
             var allEmployees = await _employeeRepository.GetAllAsync();
             var employees = allEmployees
-                .Where(e => e.FirstName.Contains(query, StringComparison.OrdinalIgnoreCase) || 
-                           e.LastName.Contains(query, StringComparison.OrdinalIgnoreCase) || 
+                .Where(e => e.FirstName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                           e.LastName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                            e.Position.Contains(query, StringComparison.OrdinalIgnoreCase))
                 .Select(e => new
                 {

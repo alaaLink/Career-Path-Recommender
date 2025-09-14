@@ -1,0 +1,21 @@
+Career Path Recommender - Email Confirmation
+
+Hello,
+
+Thank you for registering with Career Path Recommender! To complete your registration and start exploring personalized career recommendations, please confirm your email address.
+
+Please click the following link to confirm your email:
+{{CONFIRMATION_URL}}
+
+IMPORTANT: You must confirm your email address before you can log in to your account.
+
+This confirmation link will expire in 24 hours for security reasons.
+
+If you didn't create an account with us, please ignore this email.
+
+Best regards,
+The Career Path Recommender Team
+
+---
+This is an automated message. Please do not reply to this email.
+© 2024 Career Path Recommender. All rights reserved.

@@ -1,0 +1,1001 @@
+@model CareerPathRecommender.Web.Models.DashboardViewModel
+
+@{
+    ViewData["Title"] = $"Recommendations for {Model.SelectedEmployee?.FullName}";
+}
+
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="@Url.Action("Index", "Dashboard")" class="text-decoration-none">
+                                    <i class="fas fa-home me-1"></i>Dashboard
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">Recommendations</li>
+                        </ol>
+                    </nav>
+                    <h1 class="display-6 text-primary mb-2">
+                        <i class="fas fa-brain me-3"></i>Career Recommendations
+                    </h1>
+                    <p class="lead text-muted">
+                        Personalized recommendations for <strong>@Model.SelectedEmployee?.FullName</strong>
+                    </p>
+                </div>
+                <div class="text-end">
+                    <a href="@Url.Action("Index", "Dashboard")" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Employee Profile Sidebar -->
+        <div class="col-3 mb-4">
+            <div class="profile-sidebar">
+                <div class="card-modern profile-card">
+                    <div class="card-header bg-gradient p-4" style="background: var(--primary-gradient);">
+                        <div class="text-center">
+                            <div class="avatar-container mx-auto mb-3" style="width: 80px; height: 80px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-user-circle fa-4x text-white"></i>
+                            </div>
+                            <h5 class="mb-1 fw-bold">@Model.SelectedEmployee!.FullName</h5>
+                            <small class="opacity-75">@Model.SelectedEmployee.Position</small>
+                            <div class="mt-3">
+                                @if (Model.SelectedEmployee.YearsOfExperience >= 10)
+                                {
+                                    <span class="badge bg-warning bg-opacity-20 border border-warning text-white">
+                                        <i class="fas fa-star me-1"></i>Expert
+                                    </span>
+                                }
+                                else if (Model.SelectedEmployee.YearsOfExperience >= 5)
+                                {
+                                    <span class="badge bg-success bg-opacity-20 border border-success text-white">
+                                        <i class="fas fa-crown me-1"></i>Senior
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-info bg-opacity-20 border border-info text-white">
+                                        <i class="fas fa-seedling me-1"></i>Growing
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Quick Stats -->
+                        <div class="row g-2 mb-4">
+                            <div class="col-6">
+                                <div class="stat-card-mini text-center">
+                                    <div class="fw-bold text-primary text-truncate" title="@Model.SelectedEmployee.Department">@Model.SelectedEmployee.Department</div>
+                                    <small class="text-muted">Department</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-card-mini text-center">
+                                    <div class="fw-bold text-success">@Model.SelectedEmployee.YearsOfExperience yrs</div>
+                                    <small class="text-muted">Experience</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Skills Summary -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                <i class="fas fa-cogs text-primary me-2"></i>
+                                <span>Top Skills</span>
+                            </h6>
+                            <div class="skills-summary">
+                                @foreach (var skill in Model.SelectedEmployee.Skills.Take(5))
+                                {
+                                    var skillConfig = skill.Level switch
+                                    {
+                                        CareerPathRecommender.Domain.Enums.SkillLevel.Expert => new { Color = "primary", Width = "100%" },
+                                        CareerPathRecommender.Domain.Enums.SkillLevel.Advanced => new { Color = "success", Width = "80%" },
+                                        CareerPathRecommender.Domain.Enums.SkillLevel.Intermediate => new { Color = "warning", Width = "60%" },
+                                        CareerPathRecommender.Domain.Enums.SkillLevel.Beginner => new { Color = "secondary", Width = "40%" },
+                                        _ => new { Color = "secondary", Width = "20%" }
+                                    };
+
+                                    <div class="skill-item mb-3">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <small class="fw-medium text-truncate me-2" title="@skill.Skill.Name">@skill.Skill.Name</small>
+                                            <small class="text-muted flex-shrink-0">@skill.Level</small>
+                                        </div>
+                                        <div class="progress" style="height: 6px;">
+                                            <div class="progress-bar bg-@skillConfig.Color" style="width: @skillConfig.Width"></div>
+                                        </div>
+                                    </div>
+                                }
+                                @if (Model.SelectedEmployee.Skills.Count() > 5)
+                                {
+                                    <small class="text-muted">
+                                        +@(Model.SelectedEmployee.Skills.Count() - 5) more skills
+                                    </small>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary btn-sm" onclick="showSkillGapAnalysis()">
+                                <i class="fas fa-chart-line me-1"></i>
+                                <span>Analyze Career Path</span>
+                            </button>
+                            <button class="btn btn-outline-info btn-sm" onclick="exportRecommendations()">
+                                <i class="fas fa-download me-1"></i>
+                                <span>Export Report</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendations Main Content -->
+        <div class="col-9">
+            <!-- Filter and Sort Bar -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown">
+                                        <i class="fas fa-filter me-1"></i>Filter by Type
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#" onclick="filterRecommendations('all')">All Types</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="filterRecommendations('course')">Courses</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="filterRecommendations('project')">Projects</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="filterRecommendations('mentor')">Mentorship</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="filterRecommendations('certification')">Certifications</a></li>
+                                    </ul>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown">
+                                        <i class="fas fa-sort me-1"></i>Sort by Priority
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#" onclick="sortRecommendations('priority-desc')">High Priority First</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="sortRecommendations('priority-asc')">Low Priority First</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="sortRecommendations('confidence-desc')">Best Match First</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="sortRecommendations('date-desc')">Newest First</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <div class="d-flex align-items-center justify-content-end gap-2">
+                                <small class="text-muted">
+                                    Showing @Model.RecommendationsPagination.StartItem-@Model.RecommendationsPagination.EndItem
+                                    of @Model.RecommendationsPagination.TotalItems
+                                </small>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-secondary active" onclick="setViewMode('cards')" title="Card View">
+                                        <i class="fas fa-th"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary" onclick="setViewMode('list')" title="List View">
+                                        <i class="fas fa-list"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendations Content -->
+            <div id="recommendationsContent">
+                @if (Model.Recommendations.Any())
+                {
+                    <!-- Navigation Tabs -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body p-0">
+                            <ul class="nav nav-pills nav-justified" id="recommendationTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="all-tab" data-bs-toggle="pill" data-bs-target="#all-recommendations" type="button" role="tab" aria-controls="all-recommendations" aria-selected="true">
+                                        <i class="fas fa-list me-2"></i>All Recommendations
+                                        <span class="badge bg-primary ms-2">@Model.Recommendations.Count()</span>
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="courses-tab" data-bs-toggle="pill" data-bs-target="#courses-recommendations" type="button" role="tab" aria-controls="courses-recommendations" aria-selected="false">
+                                        <i class="fas fa-graduation-cap me-2"></i>Courses
+                                        <span class="badge bg-success ms-2">@Model.Recommendations.Count(r => r.Type == CareerPathRecommender.Domain.Enums.RecommendationType.Course)</span>
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="mentors-tab" data-bs-toggle="pill" data-bs-target="#mentors-recommendations" type="button" role="tab" aria-controls="mentors-recommendations" aria-selected="false">
+                                        <i class="fas fa-user-friends me-2"></i>Mentors
+                                        <span class="badge bg-warning ms-2">@Model.Recommendations.Count(r => r.Type == CareerPathRecommender.Domain.Enums.RecommendationType.Mentor)</span>
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="projects-tab" data-bs-toggle="pill" data-bs-target="#projects-recommendations" type="button" role="tab" aria-controls="projects-recommendations" aria-selected="false">
+                                        <i class="fas fa-project-diagram me-2"></i>Projects
+                                        <span class="badge bg-info ms-2">@Model.Recommendations.Count(r => r.Type == CareerPathRecommender.Domain.Enums.RecommendationType.Project)</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="recommendationsTabContent">
+                        <!-- All Recommendations Tab -->
+                        <div class="tab-pane fade show active" id="all-recommendations" role="tabpanel" aria-labelledby="all-tab">
+                            <div class="recommendations-grid" id="recommendationsList">
+                                @foreach (var recommendation in Model.Recommendations)
+                        {
+                            var typeIcon = recommendation.Type switch
+                            {
+                                CareerPathRecommender.Domain.Enums.RecommendationType.Course => "graduation-cap",
+                                CareerPathRecommender.Domain.Enums.RecommendationType.Mentor => "user-friends",
+                                CareerPathRecommender.Domain.Enums.RecommendationType.Project => "project-diagram",
+                                CareerPathRecommender.Domain.Enums.RecommendationType.Certification => "award",
+                                _ => "lightbulb"
+                            };
+
+                            var typeColor = recommendation.Type switch
+                            {
+                                CareerPathRecommender.Domain.Enums.RecommendationType.Course => "primary",
+                                CareerPathRecommender.Domain.Enums.RecommendationType.Mentor => "success",
+                                CareerPathRecommender.Domain.Enums.RecommendationType.Project => "warning",
+                                CareerPathRecommender.Domain.Enums.RecommendationType.Certification => "info",
+                                _ => "secondary"
+                            };
+
+                            var typeGradient = recommendation.Type switch
+                            {
+                                CareerPathRecommender.Domain.Enums.RecommendationType.Course => "var(--primary-gradient)",
+                                CareerPathRecommender.Domain.Enums.RecommendationType.Mentor => "var(--success-gradient)",
+                                CareerPathRecommender.Domain.Enums.RecommendationType.Project => "var(--warning-gradient)",
+                                CareerPathRecommender.Domain.Enums.RecommendationType.Certification => "var(--info-gradient)",
+                                _ => "var(--secondary-gradient)"
+                            };
+
+                            <div class="recommendation-card-modern mb-4 fade-in"
+                                 id="rec-@recommendation.Id"
+                                 data-type="@recommendation.Type.ToString().ToLower()"
+                                 data-priority="@recommendation.Priority"
+                                 data-confidence="@((int)(recommendation.ConfidenceScore * 100))">
+
+                                <!-- Card Header with Type Badge and Priority -->
+                                <div class="card-header-modern" style="background: @typeGradient;">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <div class="icon-container me-3">
+                                                <i class="fas fa-@typeIcon"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0 text-white fw-bold">@recommendation.Title</h6>
+                                                <small class="text-white-50">@recommendation.Type</small>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <!-- Priority Stars -->
+                                            <div class="priority-stars">
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    <i class="fas fa-star @(i <= recommendation.Priority ? "active" : "")"></i>
+                                                }
+                                            </div>
+                                            <!-- Confidence Score -->
+                                            <div class="confidence-badge">
+                                                <div class="confidence-circle" data-confidence="@((int)(recommendation.ConfidenceScore * 100))">
+                                                    <span>@((int)(recommendation.ConfidenceScore * 100))%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Card Body -->
+                                <div class="card-body-modern p-3">
+                                    <p class="text-muted mb-2 lh-base">@recommendation.Description</p>
+
+                                    <!-- Enhanced AI Reasoning Box -->
+                                    <div class="ai-reasoning-modern mb-3">
+                                        <div class="reasoning-header mb-1">
+                                            <div class="d-flex align-items-center">
+                                                <div class="ai-icon me-2">
+                                                    <i class="fas fa-brain"></i>
+                                                </div>
+                                                <span class="fw-bold text-dark small me-2">AI Analysis</span>
+                                                <div class="reasoning-line ms-auto"></div>
+                                            </div>
+                                        </div>
+                                        <div class="reasoning-content">
+                                            @recommendation.Reasoning
+                                        </div>
+                                    </div>
+
+                                    <!-- Enhanced Metrics Row -->
+                                    <div class="metrics-row mb-3">
+                                        <div class="row g-3">
+                                            <div class="col-4">
+                                                <div class="metric-card text-center">
+                                                    <div class="metric-icon mb-1">
+                                                        <i class="fas fa-chart-line text-success"></i>
+                                                    </div>
+                                                    <div class="metric-value">@((recommendation.ConfidenceScore * 100).ToString("F0"))%</div>
+                                                    <small class="metric-label">Match</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="metric-card text-center">
+                                                    <div class="metric-icon mb-1">
+                                                        <i class="fas fa-star text-warning"></i>
+                                                    </div>
+                                                    <div class="metric-value">@recommendation.Priority</div>
+                                                    <small class="metric-label">Priority</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="metric-card text-center">
+                                                    <div class="metric-icon mb-1">
+                                                        <i class="fas fa-calendar text-info"></i>
+                                                    </div>
+                                                    <div class="metric-value">@((DateTime.UtcNow - recommendation.CreatedDate).Days)d</div>
+                                                    <small class="metric-label">Age</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Enhanced Action Buttons -->
+                                    <div class="action-buttons d-flex flex-wrap gap-2 mb-2">
+                                        <button class="btn btn-success btn-modern flex-grow-1" onclick="acceptRecommendation(@recommendation.Id)">
+                                            <i class="fas fa-check me-1"></i>
+                                            <span>Accept & Start</span>
+                                        </button>
+                                        <button class="btn btn-outline-primary btn-modern" onclick="viewRecommendationDetails(@recommendation.Id)" title="View Details">
+                                            <i class="fas fa-info-circle"></i>
+                                        </button>
+                                        <button class="btn btn-outline-secondary btn-modern" onclick="saveRecommendation(@recommendation.Id)" title="Save for Later">
+                                            <i class="fas fa-bookmark"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger btn-modern" onclick="dismissRecommendation(@recommendation.Id)" title="Dismiss">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Card Footer with Meta Info -->
+                                    <div class="card-footer-modern pt-3 border-top">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted d-flex align-items-center">
+                                                <i class="fas fa-magic me-1 text-primary"></i>
+                                                Generated @recommendation.CreatedDate.ToString("MMM dd, yyyy")
+                                            </small>
+                                            <div class="recommendation-tags">
+                                                <span class="tag tag-@typeColor">@recommendation.Type</span>
+                                                @if (recommendation.Priority >= 4)
+                                                {
+                                                    <span class="tag tag-danger">High Priority</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                                }
+                            </div>
+
+                            <!-- Recommendations Pagination for All Tab -->
+                            @if (Model.RecommendationsPagination.TotalPages > 1)
+                            {
+                                <div class="recommendations-pagination" data-employee-id="@Model.SelectedEmployee.Id">
+                                    <partial name="_Pagination" model="Model.RecommendationsPagination" />
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Courses Tab -->
+                        <div class="tab-pane fade" id="courses-recommendations" role="tabpanel" aria-labelledby="courses-tab">
+                            <div class="recommendations-grid">
+                                @foreach (var recommendation in Model.Recommendations.Where(r => r.Type == CareerPathRecommender.Domain.Enums.RecommendationType.Course))
+                                {
+                                    <div class="recommendation-card-modern mb-4 fade-in course-recommendation">
+                                        <div class="card-header-modern" style="background: var(--primary-gradient);">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="icon-container me-3">
+                                                        <i class="fas fa-graduation-cap"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-0 text-white fw-bold">@recommendation.Title</h6>
+                                                        <small class="text-white-50">Course Recommendation</small>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="priority-stars">
+                                                        @for (int i = 1; i <= 5; i++)
+                                                        {
+                                                            <i class="fas fa-star @(i <= recommendation.Priority ? "active" : "")"></i>
+                                                        }
+                                                    </div>
+                                                    <div class="confidence-badge">
+                                                        <div class="confidence-circle" data-confidence="@((int)(recommendation.ConfidenceScore * 100))">
+                                                            <span>@((int)(recommendation.ConfidenceScore * 100))%</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body-modern p-4">
+                                            <p class="text-muted mb-3">@recommendation.Description</p>
+                                            <div class="ai-reasoning-modern mb-3">
+                                                <div class="reasoning-header mb-2">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="ai-icon me-2">
+                                                            <i class="fas fa-brain"></i>
+                                                        </div>
+                                                        <span class="fw-bold text-dark small">Why This Course?</span>
+                                                    </div>
+                                                </div>
+                                                <div class="reasoning-content">@recommendation.Reasoning</div>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-success flex-grow-1" onclick="acceptRecommendation(@recommendation.Id)">
+                                                    <i class="fas fa-play me-1"></i>Start Learning
+                                                </button>
+                                                <button class="btn btn-outline-primary" onclick="viewRecommendationDetails(@recommendation.Id)">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Mentors Tab -->
+                        <div class="tab-pane fade" id="mentors-recommendations" role="tabpanel" aria-labelledby="mentors-tab">
+                            <div class="recommendations-grid">
+                                @foreach (var recommendation in Model.Recommendations.Where(r => r.Type == CareerPathRecommender.Domain.Enums.RecommendationType.Mentor))
+                                {
+                                    <div class="recommendation-card-modern mb-4 fade-in mentor-recommendation">
+                                        <div class="card-header-modern" style="background: var(--success-gradient);">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="icon-container me-3">
+                                                        <i class="fas fa-user-friends"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-0 text-white fw-bold">@recommendation.Title</h6>
+                                                        <small class="text-white-50">Mentorship Opportunity</small>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="priority-stars">
+                                                        @for (int i = 1; i <= 5; i++)
+                                                        {
+                                                            <i class="fas fa-star @(i <= recommendation.Priority ? "active" : "")"></i>
+                                                        }
+                                                    </div>
+                                                    <div class="confidence-badge">
+                                                        <div class="confidence-circle" data-confidence="@((int)(recommendation.ConfidenceScore * 100))">
+                                                            <span>@((int)(recommendation.ConfidenceScore * 100))%</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body-modern p-4">
+                                            <p class="text-muted mb-3">@recommendation.Description</p>
+                                            <div class="ai-reasoning-modern mb-3">
+                                                <div class="reasoning-header mb-2">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="ai-icon me-2">
+                                                            <i class="fas fa-brain"></i>
+                                                        </div>
+                                                        <span class="fw-bold text-dark small">Why This Mentor?</span>
+                                                    </div>
+                                                </div>
+                                                <div class="reasoning-content">@recommendation.Reasoning</div>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-success flex-grow-1" onclick="acceptRecommendation(@recommendation.Id)">
+                                                    <i class="fas fa-handshake me-1"></i>Connect
+                                                </button>
+                                                <button class="btn btn-outline-primary" onclick="viewRecommendationDetails(@recommendation.Id)">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Projects Tab -->
+                        <div class="tab-pane fade" id="projects-recommendations" role="tabpanel" aria-labelledby="projects-tab">
+                            <div class="recommendations-grid">
+                                @foreach (var recommendation in Model.Recommendations.Where(r => r.Type == CareerPathRecommender.Domain.Enums.RecommendationType.Project))
+                                {
+                                    <div class="recommendation-card-modern mb-4 fade-in project-recommendation">
+                                        <div class="card-header-modern" style="background: var(--warning-gradient);">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="icon-container me-3">
+                                                        <i class="fas fa-project-diagram"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-0 text-white fw-bold">@recommendation.Title</h6>
+                                                        <small class="text-white-50">Project Opportunity</small>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="priority-stars">
+                                                        @for (int i = 1; i <= 5; i++)
+                                                        {
+                                                            <i class="fas fa-star @(i <= recommendation.Priority ? "active" : "")"></i>
+                                                        }
+                                                    </div>
+                                                    <div class="confidence-badge">
+                                                        <div class="confidence-circle" data-confidence="@((int)(recommendation.ConfidenceScore * 100))">
+                                                            <span>@((int)(recommendation.ConfidenceScore * 100))%</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body-modern p-4">
+                                            <p class="text-muted mb-3">@recommendation.Description</p>
+                                            <div class="ai-reasoning-modern mb-3">
+                                                <div class="reasoning-header mb-2">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="ai-icon me-2">
+                                                            <i class="fas fa-brain"></i>
+                                                        </div>
+                                                        <span class="fw-bold text-dark small">Why This Project?</span>
+                                                    </div>
+                                                </div>
+                                                <div class="reasoning-content">@recommendation.Reasoning</div>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-success flex-grow-1" onclick="acceptRecommendation(@recommendation.Id)">
+                                                    <i class="fas fa-rocket me-1"></i>Join Project
+                                                </button>
+                                                <button class="btn btn-outline-primary" onclick="viewRecommendationDetails(@recommendation.Id)">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state text-center py-5">
+                        <i class="fas fa-search fa-4x text-muted mb-4"></i>
+                        <h4 class="text-muted">No Recommendations Available</h4>
+                        <p class="text-muted mb-4">Our AI is analyzing the employee profile to generate personalized recommendations.</p>
+                        <button class="btn btn-primary" onclick="generateRecommendations(@Model.SelectedEmployee.Id)">
+                            <i class="fas fa-magic me-1"></i>Generate Recommendations
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Skill Gap Analysis Modal -->
+<div class="modal fade" id="skillGapModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-chart-line me-2"></i>Career Path Analysis
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="skillGapForm">
+                    <div class="mb-3">
+                        <label for="targetPosition" class="form-label fw-bold">Target Position:</label>
+                        <input type="text" class="form-control form-control-lg" id="targetPosition"
+                               placeholder="e.g., Senior Software Engineer, Tech Lead, Engineering Manager" required />
+                        <small class="form-text text-muted">Enter the position you want to transition to</small>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg" id="analyzeBtn">
+                            <i class="fas fa-analytics me-2"></i>Analyze Career Path
+                        </button>
+                    </div>
+                </form>
+
+                <div id="skillGapResults" class="mt-4">
+                    <!-- Skill gap analysis results will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentEmployeeId = @Model.SelectedEmployee.Id;
+        let currentFilter = 'all';
+        let currentSort = 'priority-desc';
+        let currentViewMode = 'cards';
+
+        $(document).ready(function() {
+            initializeConfidenceCircles();
+
+            // Add stagger animation
+            $('.recommendation-card-modern').each(function(index) {
+                $(this).css('animation-delay', (index * 0.1) + 's');
+            });
+
+            // Initialize tab functionality
+            initializeTabs();
+        });
+
+        // Initialize confidence circles
+        function initializeConfidenceCircles() {
+            $('.confidence-circle').each(function() {
+                const confidence = $(this).data('confidence');
+                $(this).css('--confidence-height', confidence + '%');
+            });
+        }
+
+        // Initialize tab functionality
+        function initializeTabs() {
+            // Add click handlers for tab transitions
+            $('.nav-pills .nav-link').on('click', function() {
+                const targetTab = $(this).data('bs-target');
+
+                // Add stagger animation to cards in the active tab
+                setTimeout(() => {
+                    $(`${targetTab} .recommendation-card-modern`).each(function(index) {
+                        $(this).css({
+                            'opacity': '0',
+                            'transform': 'translateY(20px)'
+                        }).delay(index * 100).animate({
+                            'opacity': '1'
+                        }, 400).css('transform', 'translateY(0)');
+                    });
+                }, 150);
+            });
+
+            // Update confidence circles when tab becomes active
+            $('button[data-bs-toggle="pill"]').on('shown.bs.tab', function (e) {
+                initializeConfidenceCircles();
+            });
+        }
+
+        // Pagination handler
+        $(document).on('click', '.recommendations-pagination .page-link', function(e) {
+            e.preventDefault();
+            const page = $(this).data('page');
+
+            if (page && !$(this).parent().hasClass('disabled') && !$(this).parent().hasClass('active')) {
+                loadRecommendationsPage(page);
+            }
+        });
+
+        function loadRecommendationsPage(page) {
+            const url = '@Url.Action("Recommendations", "Dashboard")';
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('recPage', page);
+
+            // Show loading
+            $('#recommendationsContent').html('<div class="text-center p-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-3">Loading recommendations...</p></div>');
+
+            window.location.href = currentUrl.toString();
+        }
+
+        // Filter functions
+        function filterRecommendations(type) {
+            currentFilter = type;
+            if (type === 'all') {
+                $('.recommendation-card-modern').fadeIn();
+            } else {
+                $('.recommendation-card-modern').hide();
+                $(`.recommendation-card-modern[data-type="${type}"]`).fadeIn();
+            }
+            updateFilterButton(type);
+        }
+
+        function sortRecommendations(sortBy) {
+            const $container = $('#recommendationsList');
+            const $cards = $container.children('.recommendation-card-modern').detach();
+
+            $cards.sort(function(a, b) {
+                const aVal = $(a).data(sortBy.split('-')[0]);
+                const bVal = $(b).data(sortBy.split('-')[0]);
+
+                if (sortBy.includes('desc')) {
+                    return bVal - aVal;
+                } else {
+                    return aVal - bVal;
+                }
+            });
+
+            $container.append($cards);
+            $cards.hide().each(function(index) {
+                $(this).delay(index * 100).fadeIn();
+            });
+        }
+
+        function setViewMode(mode) {
+            currentViewMode = mode;
+            if (mode === 'list') {
+                $('#recommendationsList').addClass('list-view');
+            } else {
+                $('#recommendationsList').removeClass('list-view');
+            }
+            $('.btn-group button').removeClass('active');
+            $(`.btn-group button[onclick="setViewMode('${mode}')"]`).addClass('active');
+        }
+
+        function updateFilterButton(type) {
+            const typeLabels = {
+                'all': 'All Types',
+                'course': 'Courses',
+                'project': 'Projects',
+                'mentor': 'Mentorship',
+                'certification': 'Certifications'
+            };
+            $('#filterDropdown').html(`<i class="fas fa-filter me-1"></i>${typeLabels[type]}`);
+        }
+
+        // Action functions
+        function acceptRecommendation(recommendationId) {
+            $.post('@Url.Action("AcceptRecommendation", "Dashboard")', { recommendationId: recommendationId })
+                .done(function(response) {
+                    if (response.success) {
+                        showSuccess(response.message);
+                        $(`#rec-${recommendationId}`).addClass('accepted').find('.btn-success').prop('disabled', true).text('Accepted');
+                    } else {
+                        showError(response.error);
+                    }
+                })
+                .fail(function() {
+                    showError('Failed to accept recommendation. Please try again.');
+                });
+        }
+
+        function viewRecommendationDetails(recommendationId) {
+            $.get('@Url.Action("GetRecommendationDetails", "Dashboard")', { recommendationId: recommendationId })
+                .done(function(response) {
+                    if (response.success) {
+                        // Show details in modal
+                        showRecommendationModal(response.data);
+                    } else {
+                        showError(response.error);
+                    }
+                });
+        }
+
+        function saveRecommendation(recommendationId) {
+            // Implement save functionality
+            showSuccess('Recommendation saved for later!');
+        }
+
+        function dismissRecommendation(recommendationId) {
+            if (confirm('Are you sure you want to dismiss this recommendation?')) {
+                $(`#rec-${recommendationId}`).fadeOut();
+                showSuccess('Recommendation dismissed.');
+            }
+        }
+
+        function showSkillGapAnalysis() {
+            new bootstrap.Modal(document.getElementById('skillGapModal')).show();
+        }
+
+        function exportRecommendations() {
+            // Implement export functionality
+            showSuccess('Export feature coming soon!');
+        }
+
+        function generateRecommendations(employeeId) {
+            $('#recommendationsContent').html('<div class="text-center p-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-3">Generating recommendations...</p></div>');
+
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        }
+
+        // Skill Gap Analysis Form
+        $('#skillGapForm').on('submit', function(e) {
+            e.preventDefault();
+
+            const targetPosition = $('#targetPosition').val();
+            const $btn = $('#analyzeBtn');
+
+            $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Analyzing...');
+
+            $.post('@Url.Action("AnalyzeSkillGaps", "Dashboard")', {
+                employeeId: currentEmployeeId,
+                targetPosition: targetPosition
+            })
+            .done(function(data) {
+                $('#skillGapResults').html(data).hide().slideDown();
+            })
+            .fail(function() {
+                showError('Failed to analyze skill gaps. Please try again.');
+            })
+            .always(function() {
+                $btn.prop('disabled', false).html('<i class="fas fa-analytics me-2"></i>Analyze Career Path');
+            });
+        });
+
+        function showSuccess(message) {
+            // Simple success notification
+            const toast = `<div class="toast align-items-center text-white bg-success border-0 position-fixed top-0 end-0 m-3" style="z-index: 9999" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>`;
+            $('body').append(toast);
+            $('.toast').toast('show').on('hidden.bs.toast', function() { $(this).remove(); });
+        }
+
+        function showError(message) {
+            const toast = `<div class="toast align-items-center text-white bg-danger border-0 position-fixed top-0 end-0 m-3" style="z-index: 9999" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>`;
+            $('body').append(toast);
+            $('.toast').toast('show').on('hidden.bs.toast', function() { $(this).remove(); });
+        }
+    </script>
+
+    <style>
+        /* Page-specific styles */
+        .profile-card {
+            max-height: calc(100vh - 4rem);
+            overflow-y: auto;
+            position: sticky;
+            top: 2rem;
+        }
+
+        .profile-card .card-body {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .skill-item .fw-medium {
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .list-view .recommendation-card-modern {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+
+        .list-view .card-header-modern {
+            min-width: 200px;
+            max-width: 200px;
+        }
+
+        @@media (max-width: 992px) {
+            .profile-card {
+                position: relative;
+                top: auto;
+                max-height: none;
+                overflow-y: visible;
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .skill-item .fw-medium {
+                max-width: 80px;
+            }
+        }
+
+        /* Enhanced Tab Styling */
+        .nav-pills {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 0.5rem;
+            border-radius: 0.75rem;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .nav-pills .nav-link {
+            color: #6c757d;
+            background: transparent;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            margin: 0 0.25rem;
+            transition: all 0.3s ease;
+            position: relative;
+            font-weight: 500;
+        }
+
+        .nav-pills .nav-link:hover {
+            color: #495057;
+            background: rgba(255,255,255,0.7);
+            transform: translateY(-1px);
+        }
+
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .nav-pills .nav-link.active:hover {
+            transform: translateY(-2px);
+        }
+
+        .nav-pills .nav-link .badge {
+            font-size: 0.7em;
+            padding: 0.25em 0.5em;
+            border-radius: 10px;
+        }
+
+        .nav-pills .nav-link.active .badge {
+            background: rgba(255,255,255,0.9) !important;
+            color: #667eea !important;
+        }
+
+        /* Tab Content Animation */
+        .tab-content {
+            min-height: 400px;
+        }
+
+        .tab-pane {
+            transition: all 0.3s ease;
+        }
+
+        .tab-pane.fade:not(.show) {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .tab-pane.fade.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Specialized recommendation cards */
+        .course-recommendation .card-header-modern {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        }
+
+        .mentor-recommendation .card-header-modern {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+        }
+
+        .project-recommendation .card-header-modern {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%) !important;
+        }
+
+        /* Enhanced reasoning sections for each type */
+        .course-recommendation .ai-reasoning-modern {
+            border-left: 4px solid #667eea;
+        }
+
+        .mentor-recommendation .ai-reasoning-modern {
+            border-left: 4px solid #28a745;
+        }
+
+        .project-recommendation .ai-reasoning-modern {
+            border-left: 4px solid #ffc107;
+        }
+    </style>
+}
