@@ -33,10 +33,10 @@
         <form asp-action="Login" method="post" class="auth-form" novalidate>
             <input asp-for="ReturnUrl" type="hidden" />
             <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
-            
-            
-            
-            
+
+
+
+
             <div class="form-group">
                 <label asp-for="Email" class="form-label">
                     <i class="fas fa-envelope"></i>
@@ -88,31 +88,12 @@
             </a>
         </div>
 
-            <div class="auth-footer">
-                <p>Don't have an account? <a asp-action="Register" class="auth-link">Create one here</a></p>
-                <p><a asp-action="ForgotPassword" class="auth-link">Forgot your password?</a></p>
-            </div>
-        </div>
-
-        <div class="auth-features">
-            <div class="feature-item">
-                <i class="fas fa-graduation-cap"></i>
-                <h3>Personalized Learning</h3>
-                <p>Discover courses tailored to your career goals and skill level</p>
-            </div>
-            <div class="feature-item">
-                <i class="fas fa-project-diagram"></i>
-                <h3>Project Matching</h3>
-                <p>Find projects that align with your skills and interests</p>
-            </div>
-            <div class="feature-item">
-                <i class="fas fa-trophy"></i>
-                <h3>Career Growth</h3>
-                <p>Track your progress and celebrate your achievements</p>
-            </div>
+        <div class="auth-footer">
+            <p>Don't have an account? <a asp-action="Register" class="auth-link">Create one here</a></p>
+            <p><a asp-action="ForgotPassword" class="auth-link">Forgot your password?</a></p>
         </div>
     </div>
-    
+
     <div class="auth-features">
         <div class="feature-item">
             <i class="fas fa-graduation-cap"></i>
@@ -139,7 +120,7 @@
         function togglePassword(fieldId) {
             const field = document.getElementById(fieldId);
             const eye = document.getElementById(fieldId + '-eye');
-            
+
             if (field.type === 'password') {
                 field.type = 'text';
                 eye.classList.remove('fa-eye');
@@ -150,7 +131,7 @@
                 eye.classList.add('fa-eye');
             }
         }
-        
+
         // Form submission loading state
         document.querySelector('.auth-form').addEventListener('submit', function() {
             const button = document.querySelector('.btn-auth');
@@ -164,7 +145,7 @@
             if (emailField && !emailField.value) {
                 emailField.focus();
             }
-            
+
             // Add entrance animation
             document.querySelector('.auth-card').classList.add('animate-in');
             document.querySelector('.auth-features').classList.add('animate-in');
