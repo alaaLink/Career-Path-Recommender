@@ -801,27 +801,4 @@ body > *:not(.toast-container) {
   }
 }
 
-/* Dark Mode Support (Future Enhancement) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --gray-50: #1a1a1a;
-    --gray-100: #2d2d2d;
-    --gray-200: #404040;
-    --gray-300: #525252;
-    --gray-600: #a3a3a3;
-    --gray-700: #d4d4d4;
-    --gray-800: #e5e5e5;
-    --gray-900: #f5f5f5;
-  }
-
-  body {
-    background-color: #121212;
-    color: #e5e5e5;
-  }
-
-  .card-modern,
-  .recommendation-card-modern {
-    background: #1e1e1e;
-    color: #e5e5e5;
-  }
-}
+/* Dark mode disabled - Light mode only */
