@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CareerPathRecommender.Core\CareerPathRecommender.Core.csproj" />
     <ProjectReference Include="..\CareerPathRecommender.Domain\CareerPathRecommender.Domain.csproj" />
     <ProjectReference Include="..\CareerPathRecommender.Application\CareerPathRecommender.Application.csproj" />
     <ProjectReference Include="..\CareerPathRecommender.Infrastructure\CareerPathRecommender.Infrastructure.csproj" />

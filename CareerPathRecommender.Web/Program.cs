@@ -19,7 +19,11 @@ builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("CareerPathRecommender.Infrastructure")));
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("CareerPathRecommender.Infrastructure"));
+    options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
+    options.EnableServiceProviderCaching(false); // Disable caching to avoid threading issues
+});
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => 
 {
@@ -48,6 +52,9 @@ builder.Services.AddAuthentication()
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
+// Add memory cache for performance optimization
+builder.Services.AddMemoryCache();
+
 // Register repositories
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
@@ -55,8 +62,15 @@ builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<ISkillRepository, SkillRepository>();
 builder.Services.AddScoped<IRecommendationRepository, RecommendationRepository>();
 
-// Register services
-builder.Services.AddScoped<CareerPathRecommender.Application.Interfaces.IRecommendationService, CareerPathRecommender.Infrastructure.Services.RecommendationService>();
+// Register services with caching decorator pattern
+builder.Services.AddScoped<CareerPathRecommender.Infrastructure.Services.RecommendationService>();
+builder.Services.AddScoped<CareerPathRecommender.Application.Interfaces.IRecommendationService>(provider =>
+{
+    var innerService = provider.GetRequiredService<CareerPathRecommender.Infrastructure.Services.RecommendationService>();
+    var cache = provider.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>();
+    var logger = provider.GetRequiredService<Microsoft.Extensions.Logging.ILogger<CareerPathRecommender.Infrastructure.Services.CachedRecommendationService>>();
+    return new CareerPathRecommender.Infrastructure.Services.CachedRecommendationService(innerService, cache, logger);
+});
 builder.Services.AddScoped<IAIService, CareerPathRecommender.Infrastructure.Services.MockAIService>();
 
 // Configure Mailjet settings

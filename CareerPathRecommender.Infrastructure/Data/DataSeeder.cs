@@ -148,9 +148,52 @@ public static class DataSeeder
             savedEmployees.Add(savedEmployee);
         }
 
-        // Skip adding EmployeeSkills for now to avoid DateTime timezone issues
-        // The issue appears to be with BaseEntity's CreatedAt property
-        Console.WriteLine("Skipping EmployeeSkills seeding temporarily to avoid DateTime timezone issues");
+        // Add Employee Skills - comprehensive skill assignments based on roles and experience
+        var employeeSkills = new List<EmployeeSkill>();
+        var random = new Random(42); // Fixed seed for consistent data
+
+        // Helper to assign skills based on employee role patterns
+        foreach (var emp in savedEmployees)
+        {
+            var skillsToAdd = GetSkillsForRole(emp.Position, savedSkills, random);
+            foreach (var (skill, level) in skillsToAdd)
+            {
+                employeeSkills.Add(new EmployeeSkill
+                {
+                    EmployeeId = emp.Id,
+                    SkillId = skill.Id,
+                    Level = level,
+                    AcquiredDate = DateTime.UtcNow.AddDays(-random.Next(0, emp.YearsOfExperience * 365))
+                });
+            }
+        }
+
+        context.EmployeeSkills.AddRange(employeeSkills);
+        await context.SaveChangesAsync();
+
+        // Add Employee Course Enrollments - realistic enrollment patterns
+        var employeeCourses = new List<EmployeeCourse>();
+        foreach (var emp in savedEmployees)
+        {
+            var coursesToEnroll = GetCoursesForEmployee(emp, savedCourses, random);
+            foreach (var (course, status) in coursesToEnroll)
+            {
+                employeeCourses.Add(new EmployeeCourse
+                {
+                    EmployeeId = emp.Id,
+                    CourseId = course.Id,
+                    EnrolledDate = DateTime.UtcNow.AddDays(-random.Next(1, 180)),
+                    Status = status,
+                    Progress = status == Domain.Enums.CourseStatus.Completed ? 100 :
+                              status == Domain.Enums.CourseStatus.InProgress ? random.Next(20, 90) : 0
+                });
+            }
+        }
+
+        context.EmployeeCourses.AddRange(employeeCourses);
+        await context.SaveChangesAsync();
+
+        // Projects and project assignments will be handled after project creation
 
         // Add comprehensive sample projects (15+ projects across different departments)
         var projects = new List<Project>
@@ -260,6 +303,181 @@ public static class DataSeeder
         // ProjectSkills is also a junction table - using context directly
         context.ProjectSkills.AddRange(projectSkills);
         await context.SaveChangesAsync();
+
+        // Add Project Assignments - realistic team assignments
+        var projectAssignments = new List<ProjectAssignment>();
+        foreach (var project in savedProjects.Take(10)) // Assign to first 10 projects
+        {
+            var assignedEmployees = GetEmployeesForProject(project, savedEmployees, random);
+            foreach (var emp in assignedEmployees)
+            {
+                projectAssignments.Add(new ProjectAssignment
+                {
+                    ProjectId = project.Id,
+                    EmployeeId = emp.Id,
+                    AssignedDate = project.StartDate.AddDays(-random.Next(1, 30))
+                });
+            }
+        }
+
+        context.ProjectAssignments.AddRange(projectAssignments);
+        await context.SaveChangesAsync();
     }
 
+    private static List<(Skill skill, SkillLevel level)> GetSkillsForRole(string position, List<Skill> skills, Random random)
+    {
+        var result = new List<(Skill skill, SkillLevel level)>();
+        var positionLower = position.ToLower();
+
+        // Define skill sets for different roles
+        if (positionLower.Contains("developer") || positionLower.Contains("engineer"))
+        {
+            if (positionLower.Contains("frontend")) AddFrontendSkills(result, skills, random);
+            else if (positionLower.Contains("backend")) AddBackendSkills(result, skills, random);
+            else if (positionLower.Contains("mobile")) AddMobileSkills(result, skills, random);
+            else AddFullStackSkills(result, skills, random);
+        }
+        else if (positionLower.Contains("manager") || positionLower.Contains("lead"))
+        {
+            AddLeadershipSkills(result, skills, random);
+        }
+        else if (positionLower.Contains("analyst"))
+        {
+            AddAnalyticalSkills(result, skills, random);
+        }
+        else if (positionLower.Contains("designer"))
+        {
+            AddDesignSkills(result, skills, random);
+        }
+        else if (positionLower.Contains("qa") || positionLower.Contains("test"))
+        {
+            AddQASkills(result, skills, random);
+        }
+
+        return result;
+    }
+
+    private static void AddFrontendSkills(List<(Skill skill, SkillLevel level)> result, List<Skill> skills, Random random)
+    {
+        AddSkillIfExists(result, skills, "JavaScript", SkillLevel.Advanced, random);
+        AddSkillIfExists(result, skills, "React", SkillLevel.Intermediate, random);
+        AddSkillIfExists(result, skills, "C#", SkillLevel.Beginner, random);
+    }
+
+    private static void AddBackendSkills(List<(Skill skill, SkillLevel level)> result, List<Skill> skills, Random random)
+    {
+        AddSkillIfExists(result, skills, "C#", SkillLevel.Advanced, random);
+        AddSkillIfExists(result, skills, "ASP.NET Core", SkillLevel.Advanced, random);
+        AddSkillIfExists(result, skills, "SQL Server", SkillLevel.Intermediate, random);
+        AddSkillIfExists(result, skills, "Azure", SkillLevel.Intermediate, random);
+    }
+
+    private static void AddMobileSkills(List<(Skill skill, SkillLevel level)> result, List<Skill> skills, Random random)
+    {
+        AddSkillIfExists(result, skills, "JavaScript", SkillLevel.Advanced, random);
+        AddSkillIfExists(result, skills, "React", SkillLevel.Advanced, random);
+        AddSkillIfExists(result, skills, "C#", SkillLevel.Intermediate, random);
+    }
+
+    private static void AddFullStackSkills(List<(Skill skill, SkillLevel level)> result, List<Skill> skills, Random random)
+    {
+        AddSkillIfExists(result, skills, "C#", SkillLevel.Intermediate, random);
+        AddSkillIfExists(result, skills, "JavaScript", SkillLevel.Intermediate, random);
+        AddSkillIfExists(result, skills, "SQL Server", SkillLevel.Beginner, random);
+    }
+
+    private static void AddLeadershipSkills(List<(Skill skill, SkillLevel level)> result, List<Skill> skills, Random random)
+    {
+        AddSkillIfExists(result, skills, "Leadership", SkillLevel.Advanced, random);
+        AddSkillIfExists(result, skills, "Project Management", SkillLevel.Advanced, random);
+        AddSkillIfExists(result, skills, "C#", SkillLevel.Intermediate, random);
+    }
+
+    private static void AddAnalyticalSkills(List<(Skill skill, SkillLevel level)> result, List<Skill> skills, Random random)
+    {
+        AddSkillIfExists(result, skills, "SQL Server", SkillLevel.Advanced, random);
+        AddSkillIfExists(result, skills, "JavaScript", SkillLevel.Intermediate, random);
+        AddSkillIfExists(result, skills, "Azure", SkillLevel.Beginner, random);
+    }
+
+    private static void AddDesignSkills(List<(Skill skill, SkillLevel level)> result, List<Skill> skills, Random random)
+    {
+        AddSkillIfExists(result, skills, "JavaScript", SkillLevel.Intermediate, random);
+        AddSkillIfExists(result, skills, "React", SkillLevel.Beginner, random);
+    }
+
+    private static void AddQASkills(List<(Skill skill, SkillLevel level)> result, List<Skill> skills, Random random)
+    {
+        AddSkillIfExists(result, skills, "C#", SkillLevel.Intermediate, random);
+        AddSkillIfExists(result, skills, "JavaScript", SkillLevel.Intermediate, random);
+        AddSkillIfExists(result, skills, "SQL Server", SkillLevel.Beginner, random);
+    }
+
+    private static void AddSkillIfExists(List<(Skill skill, SkillLevel level)> result, List<Skill> skills, string skillName, SkillLevel baseLevel, Random random)
+    {
+        var skill = skills.FirstOrDefault(s => s.Name == skillName);
+        if (skill != null)
+        {
+            // Add some randomness to skill levels
+            var levelVariation = random.Next(-1, 2); // -1, 0, or 1
+            var finalLevel = (int)baseLevel + levelVariation;
+            finalLevel = Math.Max(0, Math.Min(3, finalLevel)); // Clamp to valid range
+            result.Add((skill, (SkillLevel)finalLevel));
+        }
+    }
+
+    private static int CalculateSkillExperience(int totalExperience, SkillLevel level, Random random)
+    {
+        return level switch
+        {
+            SkillLevel.Beginner => Math.Min(totalExperience, random.Next(0, 2)),
+            SkillLevel.Intermediate => Math.Min(totalExperience, random.Next(1, 4)),
+            SkillLevel.Advanced => Math.Min(totalExperience, random.Next(2, 6)),
+            SkillLevel.Expert => Math.Min(totalExperience, random.Next(4, Math.Max(5, totalExperience))),
+            _ => 0
+        };
+    }
+
+    private static List<(Course course, Domain.Enums.CourseStatus status)> GetCoursesForEmployee(Employee employee, List<Course> courses, Random random)
+    {
+        var result = new List<(Course course, Domain.Enums.CourseStatus status)>();
+        var numCourses = employee.YearsOfExperience switch
+        {
+            <= 2 => random.Next(1, 4), // 1-3 courses for juniors
+            <= 5 => random.Next(2, 5), // 2-4 courses for mid-level
+            <= 10 => random.Next(1, 4), // 1-3 courses for seniors
+            _ => random.Next(0, 3) // 0-2 courses for experts
+        };
+
+        var selectedCourses = courses.OrderBy(_ => random.Next()).Take(numCourses);
+        foreach (var course in selectedCourses)
+        {
+            var status = random.Next(100) switch
+            {
+                < 30 => Domain.Enums.CourseStatus.Completed,
+                < 60 => Domain.Enums.CourseStatus.InProgress,
+                _ => Domain.Enums.CourseStatus.NotStarted
+            };
+            result.Add((course, status));
+        }
+
+        return result;
+    }
+
+    private static List<Employee> GetEmployeesForProject(Project project, List<Employee> employees, Random random)
+    {
+        // Filter employees by department and experience level for project fit
+        var suitableEmployees = employees.Where(e =>
+            e.Department == project.Department ||
+            (project.Department == "Engineering" && (e.Department == "Quality Assurance" || e.Department == "IT Operations")) ||
+            (project.Name.Contains("Analytics") && e.Department == "Analytics")).ToList();
+
+        if (!suitableEmployees.Any())
+            suitableEmployees = employees; // Fallback to all employees
+
+        var teamSize = Math.Min(project.MaxTeamSize > 0 ? project.MaxTeamSize : 3, random.Next(2, 6));
+        return suitableEmployees.OrderBy(_ => random.Next()).Take(teamSize).ToList();
+    }
+
+    // Removed GetProjectRole method as ProjectAssignment doesn't have Role property
 }

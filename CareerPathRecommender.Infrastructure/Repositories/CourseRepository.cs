@@ -61,6 +61,13 @@ public class CourseRepository : ICourseRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IEnumerable<Course>> GetEnrolledCoursesAsync(int employeeId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Courses
+            .Where(c => _context.EmployeeCourses.Any(ec => ec.EmployeeId == employeeId && ec.CourseId == c.Id))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<Course> AddAsync(Course course, CancellationToken cancellationToken = default)
     {
         var entry = await _context.Courses.AddAsync(course, cancellationToken);
