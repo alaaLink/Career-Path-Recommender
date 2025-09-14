@@ -36,6 +36,7 @@ public class RecommendationService : IRecommendationService
 
     public async Task<IEnumerable<RecommendationDto>> GenerateRecommendationsAsync(int employeeId, CancellationToken cancellationToken = default)
     {
+        _logger.LogInformation("Starting recommendation generation for employee {EmployeeId}", employeeId);
         try
         {
             // Execute recommendation types sequentially to avoid DbContext threading issues
@@ -50,6 +51,8 @@ public class RecommendationService : IRecommendationService
             var projectRecommendations = await GenerateProjectRecommendationsAsync(employeeId, cancellationToken);
             recommendations.AddRange(projectRecommendations);
 
+            _logger.LogInformation("Generated {Count} total recommendations for employee {EmployeeId}", recommendations.Count, employeeId);
+
             return recommendations.OrderByDescending(r => r.Priority)
                                 .ThenByDescending(r => r.ConfidenceScore);
         }
@@ -62,28 +65,51 @@ public class RecommendationService : IRecommendationService
 
     public async Task<RecommendationDto> AcceptRecommendationAsync(int recommendationId, CancellationToken cancellationToken = default)
     {
-        var recommendation = await _recommendationRepository.GetByIdAsync(recommendationId, cancellationToken);
+        _logger.LogInformation("Accepting recommendation {RecommendationId}", recommendationId);
+        try
+        {
+            var recommendation = await _recommendationRepository.GetByIdAsync(recommendationId, cancellationToken);
 
-        if (recommendation == null)
-            throw new ArgumentException($"Recommendation with ID {recommendationId} not found");
+            if (recommendation == null)
+            {
+                _logger.LogWarning("Recommendation with ID {RecommendationId} not found", recommendationId);
+                throw new ArgumentException($"Recommendation with ID {recommendationId} not found");
+            }
 
-        await _recommendationRepository.MarkAsAcceptedAsync(recommendationId, cancellationToken);
+            await _recommendationRepository.MarkAsAcceptedAsync(recommendationId, cancellationToken);
+            _logger.LogInformation("Recommendation {RecommendationId} marked as accepted", recommendationId);
 
-        return MapToDto(recommendation);
+            return MapToDto(recommendation);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error accepting recommendation {RecommendationId}", recommendationId);
+            return new RecommendationDto();
+        }
     }
 
     public async Task<IEnumerable<RecommendationDto>> GetEmployeeRecommendationsAsync(int employeeId, CancellationToken cancellationToken = default)
     {
-        var recommendations = await _recommendationRepository.GetByEmployeeIdAsync(employeeId, cancellationToken);
-        return recommendations.Select(MapToDto);
+        _logger.LogInformation("Fetching recommendations for employee {EmployeeId}", employeeId);
+        try
+        {
+            var recommendations = await _recommendationRepository.GetByEmployeeIdAsync(employeeId, cancellationToken);
+            var list = recommendations.Select(MapToDto).ToList();
+            _logger.LogInformation("Found {Count} recommendations for employee {EmployeeId}", list.Count, employeeId);
+            return list;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching recommendations for employee {EmployeeId}", employeeId);
+            return new List<RecommendationDto>();
+        }
     }
 
     private async Task<IEnumerable<RecommendationDto>> GenerateCourseRecommendationsAsync(int employeeId, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Generating course recommendations for employee {EmployeeId}", employeeId);
         try
         {
-            _logger.LogInformation("Generating course recommendations for employee {EmployeeId}", employeeId);
-
             var employee = await _employeeRepository.GetByIdWithSkillsAsync(employeeId, cancellationToken);
             if (employee == null)
             {
@@ -98,23 +124,23 @@ public class RecommendationService : IRecommendationService
             var employeeSkillNames = employee.Skills.Select(s => s.Skill.Name).Distinct().ToHashSet();
             var employeeSkillMap = employee.Skills.ToDictionary(s => s.SkillId, s => s.Level);
 
-        // Get courses already taken by employee to avoid duplicates
-        var enrolledCourses = await _courseRepository.GetEnrolledCoursesAsync(employeeId, cancellationToken);
-        var enrolledCourseIds = enrolledCourses.Select(c => c.Id).ToHashSet();
+            // Get courses already taken by employee to avoid duplicates
+            var enrolledCourses = await _courseRepository.GetEnrolledCoursesAsync(employeeId, cancellationToken);
+            var enrolledCourseIds = enrolledCourses.Select(c => c.Id).ToHashSet();
 
-        var courseScores = new List<(Course Course, double Score, string Reason)>();
+            var courseScores = new List<(Course Course, double Score, string Reason)>();
 
-        // Filter and score courses efficiently
-        var availableCourses = allCourses.Where(c => !enrolledCourseIds.Contains(c.Id)).ToList();
+            // Filter and score courses efficiently
+            var availableCourses = allCourses.Where(c => !enrolledCourseIds.Contains(c.Id)).ToList();
 
-        foreach (var course in availableCourses)
-        {
-            var score = CalculateCourseRelevanceScore(course, employee, employeeSkillCategories, employeeSkillNames);
-            if (score.Score > 0.3) // Only recommend courses with reasonable relevance
+            foreach (var course in availableCourses)
             {
-                courseScores.Add(score);
+                var score = CalculateCourseRelevanceScore(course, employee, employeeSkillCategories, employeeSkillNames);
+                if (score.Score > 0.3) // Only recommend courses with reasonable relevance
+                {
+                    courseScores.Add(score);
+                }
             }
-        }
 
             // Take top 5 most relevant courses
             var topCourses = courseScores
@@ -162,206 +188,264 @@ public class RecommendationService : IRecommendationService
 
     private async Task<IEnumerable<RecommendationDto>> GenerateMentorRecommendationsAsync(int employeeId, CancellationToken cancellationToken)
     {
-        var employee = await _employeeRepository.GetByIdWithSkillsAsync(employeeId, cancellationToken);
-        if (employee == null)
-            throw new ArgumentException($"Employee with ID {employeeId} not found");
-
-        // Get potential mentors efficiently - filter by department and experience upfront
-        var potentialMentors = await _employeeRepository.GetMentorCandidatesAsync(employeeId, cancellationToken);
-        var mentorScores = new List<(Employee Mentor, double Score, string Reason)>();
-
-        // Pre-compute employee skill map for performance
-        var employeeSkillMap = employee.Skills.ToDictionary(s => s.SkillId, s => s.Level);
-
-        // Process mentor scoring synchronously (CPU-bound operation)
-        foreach (var mentor in potentialMentors)
+        _logger.LogInformation("Generating mentor recommendations for employee {EmployeeId}", employeeId);
+        try
         {
-            var score = CalculateMentorRelevanceScore(mentor, employee, employeeSkillMap);
-            if (score.Score > 0.4) // Only recommend mentors with good relevance
+            var employee = await _employeeRepository.GetByIdWithSkillsAsync(employeeId, cancellationToken);
+            if (employee == null)
             {
-                mentorScores.Add(score);
+                _logger.LogWarning("Employee with ID {EmployeeId} not found for mentor recommendations", employeeId);
+                throw new ArgumentException($"Employee with ID {employeeId} not found");
             }
-        }
 
-        // Take top 3 most relevant mentors with performance optimization
-        var topMentors = mentorScores
-            .OrderByDescending(ms => ms.Score)
-            .Take(3)
-            .ToList();
+            // Get potential mentors efficiently - filter by department and experience upfront
+            var potentialMentors = await _employeeRepository.GetMentorCandidatesAsync(employeeId, cancellationToken);
+            var mentorScores = new List<(Employee Mentor, double Score, string Reason)>();
 
-        if (!topMentors.Any())
-        {
-            return new List<RecommendationDto>(); // Early return if no suitable mentors
-        }
+            // Pre-compute employee skill map for performance
+            var employeeSkillMap = employee.Skills.ToDictionary(s => s.SkillId, s => s.Level);
 
-        var recommendations = new List<RecommendationDto>();
-
-        foreach (var (mentor, score, reason) in topMentors)
-        {
-            var aiReasoning = await _aiService.GenerateMentorMatchReasoningAsync(
-                MapToEmployeeDto(employee), MapToEmployeeDto(mentor), cancellationToken);
-
-            var priority = CalculateDynamicMentorPriority(mentor, score, employee);
-            var confidenceScore = Math.Min(0.92m, (decimal)(0.65 + (score * 0.35))); // Scale score appropriately
-
-            var recommendation = new Recommendation
+            // Process mentor scoring synchronously (CPU-bound operation)
+            foreach (var mentor in potentialMentors)
             {
-                EmployeeId = employeeId,
-                Type = RecommendationType.Mentor,
-                Title = $"Connect with: {mentor.FullName}",
-                Description = $"{mentor.Position} in {mentor.Department} • {mentor.YearsOfExperience} years experience",
-                Reasoning = $"{reason} {aiReasoning}",
-                Priority = priority,
-                ConfidenceScore = confidenceScore,
-                CreatedDate = DateTime.UtcNow,
-                MentorEmployeeId = mentor.Id
-            };
+                var score = CalculateMentorRelevanceScore(mentor, employee, employeeSkillMap);
+                if (score.Score > 0.4) // Only recommend mentors with good relevance
+                {
+                    mentorScores.Add(score);
+                }
+            }
 
-            var savedRecommendation = await _recommendationRepository.AddAsync(recommendation, cancellationToken);
-            recommendations.Add(MapToDto(savedRecommendation));
+            // Take top 3 most relevant mentors with performance optimization
+            var topMentors = mentorScores
+                .OrderByDescending(ms => ms.Score)
+                .Take(3)
+                .ToList();
+
+            if (!topMentors.Any())
+            {
+                _logger.LogInformation("No suitable mentor recommendations for employee {EmployeeId}", employeeId);
+                return new List<RecommendationDto>(); // Early return if no suitable mentors
+            }
+
+            var recommendations = new List<RecommendationDto>();
+
+            foreach (var (mentor, score, reason) in topMentors)
+            {
+                var aiReasoning = await _aiService.GenerateMentorMatchReasoningAsync(
+                    MapToEmployeeDto(employee), MapToEmployeeDto(mentor), cancellationToken);
+
+                var priority = CalculateDynamicMentorPriority(mentor, score, employee);
+                var confidenceScore = Math.Min(0.92m, (decimal)(0.65 + (score * 0.35))); // Scale score appropriately
+
+                var recommendation = new Recommendation
+                {
+                    EmployeeId = employeeId,
+                    Type = RecommendationType.Mentor,
+                    Title = $"Connect with: {mentor.FullName}",
+                    Description = $"{mentor.Position} in {mentor.Department} • {mentor.YearsOfExperience} years experience",
+                    Reasoning = $"{reason} {aiReasoning}",
+                    Priority = priority,
+                    ConfidenceScore = confidenceScore,
+                    CreatedDate = DateTime.UtcNow,
+                    MentorEmployeeId = mentor.Id
+                };
+
+                var savedRecommendation = await _recommendationRepository.AddAsync(recommendation, cancellationToken);
+                recommendations.Add(MapToDto(savedRecommendation));
+            }
+
+            _logger.LogInformation("Generated {Count} mentor recommendations for employee {EmployeeId}", recommendations.Count, employeeId);
+            return recommendations;
         }
-
-        return recommendations;
+        catch (OperationCanceledException)
+        {
+            _logger.LogWarning("Mentor recommendation generation canceled for employee {EmployeeId}", employeeId);
+            return new List<RecommendationDto>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating mentor recommendations for employee {EmployeeId}", employeeId);
+            return new List<RecommendationDto>();
+        }
     }
 
     private async Task<IEnumerable<RecommendationDto>> GenerateProjectRecommendationsAsync(int employeeId, CancellationToken cancellationToken)
     {
-        var employee = await _employeeRepository.GetByIdWithSkillsAsync(employeeId, cancellationToken);
-        if (employee == null)
-            throw new ArgumentException($"Employee with ID {employeeId} not found");
-
-        var availableProjects = await _projectRepository.GetAvailableProjectsAsync(cancellationToken);
-        var projectScores = new List<(object Project, double Score, string Reason)>();
-
-        var employeeSkillMap = employee.Skills.ToDictionary(s => s.SkillId, s => s.Level);
-
-        foreach (var project in availableProjects)
+        _logger.LogInformation("Generating project recommendations for employee {EmployeeId}", employeeId);
+        try
         {
-            var score = await CalculateProjectRelevanceScore(project, employee, employeeSkillMap);
-            if (score.Score > 0.5) // Only recommend projects with good skill match
+            var employee = await _employeeRepository.GetByIdWithSkillsAsync(employeeId, cancellationToken);
+            if (employee == null)
             {
-                projectScores.Add(score);
+                _logger.LogWarning("Employee with ID {EmployeeId} not found for project recommendations", employeeId);
+                throw new ArgumentException($"Employee with ID {employeeId} not found");
             }
-        }
 
-        // Take top 4 most suitable projects
-        var topProjects = projectScores
-            .OrderByDescending(ps => ps.Score)
-            .Take(4)
-            .ToList();
+            var availableProjects = await _projectRepository.GetAvailableProjectsAsync(cancellationToken);
+            var projectScores = new List<(object Project, double Score, string Reason)>();
 
-        var recommendations = new List<RecommendationDto>();
+            var employeeSkillMap = employee.Skills.ToDictionary(s => s.SkillId, s => s.Level);
 
-        foreach (var (project, score, reason) in topProjects)
-        {
-            var aiReasoning = await _aiService.GenerateProjectMatchReasoningAsync(
-                MapToEmployeeDto(employee), project, cancellationToken);
-
-            var priority = CalculateDynamicProjectPriority(project, score, employee);
-            var confidenceScore = Math.Min(0.95m, (decimal)(0.7 + (score * 0.3))); // Higher base for projects
-
-            // Cast project to access properties (assuming it has Name, Description, Id)
-            var projectName = project.GetType().GetProperty("Name")?.GetValue(project)?.ToString() ?? "Unknown Project";
-            var projectDesc = project.GetType().GetProperty("Description")?.GetValue(project)?.ToString() ?? "";
-            var projectId = (int?)project.GetType().GetProperty("Id")?.GetValue(project) ?? 0;
-
-            var recommendation = new Recommendation
+            foreach (var project in availableProjects)
             {
-                EmployeeId = employeeId,
-                Type = RecommendationType.Project,
-                Title = $"Join Project: {projectName}",
-                Description = projectDesc,
-                Reasoning = $"{reason} {aiReasoning}",
-                Priority = priority,
-                ConfidenceScore = confidenceScore,
-                CreatedDate = DateTime.UtcNow,
-                ProjectId = projectId
-            };
+                var score = await CalculateProjectRelevanceScore(project, employee, employeeSkillMap);
+                if (score.Score > 0.5) // Only recommend projects with good skill match
+                {
+                    projectScores.Add(score);
+                }
+            }
 
-            var savedRecommendation = await _recommendationRepository.AddAsync(recommendation, cancellationToken);
-            recommendations.Add(MapToDto(savedRecommendation));
+            // Take top 4 most suitable projects
+            var topProjects = projectScores
+                .OrderByDescending(ps => ps.Score)
+                .Take(4)
+                .ToList();
+
+            var recommendations = new List<RecommendationDto>();
+
+            foreach (var (project, score, reason) in topProjects)
+            {
+                var aiReasoning = await _aiService.GenerateProjectMatchReasoningAsync(
+                    MapToEmployeeDto(employee), project, cancellationToken);
+
+                var priority = CalculateDynamicProjectPriority(project, score, employee);
+                var confidenceScore = Math.Min(0.95m, (decimal)(0.7 + (score * 0.3))); // Higher base for projects
+
+                // Cast project to access properties (assuming it has Name, Description, Id)
+                var projectName = project.GetType().GetProperty("Name")?.GetValue(project)?.ToString() ?? "Unknown Project";
+                var projectDesc = project.GetType().GetProperty("Description")?.GetValue(project)?.ToString() ?? "";
+                var projectId = (int?)project.GetType().GetProperty("Id")?.GetValue(project) ?? 0;
+
+                var recommendation = new Recommendation
+                {
+                    EmployeeId = employeeId,
+                    Type = RecommendationType.Project,
+                    Title = $"Join Project: {projectName}",
+                    Description = projectDesc,
+                    Reasoning = $"{reason} {aiReasoning}",
+                    Priority = priority,
+                    ConfidenceScore = confidenceScore,
+                    CreatedDate = DateTime.UtcNow,
+                    ProjectId = projectId
+                };
+
+                var savedRecommendation = await _recommendationRepository.AddAsync(recommendation, cancellationToken);
+                recommendations.Add(MapToDto(savedRecommendation));
+            }
+
+            _logger.LogInformation("Generated {Count} project recommendations for employee {EmployeeId}", recommendations.Count, employeeId);
+            return recommendations;
         }
-
-        return recommendations;
+        catch (OperationCanceledException)
+        {
+            _logger.LogWarning("Project recommendation generation canceled for employee {EmployeeId}", employeeId);
+            return new List<RecommendationDto>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating project recommendations for employee {EmployeeId}", employeeId);
+            return new List<RecommendationDto>();
+        }
     }
 
     public async Task<SkillGapAnalysisDto> AnalyzeSkillGapsAsync(int employeeId, string targetPosition, CancellationToken cancellationToken = default)
     {
-        var employee = await _employeeRepository.GetByIdWithSkillsAsync(employeeId, cancellationToken);
-        if (employee == null)
-            throw new ArgumentException($"Employee with ID {employeeId} not found");
-
-        // Create dictionary of employee's current skills
-        var employeeSkillsDict = employee.Skills.ToDictionary(es => es.Skill.Name, es => es.Level);
-
-        // Define skill requirements for different target positions
-        var targetSkillRequirements = GetTargetPositionSkillRequirements(targetPosition);
-
-        var missingSkills = new List<SkillGapDto>();
-        var skillsToImprove = new List<SkillGapDto>();
-
-        // Analyze each required skill
-        foreach (var requirement in targetSkillRequirements)
+        _logger.LogInformation("Analyzing skill gaps for employee {EmployeeId} towards target position '{TargetPosition}'", employeeId, targetPosition);
+        try
         {
-            var currentLevel = employeeSkillsDict.TryGetValue(requirement.Key, out var level) ? level : SkillLevel.Beginner;
-            var requiredLevel = requirement.Value;
-
-            if (currentLevel < requiredLevel)
+            var employee = await _employeeRepository.GetByIdWithSkillsAsync(employeeId, cancellationToken);
+            if (employee == null)
             {
-                var skillGap = new SkillGapDto
-                {
-                    SkillName = requirement.Key,
-                    CurrentLevel = currentLevel,
-                    RequiredLevel = requiredLevel,
-                    Priority = CalculateSkillPriority(requirement.Key, currentLevel, requiredLevel),
-                    Reasoning = GenerateSkillGapReasoning(requirement.Key, currentLevel, requiredLevel, targetPosition),
-                    Category = GetSkillCategory(requirement.Key),
-                    EstimatedLearningTimeMonths = CalculateSkillLearningTime(currentLevel, requiredLevel),
-                    RecommendedResources = GetRecommendedResources(requirement.Key),
-                    ImportanceScore = CalculateImportanceScore(requirement.Key, targetPosition)
-                };
+                _logger.LogWarning("Employee with ID {EmployeeId} not found for skill gap analysis", employeeId);
+                throw new ArgumentException($"Employee with ID {employeeId} not found");
+            }
 
-                if (currentLevel == SkillLevel.Beginner)
+            // Create dictionary of employee's current skills
+            var employeeSkillsDict = employee.Skills.ToDictionary(es => es.Skill.Name, es => es.Level);
+
+            // Define skill requirements for different target positions
+            var targetSkillRequirements = GetTargetPositionSkillRequirements(targetPosition);
+
+            var missingSkills = new List<SkillGapDto>();
+            var skillsToImprove = new List<SkillGapDto>();
+
+            // Analyze each required skill
+            foreach (var requirement in targetSkillRequirements)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var currentLevel = employeeSkillsDict.TryGetValue(requirement.Key, out var level) ? level : SkillLevel.Beginner;
+                var requiredLevel = requirement.Value;
+
+                if (currentLevel < requiredLevel)
                 {
-                    missingSkills.Add(skillGap);
-                }
-                else
-                {
-                    skillsToImprove.Add(skillGap);
+                    var skillGap = new SkillGapDto
+                    {
+                        SkillName = requirement.Key,
+                        CurrentLevel = currentLevel,
+                        RequiredLevel = requiredLevel,
+                        Priority = CalculateSkillPriority(requirement.Key, currentLevel, requiredLevel),
+                        Reasoning = GenerateSkillGapReasoning(requirement.Key, currentLevel, requiredLevel, targetPosition),
+                        Category = GetSkillCategory(requirement.Key),
+                        EstimatedLearningTimeMonths = CalculateSkillLearningTime(currentLevel, requiredLevel),
+                        RecommendedResources = GetRecommendedResources(requirement.Key),
+                        ImportanceScore = CalculateImportanceScore(requirement.Key, targetPosition)
+                    };
+
+                    if (currentLevel == SkillLevel.Beginner)
+                    {
+                        missingSkills.Add(skillGap);
+                    }
+                    else
+                    {
+                        skillsToImprove.Add(skillGap);
+                    }
                 }
             }
+
+            // Generate personalized learning path
+            var learningPath = GenerateLearningPath(missingSkills, skillsToImprove, targetPosition, employee.YearsOfExperience);
+            var estimatedMonths = CalculateEstimatedTimeToTarget(missingSkills, skillsToImprove);
+            var milestones = GenerateMilestoneTimeline(missingSkills, skillsToImprove, estimatedMonths);
+            var actionItems = GenerateActionItems(missingSkills, skillsToImprove);
+
+            var totalRequired = targetSkillRequirements.Count;
+            var skillsMet = targetSkillRequirements.Count - missingSkills.Count() - skillsToImprove.Count();
+            var readiness = totalRequired > 0 ? (decimal)skillsMet / totalRequired * 100 : 100;
+
+            var result = new SkillGapAnalysisDto
+            {
+                MissingSkills = missingSkills.OrderByDescending(s => s.Priority),
+                SkillsToImprove = skillsToImprove.OrderByDescending(s => s.Priority),
+                RecommendedLearningPath = learningPath,
+                EstimatedTimeToTargetMonths = estimatedMonths,
+                TargetPosition = targetPosition,
+                EmployeeName = $"{employee.FirstName} {employee.LastName}",
+                CurrentPosition = employee.Position,
+                YearsOfExperience = employee.YearsOfExperience,
+                AnalysisDate = DateTime.UtcNow,
+                OverallReadiness = readiness,
+                TotalSkillsRequired = totalRequired,
+                SkillsMet = skillsMet,
+                HighPriorityGaps = missingSkills.Count(s => s.Priority >= 4) + skillsToImprove.Count(s => s.Priority >= 4),
+                NextActionItems = actionItems,
+                MilestoneTimeline = milestones
+            };
+
+            _logger.LogInformation("Completed skill gap analysis for employee {EmployeeId}: Required={TotalRequired}, Met={SkillsMet}, Readiness={Readiness}%", employeeId, totalRequired, skillsMet, readiness);
+            return result;
         }
-
-        // Generate personalized learning path
-        var learningPath = GenerateLearningPath(missingSkills, skillsToImprove, targetPosition, employee.YearsOfExperience);
-        var estimatedMonths = CalculateEstimatedTimeToTarget(missingSkills, skillsToImprove);
-        var milestones = GenerateMilestoneTimeline(missingSkills, skillsToImprove, estimatedMonths);
-        var actionItems = GenerateActionItems(missingSkills, skillsToImprove);
-
-        var totalRequired = targetSkillRequirements.Count;
-        var skillsMet = targetSkillRequirements.Count - missingSkills.Count() - skillsToImprove.Count();
-        var readiness = totalRequired > 0 ? (decimal)skillsMet / totalRequired * 100 : 100;
-
-        return new SkillGapAnalysisDto
+        catch (OperationCanceledException)
         {
-            MissingSkills = missingSkills.OrderByDescending(s => s.Priority),
-            SkillsToImprove = skillsToImprove.OrderByDescending(s => s.Priority),
-            RecommendedLearningPath = learningPath,
-            EstimatedTimeToTargetMonths = estimatedMonths,
-            TargetPosition = targetPosition,
-            EmployeeName = $"{employee.FirstName} {employee.LastName}",
-            CurrentPosition = employee.Position,
-            YearsOfExperience = employee.YearsOfExperience,
-            AnalysisDate = DateTime.UtcNow,
-            OverallReadiness = readiness,
-            TotalSkillsRequired = totalRequired,
-            SkillsMet = skillsMet,
-            HighPriorityGaps = missingSkills.Count(s => s.Priority >= 4) + skillsToImprove.Count(s => s.Priority >= 4),
-            NextActionItems = actionItems,
-            MilestoneTimeline = milestones
-        };
-    }
+            _logger.LogWarning("Skill gap analysis canceled for employee {EmployeeId}", employeeId);
+            return new SkillGapAnalysisDto();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error analyzing skill gaps for employee {EmployeeId} towards '{TargetPosition}'", employeeId, targetPosition);
+            return new SkillGapAnalysisDto();
 
+        }
+    }
 
     private Dictionary<string, SkillLevel> GetTargetPositionSkillRequirements(string targetPosition)
     {
