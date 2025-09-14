@@ -49,7 +49,8 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
         modelBuilder.Entity<Recommendation>()
             .HasOne(r => r.Employee)
             .WithMany(e => e.Recommendations)
-            .HasForeignKey(r => r.EmployeeId);
+            .HasForeignKey(r => r.EmployeeId)
+            .OnDelete(DeleteBehavior.Cascade);
             
         modelBuilder.Entity<Recommendation>()
             .HasOne(r => r.Course)
@@ -61,7 +62,7 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
             .HasOne(r => r.MentorEmployee)
             .WithMany()
             .HasForeignKey(r => r.MentorEmployeeId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.NoAction);
             
         modelBuilder.Entity<ProjectAssignment>()
             .HasOne(pa => pa.Employee)
