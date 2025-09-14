@@ -82,7 +82,7 @@
         </div>
 
         <div class="social-login">
-            <a asp-action="ExternalLogin" asp-route-provider="Google" asp-route-returnUrl="@ViewData["ReturnUrl"]" class="btn btn-social btn-google">
+            <a asp-action="ExternalLogin" asp-route-provider="Google" asp-route-returnUrl="@(ViewData["ReturnUrl"] ?? Url.Action("Index", "Dashboard"))" class="btn btn-social btn-google">
                 <i class="fab fa-google"></i>
                 Login with Google
             </a>

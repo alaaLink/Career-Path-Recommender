@@ -300,8 +300,6 @@ public class AccountController : Controller
     [AllowAnonymous]
     public async Task<IActionResult> ExternalLoginCallback(string? returnUrl = null, string? remoteError = null)
     {
-        returnUrl ??= Url.Content("~/Dashboard/Index");
-
         if (remoteError != null)
         {
             _logger.LogError("External login error: {Error}", remoteError);
@@ -322,27 +320,62 @@ public class AccountController : Controller
         if (result.Succeeded)
         {
             _logger.LogInformation("User logged in with {Name} provider", info.LoginProvider);
-            return LocalRedirect(returnUrl);
+            
+            // Always redirect to dashboard after successful Google login
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+            
+            return RedirectToAction("Index", "Dashboard");
         }
 
-        // If the user does not have an account, create one
+        // Handle existing users and new user creation
         var email = info.Principal.FindFirstValue(ClaimTypes.Email);
         if (email != null)
         {
-            _logger.LogInformation("Creating new user for email: {Email}", email);
+            _logger.LogInformation("Processing external login for email: {Email}", email);
             
-            // Check if user already exists
+            // Check if user already exists by email
             var existingUser = await _userManager.FindByEmailAsync(email);
             if (existingUser != null)
             {
-                // User exists but external login doesn't - add the external login
-                var addLoginResult = await _userManager.AddLoginAsync(existingUser, info);
-                if (addLoginResult.Succeeded)
+                _logger.LogInformation("Found existing user for email: {Email}", email);
+                
+                // Check if this external login is already associated with the user
+                var existingLogins = await _userManager.GetLoginsAsync(existingUser);
+                var hasGoogleLogin = existingLogins.Any(l => l.LoginProvider == info.LoginProvider && l.ProviderKey == info.ProviderKey);
+                
+                if (hasGoogleLogin)
                 {
+                    // External login already exists, just sign in the user
                     await _signInManager.SignInAsync(existingUser, isPersistent: false);
-                    _logger.LogInformation("Added external login for existing user {Email}", email);
-                    return LocalRedirect(returnUrl);
+                    _logger.LogInformation("User {Email} signed in with existing Google login", email);
                 }
+                else
+                {
+                    // User exists but Google login doesn't exist - link the Google account
+                    var addLoginResult = await _userManager.AddLoginAsync(existingUser, info);
+                    if (addLoginResult.Succeeded)
+                    {
+                        await _signInManager.SignInAsync(existingUser, isPersistent: false);
+                        _logger.LogInformation("Linked Google account and signed in existing user {Email}", email);
+                    }
+                    else
+                    {
+                        _logger.LogError("Failed to link Google account for user {Email}: {Errors}", email, string.Join(", ", addLoginResult.Errors.Select(e => e.Description)));
+                        ModelState.AddModelError(string.Empty, "Unable to link your Google account. Please try logging in with your email and password.");
+                        return RedirectToAction("Login");
+                    }
+                }
+                
+                // Redirect to dashboard for existing users
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+                
+                return RedirectToAction("Index", "Dashboard");
             }
             else
             {
@@ -371,7 +404,13 @@ public class AccountController : Controller
                         
                         await _employeeRepository.AddAsync(employee);
                         
-                        return LocalRedirect(returnUrl);
+                        // Always redirect to dashboard after successful Google login
+                        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                        {
+                            return Redirect(returnUrl);
+                        }
+                        
+                        return RedirectToAction("Index", "Dashboard");
                     }
                     else
                     {
