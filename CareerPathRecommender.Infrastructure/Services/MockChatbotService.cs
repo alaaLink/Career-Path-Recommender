@@ -15,7 +15,7 @@ namespace CareerPathRecommender.Infrastructure.Services
             ["bye"] = "Goodbye! Feel free to come back if you have more questions about your career development.",
         };
 
-        public Task<string> GetResponseAsync(string message)
+        public Task<string> GetResponseAsync(string message, string systemMessag = "")
         {
             var response = _responses
                 .FirstOrDefault(kvp => message.Contains(kvp.Key, StringComparison.OrdinalIgnoreCase))

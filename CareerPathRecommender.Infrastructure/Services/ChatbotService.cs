@@ -57,7 +57,7 @@ namespace CareerPathRecommender.Infrastructure.Services
             catch (HttpRequestException ex)
             {
                 // Log the error
-                return "I'm having trouble connecting to the chat service. Please try again later.";
+                return await new MockChatbotService().GetResponseAsync(userMessage);
             }
             catch (Exception ex)
             {
