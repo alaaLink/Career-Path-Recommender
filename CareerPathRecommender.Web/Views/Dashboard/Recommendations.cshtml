@@ -130,7 +130,7 @@
                                 <i class="fas fa-chart-line me-1"></i>
                                 <span>Analyze Career Path</span>
                             </button>
-                            <button class="btn btn-outline-info btn-sm" onclick="exportRecommendations()">
+                            <button class="btn btn-outline-info btn-sm" onclick="exportCurrentPage()">
                                 <i class="fas fa-download me-1"></i>
                                 <span>Export Report</span>
                             </button>
@@ -799,8 +799,74 @@
         }
 
         function exportRecommendations() {
-            // Implement export functionality
-            showSuccess('Export feature coming soon!');
+            // Default behavior - export current page
+            exportCurrentPage();
+        }
+
+        function exportCurrentPage() {
+            // Show loading state
+            const exportBtn = event.target.closest('button') || document.querySelector('.btn-outline-info');
+            const originalContent = exportBtn.innerHTML;
+            exportBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generating...';
+            exportBtn.disabled = true;
+
+            // Get current page from URL or default to 1
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentPage = urlParams.get('recPage') || 1;
+            const pageSize = 6; // Same as the UI pagination
+
+            // Create download URL with pagination parameters
+            const url = '@Url.Action("ExportRecommendationsPDF", "Dashboard")' +
+                       `?employeeId=${currentEmployeeId}&page=${currentPage}&pageSize=${pageSize}`;
+
+            // Create a temporary link to download the file
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Career-Recommendations-@Model.SelectedEmployee?.FullName.Replace(" ", "-")-Page${currentPage}-${new Date().toISOString().split('T')[0]}.pdf`;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Restore button state after a short delay
+            setTimeout(() => {
+                exportBtn.innerHTML = originalContent;
+                exportBtn.disabled = false;
+                showSuccess(`Page ${currentPage} exported successfully! (${pageSize} recommendations)`);
+            }, 1000);
+        }
+
+        function exportAllRecommendations() {
+            if (!confirm('This will export all recommendations (may be a large file). Continue?')) {
+                return;
+            }
+
+            // Show loading state - find any export button
+            const exportBtn = event.target.closest('.dropdown-item') || document.querySelector('.btn-outline-info');
+            const loadingMsg = document.createElement('div');
+            loadingMsg.className = 'alert alert-info position-fixed';
+            loadingMsg.style.cssText = 'top: 20px; right: 20px; z-index: 1050;';
+            loadingMsg.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generating complete report...';
+            document.body.appendChild(loadingMsg);
+
+            // Create download URL for all recommendations (no pagination)
+            const url = '@Url.Action("ExportRecommendationsPDF", "Dashboard")' +
+                       `?employeeId=${currentEmployeeId}&page=1&pageSize=1000`; // Large pageSize to get all
+
+            // Create a temporary link to download the file
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Career-Recommendations-@Model.SelectedEmployee?.FullName.Replace(" ", "-")-Complete-${new Date().toISOString().split('T')[0]}.pdf`;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Remove loading message after delay
+            setTimeout(() => {
+                document.body.removeChild(loadingMsg);
+                showSuccess('Complete report exported successfully!');
+            }, 2000);
         }
 
         function generateRecommendations(employeeId) {
