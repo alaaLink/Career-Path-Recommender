@@ -1,18 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(dotnet new:*)",
-      "Bash(dotnet sln add:*)",
-      "Bash(dotnet add:*)",
-      "Bash(dotnet build)",
-      "Bash(dotnet test:*)",
-      "Bash(dotnet build:*)",
-      "Bash(dotnet remove package:*)",
-      "Bash(psql:*)",
-      "Bash(docker:*)",
-      "Bash(dotnet ef migrations add:*)",
-      "Bash(dotnet ef migrations:*)",
-      "Bash(del Migrations*.cs)"
+      "Bash(rm:*)",
+      "Bash(dotnet restore:*)",
+      "Bash(dotnet test:*)"
     ],
     "deny": [],
     "ask": []

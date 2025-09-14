@@ -1,8 +1,12 @@
 using Xunit;
 using Microsoft.EntityFrameworkCore;
-using CareerPathRecommender.Core.Data;
-using CareerPathRecommender.Core.Services;
-using CareerPathRecommender.Core.Models;
+using CareerPathRecommender.Infrastructure.Data;
+using CareerPathRecommender.Infrastructure.Services;
+using CareerPathRecommender.Infrastructure.Repositories;
+using CareerPathRecommender.Application.Interfaces;
+using CareerPathRecommender.Domain.Entities;
+using CareerPathRecommender.Domain.Enums;
+using Moq;
 
 namespace CareerPathRecommender.Tests.Services;
 
@@ -10,6 +14,7 @@ public class RecommendationServiceTests : IDisposable
 {
     private readonly ApplicationDbContext _context;
     private readonly RecommendationService _service;
+    private readonly Mock<IAIService> _mockAIService;
 
     public RecommendationServiceTests()
     {
@@ -18,10 +23,17 @@ public class RecommendationServiceTests : IDisposable
             .Options;
 
         _context = new ApplicationDbContext(options);
-        var mockAIService = new MockAIService();
-        _service = new RecommendationService(_context, mockAIService);
+        _mockAIService = new Mock<IAIService>();
+
+        var employeeRepo = new EmployeeRepository(_context);
+        var courseRepo = new CourseRepository(_context);
+        var projectRepo = new ProjectRepository(_context);
+        var recommendationRepo = new RecommendationRepository(_context);
+
+        _service = new RecommendationService(employeeRepo, courseRepo, projectRepo, recommendationRepo, _mockAIService.Object);
 
         SeedTestData();
+        SetupMockAIService();
     }
 
     [Fact]
@@ -38,21 +50,24 @@ public class RecommendationServiceTests : IDisposable
         Assert.True(recommendations.Any());
         Assert.All(recommendations, r => Assert.True(r.Priority >= 1 && r.Priority <= 5));
         Assert.All(recommendations, r => Assert.True(r.ConfidenceScore >= 0 && r.ConfidenceScore <= 1));
+        _mockAIService.Verify(x => x.GenerateRecommendationReasoningAsync(It.IsAny<CareerPathRecommender.Application.DTOs.EmployeeDto>(), It.IsAny<object>(), It.IsAny<CancellationToken>()), Times.AtLeastOnce);
     }
 
     [Fact]
-    public async Task RecommendCoursesAsync_ShouldReturnFilteredCourses()
+    public async Task GetEmployeeRecommendationsAsync_ShouldReturnEmployeeRecommendations()
     {
         // Arrange
         var employeeId = 1;
 
+        // First generate some recommendations
+        await _service.GenerateRecommendationsAsync(employeeId);
+
         // Act
-        var courses = await _service.RecommendCoursesAsync(employeeId);
+        var recommendations = await _service.GetEmployeeRecommendationsAsync(employeeId);
 
         // Assert
-        Assert.NotNull(courses);
-        // Should not recommend courses the employee is already enrolled in
-        Assert.DoesNotContain(courses, c => c.Id == 1); // Assuming employee 1 is enrolled in course 1
+        Assert.NotNull(recommendations);
+        Assert.All(recommendations, r => Assert.Equal(employeeId, r.EmployeeId));
     }
 
     [Fact]
@@ -98,32 +113,49 @@ public class RecommendationServiceTests : IDisposable
     {
         var skills = new List<Skill>
         {
-            new() { Id = 1, Name = "C#", Category = "Programming" },
-            new() { Id = 2, Name = "JavaScript", Category = "Programming" },
-            new() { Id = 3, Name = "Leadership", Category = "Soft Skills" }
+            new() { Name = "C#", Category = "Programming", Description = "C# programming language" },
+            new() { Name = "JavaScript", Category = "Programming", Description = "JavaScript programming" },
+            new() { Name = "Leadership", Category = "Soft Skills", Description = "Leadership abilities" }
         };
 
         var employees = new List<Employee>
         {
-            new() { Id = 1, FirstName = "John", LastName = "Doe", Position = "Developer", Department = "Engineering", YearsOfExperience = 3 }
+            new() { FirstName = "John", LastName = "Doe", Email = "john.doe@test.com", Position = "Developer", Department = "Engineering", YearsOfExperience = 3 }
         };
 
         var courses = new List<Course>
         {
-            new() { Id = 1, Title = "Advanced C#", Provider = "Udemy", Rating = 4.5m, Price = 99.99m },
-            new() { Id = 2, Title = "JavaScript Fundamentals", Provider = "freeCodeCamp", Rating = 4.3m, Price = 0m }
-        };
-
-        var employeeSkills = new List<EmployeeSkill>
-        {
-            new() { EmployeeId = 1, SkillId = 1, Level = SkillLevel.Intermediate, AcquiredDate = DateTime.Now.AddMonths(-6) }
+            new() { Title = "Advanced C#", Provider = "Udemy", Category = "Programming", DurationHours = 40, Rating = 4.5m, Price = 99.99m, Url = "test.com", Description = "Advanced C# course" },
+            new() { Title = "JavaScript Fundamentals", Provider = "freeCodeCamp", Category = "Programming", DurationHours = 30, Rating = 4.3m, Price = 0m, Url = "test.com", Description = "JS fundamentals" }
         };
 
         _context.Skills.AddRange(skills);
         _context.Employees.AddRange(employees);
         _context.Courses.AddRange(courses);
+        _context.SaveChanges();
+
+        var employeeSkills = new List<EmployeeSkill>
+        {
+            new() { EmployeeId = employees[0].Id, SkillId = skills[0].Id, Level = SkillLevel.Intermediate, AcquiredDate = DateTime.UtcNow.AddMonths(-6) }
+        };
+
         _context.EmployeeSkills.AddRange(employeeSkills);
         _context.SaveChanges();
+    }
+
+    private void SetupMockAIService()
+    {
+        _mockAIService.Setup(x => x.GenerateRecommendationReasoningAsync(
+            It.IsAny<CareerPathRecommender.Application.DTOs.EmployeeDto>(), It.IsAny<object>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync("This is a mock recommendation reasoning.");
+
+        _mockAIService.Setup(x => x.GenerateMentorMatchReasoningAsync(
+            It.IsAny<CareerPathRecommender.Application.DTOs.EmployeeDto>(), It.IsAny<CareerPathRecommender.Application.DTOs.EmployeeDto>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync("This is a mock mentor match reasoning.");
+
+        _mockAIService.Setup(x => x.GenerateProjectMatchReasoningAsync(
+            It.IsAny<CareerPathRecommender.Application.DTOs.EmployeeDto>(), It.IsAny<object>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync("This is a mock project match reasoning.");
     }
 
     public void Dispose()
