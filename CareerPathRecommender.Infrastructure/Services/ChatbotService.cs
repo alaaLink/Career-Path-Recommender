@@ -1,5 +1,7 @@
 using CareerPathRecommender.Application.Constants;
 using CareerPathRecommender.Application.Interfaces;
+using CareerPathRecommender.Domain.Entities;
+using CareerPathRecommender.Domain.Enums;
 using Microsoft.Extensions.Configuration;
 using System.Text;
 using System.Text.Json;
@@ -10,12 +12,14 @@ namespace CareerPathRecommender.Infrastructure.Services
     {
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _configuration;
+        private readonly IRecommendationRepository _recommendationRepository;
         private readonly string apiUrl;
-        public ChatbotService(HttpClient httpClient, IConfiguration configuration)
+        public ChatbotService(HttpClient httpClient, IConfiguration configuration, IRecommendationRepository recommendationRepository)
         {
             _httpClient = httpClient;
             _configuration = configuration;
             apiUrl = _configuration["OpenAiUrl"] ?? throw new InvalidOperationException("OpenAI API key is not configured in appsettings.json");
+            _recommendationRepository = recommendationRepository;
         }
 
         public async Task<string> GetResponseAsync(string userMessage, string systemMessage = ChatbotConsts.DefaultSystemMessage)
@@ -64,6 +68,50 @@ namespace CareerPathRecommender.Infrastructure.Services
                 // Log the error
                 return "I encountered an error while processing your request. Please try again.";
             }
+        }
+
+        public async Task<string> GetRecommentationResponseAsync(string userMessage)
+        {
+            RecommendationType  recommendationType = GetRecommendationTypeInUserMessage(userMessage);
+
+            var recommendations = await _recommendationRepository.GetByTypeAsync(recommendationType);
+            string systemMessage = ChatbotConsts.DefaultSystemMessage;
+
+            if (recommendations.Any())
+            {
+                systemMessage = GenerateSystemMessage(recommendations, recommendationType);
+            }
+
+            return await GetResponseAsync(userMessage, systemMessage);
+        }
+
+        private RecommendationType GetRecommendationTypeInUserMessage(string userMessage)
+        {
+            var enummNames = Enum.GetNames<RecommendationType>();
+
+            foreach (var item in enummNames)
+            {
+                if (userMessage.Contains(item, StringComparison.OrdinalIgnoreCase))
+                {
+                    return (RecommendationType)Enum.Parse(typeof(RecommendationType), item);
+                }
+                continue;
+            }
+
+            return RecommendationType.None;
+        }
+
+        private string GenerateSystemMessage(IEnumerable<Recommendation> recommendations, RecommendationType recommendationType)
+        {
+            // Generate system message includes every recommendation name and description
+            var systemMessage = new StringBuilder();
+            systemMessage.AppendLine($"You are a career path assistant in SoftWare Development. Here are some {recommendationType} recommendations:");
+            foreach (var recommendation in recommendations)
+            {
+                systemMessage.AppendLine($"Title: {recommendation.Title}-Description: {recommendation.Description}");
+            }
+            systemMessage.AppendLine($"return a links from web (mostly from youtube) for every recommendation, then the usual response of you");
+            return systemMessage.ToString();
         }
     }
 }

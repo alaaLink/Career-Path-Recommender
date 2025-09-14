@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using CareerPathRecommender.Application.Interfaces;
+using CareerPathRecommender.Application.DTOs;
 
 namespace CareerPathRecommender.Web.Controllers
 {
@@ -29,7 +30,17 @@ namespace CareerPathRecommender.Web.Controllers
 
             try
             {
-                var response = await _chatbotService.GetResponseAsync(model.Message);
+                string response = string.Empty;
+
+                if (model.RecommendedFromDatabase)
+                {
+                    response = await _chatbotService.GetRecommentationResponseAsync(model.Message);
+                }
+                else 
+                {
+                    response = await _chatbotService.GetResponseAsync(model.Message);
+                }
+
                 return Ok(new { response });
             }
             catch (Exception ex)
@@ -40,8 +51,4 @@ namespace CareerPathRecommender.Web.Controllers
         }
     }
 
-    public class ChatMessageModel
-    {
-        public string Message { get; set; } = string.Empty;
-    }
 }

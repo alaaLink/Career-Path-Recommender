@@ -1,3 +1,4 @@
+using CareerPathRecommender.Application.Constants;
 using CareerPathRecommender.Application.Interfaces;
 
 namespace CareerPathRecommender.Infrastructure.Services
@@ -15,7 +16,12 @@ namespace CareerPathRecommender.Infrastructure.Services
             ["bye"] = "Goodbye! Feel free to come back if you have more questions about your career development.",
         };
 
-        public Task<string> GetResponseAsync(string message, string systemMessag = "")
+        public async Task<string> GetRecommentationResponseAsync(string message)
+        {
+            return await GetResponseAsync(message);
+        }
+
+        public Task<string> GetResponseAsync(string message, string systemMessage = ChatbotConsts.DefaultSystemMessage)
         {
             var response = _responses
                 .FirstOrDefault(kvp => message.Contains(kvp.Key, StringComparison.OrdinalIgnoreCase))
