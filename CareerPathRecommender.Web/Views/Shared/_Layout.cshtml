@@ -27,6 +27,179 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Career Path Recommender">
     @await RenderSectionAsync("Styles", required: false)
+    <style>
+        /* AI Assistant Button */
+        .ai-assistant-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .ai-assistant-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+        
+        .ai-assistant-btn i {
+            font-size: 24px;
+        }
+        
+        /* Chat Interface */
+        .ai-chat-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            max-height: 600px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            z-index: 1050;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .ai-chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .ai-chat-header h5 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .ai-chat-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+            line-height: 1;
+        }
+        
+        .ai-chat-messages {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+        }
+        
+        .ai-chat-input-container {
+            padding: 12px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .ai-chat-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .ai-chat-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            color: #333;
+        }
+        
+        /* Typing Animation */
+        .typing-dots {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            height: 24px;
+            padding: 4px 0;
+            margin: 4px 0;
+        }
+        
+        .typing-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: #6c757d;
+            animation: typing-dot 1.2s infinite ease-in-out both;
+        }
+        
+        .typing-dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @@keyframes typing-dot {
+            0%, 60%, 100% { 
+                transform: translateY(0);
+                opacity: 0.6;
+            }
+            30% { 
+                transform: translateY(-3px);
+                opacity: 1;
+                background-color: #0d6efd;
+            }
+        }
+        
+        .ai-message {
+            margin-bottom: 12px;
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .ai-message.user {
+            background-color: #e3f2fd;
+            color: #0d6efd;
+            margin-left: auto;
+            border-bottom-right-radius: 2px;
+        }
+        
+        .ai-message.bot {
+            background-color: #f1f1f1;
+            color: #333;
+            margin-right: auto;
+            border-bottom-left-radius: 2px;
+        }
+
+        #recommended-toggle-lable {
+            color: var(--bs-secondary-color);
+        }
+    </style>
 </head>
 <body class="min-vh-100">
     <header>
@@ -111,7 +284,7 @@
                 </div>
                 <div class="col-md-6 text-md-end">
                     <div class="small">
-                        <div>&copy; 2024 Career Path Recommender</div>
+                        <div>&copy; @DateTime.Now.Year - Career Path Recommender</div>
                         <div class="mt-1">
                             <a href="#" class="text-light me-3"><i class="fas fa-shield-alt"></i> Privacy</a>
                             <a href="#" class="text-light me-3"><i class="fas fa-file-contract"></i> Terms</a>
@@ -120,11 +293,162 @@
                     </div>
                 </div>
             </div>
+        </footer>
+        <script src="~/lib/jquery/jquery.min.js"></script>
+        <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <script src="~/js/site.js" asp-append-version="true"></script>
+        @await RenderSectionAsync("Scripts", required: false)
+        
+        <!-- AI Assistant Button -->
+        <button id="aiAssistantBtn" class="ai-assistant-btn" title="AI Assistant">
+            <i class="fas fa-robot"></i>
+        </button>
+        
+        <!-- AI Chat Interface -->
+        <div id="aiChatContainer" class="ai-chat-container">
+            <div class="ai-chat-header">
+                <h5><i class="fas fa-robot me-2"></i>AI Assistant</h5>
+                <button class="ai-chat-close" id="closeChat">&times;</button>
+            </div>
+            <div class="ai-chat-messages" id="aiChatMessages">
+                <div class="ai-message bot">
+                    Hello! I'm your AI Assistant. How can I help you today?
+                </div>
+            </div>
+            <div class="ai-chat-input-container">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" id="recommended-toggle" checked>
+                    <label class="form-check-label small" for="recommended-toggle" id="recommended-toggle-lable">
+                            <i class="fas fa-database me-1"></i>Include recommendations
+                        </label>
+                    </div>
+                </div>
+                <form id="aiChatForm">
+                    <div class="input-group">
+                        <input type="text" class="form-control ai-chat-input" placeholder="Type your message..." autocomplete="off" required>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </footer>
-    <script src="~/lib/jquery/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
-</body>
-</html>
+        
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const aiBtn = document.getElementById('aiAssistantBtn');
+                const chatContainer = document.getElementById('aiChatContainer');
+                const closeChat = document.getElementById('closeChat');
+                const chatForm = document.getElementById('aiChatForm');
+                const chatInput = chatForm.querySelector('input[type="text"]');
+                const chatMessages = document.getElementById('aiChatMessages');
+                const recommendedToggle = document.getElementById('recommended-toggle');
+                
+                // Toggle chat visibility
+                function toggleChat() {
+                    chatContainer.style.display = chatContainer.style.display === 'flex' ? 'none' : 'flex';
+                }
+                
+                // Format message with newlines and links
+                function formatMessage(text) {
+                    if (!text) return '';
+                    
+                    // Convert newlines to <br>
+                    let formatted = text.replace(/\n/g, '<br>');
+                    
+                    // Convert Markdown-style links [text](url) to HTML anchor tags
+                    formatted = formatted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, 
+                        (match, text, url) => {
+                            return `<a href="${url}" target="_blank" class="text-primary text-decoration-underline">${text}</a>`;
+                        }
+                    );
+                    
+                    // Convert (link) format to HTML anchor tags
+                    formatted = formatted.replace(/\(link\)([\s\S]*?)\(link\)/g, 
+                        (match, urlPart) => {
+                            const parts = urlPart.split('|');
+                            const link = parts[0].trim();
+                            const displayText = parts[1] ? parts[1].trim() : link;
+                            return `<a href="${link}" target="_blank" class="text-primary text-decoration-underline">${displayText}</a>`;
+                        }
+                    );
+                    
+                    return formatted;
+                }
+                
+                // Add message to chat
+                function addMessage(role, content) {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `ai-message ${role}`;
+                    messageDiv.innerHTML = formatMessage(content);
+                    chatMessages.appendChild(messageDiv);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+                
+                // Event listeners
+                aiBtn.addEventListener('click', toggleChat);
+                closeChat.addEventListener('click', toggleChat);
+                
+                chatForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const message = chatInput.value.trim();
+                    
+                    if (message) {
+                        // Add user message
+                        addMessage('user', message);
+                        chatInput.value = '';
+                        
+                        // Show typing indicator
+                        const typingIndicator = document.createElement('div');
+                        typingIndicator.className = 'ai-message bot';
+                        typingIndicator.innerHTML = `
+                            <div class="typing-dots">
+                                <span class="typing-dot"></span>
+                                <span class="typing-dot"></span>
+                                <span class="typing-dot"></span>
+                            </div>`;
+                        chatMessages.appendChild(typingIndicator);
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                        
+                        // Get the recommendation toggle state
+                        const useRecommended = recommendedToggle.checked;
+                        
+                        // Send message to server
+                        fetch('/Chatbot/SendMessage', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                            },
+                            body: JSON.stringify({
+                                message: message,
+                                recommendedFromDatabase: useRecommended
+                            })
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Remove typing indicator and show response
+                            chatMessages.removeChild(typingIndicator);
+                            if (data.response) {
+                                addMessage('bot', data.response);
+                            } else {
+                                addMessage('bot', 'I received your message, but there was an issue processing it.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            chatMessages.removeChild(typingIndicator);
+                            addMessage('bot', 'Sorry, I encountered an error while processing your request. Please try again.');
+                        });
+                    }
+                });
+            });
+        </script>
+    </body>
+    </html>
