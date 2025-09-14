@@ -6,10 +6,6 @@ using CareerPathRecommender.Infrastructure.Services;
 using CareerPathRecommender.Infrastructure.Data;
 using CareerPathRecommender.Web.Services;
 using Serilog;
-using CareerPathRecommender.Domain.Entities;
-using CareerPathRecommender.Domain.Enums;
-using CareerPathRecommender.Application.Interfaces;
-using CareerPathRecommender.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,8 +61,6 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<ISkillRepository, SkillRepository>();
 builder.Services.AddScoped<IRecommendationRepository, RecommendationRepository>();
-builder.Services.AddScoped<ISkillRepository, SkillRepository>();
-builder.Services.AddScoped<IEmployeeSkillRepository, EmployeeSkillRepository>();
 
 // Register services with caching decorator pattern
 builder.Services.AddScoped<CareerPathRecommender.Infrastructure.Services.RecommendationService>();
@@ -82,20 +76,6 @@ builder.Services.AddScoped<IAIService, CareerPathRecommender.Infrastructure.Serv
 // Configure Mailjet settings
 builder.Services.Configure<MailjetSettings>(builder.Configuration.GetSection("Mailjet"));
 builder.Services.AddScoped<IEmailService, MailjetEmailService>();
-
-// Add Chatbot service
-builder.Services.AddHttpClient();
-
-// Use MockChatbotService by default. Replace with ChatbotService when you have OpenAI API key
-builder.Services.AddScoped<IChatbotService, ChatbotService>();
-
-// Uncomment and add your OpenAI API key to appsettings.json to use the real ChatbotService
-// builder.Services.AddScoped<IChatbotService>(sp => 
-//     new ChatbotService(
-//         sp.GetRequiredService<HttpClient>(),
-//         sp.GetRequiredService<IConfiguration>()
-//     )
-// );
 
 var app = builder.Build();
 

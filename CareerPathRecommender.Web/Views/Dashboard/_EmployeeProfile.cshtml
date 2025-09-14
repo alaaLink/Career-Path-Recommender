@@ -60,17 +60,17 @@
                     </div>
                 </div>
                 
-                <!-- Experience Showcase -->
+                <!-- Editable Experience Showcase -->
                 <div class="text-center mb-4">
                     <div class="d-inline-block position-relative">
-                        <div class="stat-card p-3">
+                        <div class="stat-card p-3 experience-editor">
                             <div class="d-flex align-items-center justify-content-center gap-2">
                                 <div class="position-relative">
                                     <svg width="50" height="50" viewBox="0 0 50 50">
                                         <circle cx="25" cy="25" r="20" stroke="var(--gray-300)" stroke-width="3" fill="none"/>
                                         <circle cx="25" cy="25" r="20" stroke="url(#experienceGradient)" stroke-width="3" fill="none"
-                                                stroke-dasharray="@(125 * Math.Min(1, Model.SelectedEmployee.YearsOfExperience / 15.0))" 
-                                                stroke-dashoffset="0" 
+                                                stroke-dasharray="@(125 * Math.Min(1, Model.SelectedEmployee.YearsOfExperience / 15.0))"
+                                                stroke-dashoffset="0"
                                                 transform="rotate(-90 25 25)"
                                                 stroke-linecap="round"/>
                                         <defs>
@@ -81,13 +81,32 @@
                                         </defs>
                                     </svg>
                                     <div class="position-absolute top-50 start-50 translate-middle text-center">
-                                        <div class="fw-bold">@Model.SelectedEmployee.YearsOfExperience</div>
+                                        <div class="fw-bold experience-display" id="experienceDisplay">@Model.SelectedEmployee.YearsOfExperience</div>
                                         <small class="text-muted" style="font-size: 0.65rem;">yrs</small>
                                     </div>
                                 </div>
                                 <div class="text-start">
-                                    <div class="fw-bold">Experience Level</div>
+                                    <div class="fw-bold d-flex align-items-center">
+                                        Experience Level
+                                        <button class="btn btn-sm btn-outline-primary ms-2" onclick="editExperience()" title="Edit Experience">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </div>
                                     <small class="text-muted">Professional Journey</small>
+                                </div>
+                            </div>
+
+                            <!-- Hidden Experience Edit Form -->
+                            <div class="experience-edit-form mt-3" id="experienceEditForm" style="display: none;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <input type="number" class="form-control form-control-sm" id="experienceInput"
+                                           value="@Model.SelectedEmployee.YearsOfExperience" min="0" max="50" style="width: 80px;">
+                                    <button class="btn btn-sm btn-success" onclick="saveExperience()">
+                                        <i class="fas fa-save"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="cancelEditExperience()">
+                                        <i class="fas fa-times"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -96,15 +115,20 @@
                 
                 <!-- Enhanced Skills Section -->
                 <div class="mb-4">
-                    <h6 class="fw-bold mb-3 d-flex align-items-center">
-                        <div class="me-2 p-2 rounded-circle" style="background: var(--info-gradient); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-cogs text-white"></i>
-                        </div>
-                        Current Skills
-                        <span class="badge badge-soft-primary ms-auto">@Model.SelectedEmployee.Skills.Count() skills</span>
-                    </h6>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0 d-flex align-items-center">
+                            <div class="me-2 p-2 rounded-circle" style="background: var(--info-gradient); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-cogs text-white"></i>
+                            </div>
+                            Current Skills
+                            <span class="badge badge-soft-primary ms-2" id="skillsCount">@Model.SelectedEmployee.Skills.Count() skills</span>
+                        </h6>
+                        <button class="btn btn-sm btn-success" onclick="showAddSkillModal()" title="Add New Skill">
+                            <i class="fas fa-plus me-1"></i>Add Skill
+                        </button>
+                    </div>
                     
-                    <div class="skills-container mb-3">
+                    <div class="skills-container mb-3" id="skillsContainer">
                         @foreach (var skill in Model.SelectedEmployee.Skills)
                         {
                             var skillConfig = skill.Level switch
@@ -115,13 +139,20 @@
                                 CareerPathRecommender.Domain.Enums.SkillLevel.Expert => new { Color = "primary", Icon = "crown", Gradient = "--primary-gradient" },
                                 _ => new { Color = "secondary", Icon = "circle", Gradient = "--gray-400" }
                             };
-                            
-                            <div class="skill-badge d-inline-block me-2 mb-2 position-relative hover-lift" 
+
+                            <div class="skill-badge d-inline-block me-2 mb-2 position-relative hover-lift"
+                                 data-skill-id="@skill.Skill.Id"
                                  style="background: white; border: 2px solid var(--gray-200); border-radius: var(--radius-lg); padding: 0.5rem 0.75rem; transition: all var(--transition-normal);">
                                 <div class="d-flex align-items-center gap-2">
                                     <i class="fas fa-@skillConfig.Icon text-@skillConfig.Color"></i>
                                     <span class="fw-medium">@skill.Skill.Name</span>
                                     <span class="badge badge-soft-@skillConfig.Color">@skill.Level</span>
+                                    <button class="btn btn-sm p-0 ms-1 text-danger skill-remove-btn"
+                                            onclick="removeSkill(@skill.Skill.Id, '@skill.Skill.Name')"
+                                            title="Remove Skill"
+                                            style="width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border: none; background: none; font-size: 0.7rem;">
+                                        <i class="fas fa-times"></i>
+                                    </button>
                                 </div>
                             </div>
                         }
@@ -465,3 +496,232 @@
         </div>
     </div>
 </div>
+
+<!-- Add Skill Modal -->
+<div class="modal fade" id="addSkillModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus me-2"></i>Add New Skill
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addSkillForm">
+                    <div class="mb-3">
+                        <label for="skillName" class="form-label">Skill Name</label>
+                        <input type="text" class="form-control" id="skillName" placeholder="e.g., JavaScript, Leadership" required>
+                        <div class="form-text">Enter the name of the skill you want to add</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="skillCategory" class="form-label">Category</label>
+                        <select class="form-control" id="skillCategory" required>
+                            <option value="">Choose category</option>
+                            <option value="Programming">Programming</option>
+                            <option value="Soft Skills">Soft Skills</option>
+                            <option value="Technical">Technical</option>
+                            <option value="Architecture & Cloud">Architecture & Cloud</option>
+                            <option value="Project Management">Project Management</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="skillLevel" class="form-label">Proficiency Level</label>
+                        <select class="form-control" id="skillLevel" required>
+                            <option value="">Choose level</option>
+                            <option value="0">Beginner - Just starting out</option>
+                            <option value="1">Intermediate - Some experience</option>
+                            <option value="2">Advanced - Highly skilled</option>
+                            <option value="3">Expert - Master level</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="skillDescription" class="form-label">Description (Optional)</label>
+                        <textarea class="form-control" id="skillDescription" rows="3"
+                                  placeholder="Briefly describe your experience with this skill"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="addSkill()">
+                    <i class="fas fa-plus me-1"></i>Add Skill
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Skill Management JavaScript -->
+<script>
+    let currentEmployeeId = @Model.SelectedEmployee.Id;
+
+    function editExperience() {
+        $('#experienceEditForm').slideDown();
+        $('#experienceInput').focus();
+    }
+
+    function cancelEditExperience() {
+        $('#experienceEditForm').slideUp();
+        $('#experienceInput').val($('#experienceDisplay').text());
+    }
+
+    function saveExperience() {
+        const newExperience = parseInt($('#experienceInput').val());
+
+        if (newExperience < 0 || newExperience > 50) {
+            showAlert('Please enter a valid experience value (0-50 years)', 'warning');
+            return;
+        }
+
+        $.post('@Url.Action("UpdateExperience", "Dashboard")', {
+            employeeId: currentEmployeeId,
+            yearsOfExperience: newExperience
+        })
+        .done(function(response) {
+            if (response.success) {
+                $('#experienceDisplay').text(newExperience);
+                $('#experienceEditForm').slideUp();
+                showAlert('Experience updated successfully!', 'success');
+
+                // Update the experience circle
+                updateExperienceCircle(newExperience);
+            } else {
+                showAlert(response.message || 'Failed to update experience', 'danger');
+            }
+        })
+        .fail(function() {
+            showAlert('Failed to update experience', 'danger');
+        });
+    }
+
+    function updateExperienceCircle(experience) {
+        const circle = document.querySelector('#experienceDisplay').closest('.position-relative').querySelector('circle[stroke="url(#experienceGradient)"]');
+        const newDashArray = 125 * Math.min(1, experience / 15.0);
+        circle.setAttribute('stroke-dasharray', newDashArray);
+    }
+
+    function showAddSkillModal() {
+        $('#addSkillModal').modal('show');
+    }
+
+    function addSkill() {
+        const skillName = $('#skillName').val().trim();
+        const skillCategory = $('#skillCategory').val();
+        const skillLevel = parseInt($('#skillLevel').val());
+        const skillDescription = $('#skillDescription').val().trim();
+
+        if (!skillName || !skillCategory || skillLevel === null || skillLevel === undefined) {
+            showAlert('Please fill in all required fields', 'warning');
+            return;
+        }
+
+        $.post('@Url.Action("AddEmployeeSkill", "Dashboard")', {
+            employeeId: currentEmployeeId,
+            skillName: skillName,
+            category: skillCategory,
+            level: skillLevel,
+            description: skillDescription
+        })
+        .done(function(response) {
+            if (response.success) {
+                $('#addSkillModal').modal('hide');
+                $('#addSkillForm')[0].reset();
+                showAlert('Skill added successfully!', 'success');
+
+                // Add the skill to the UI
+                addSkillToUI(response.skill);
+                updateSkillsCount();
+            } else {
+                showAlert(response.message || 'Failed to add skill', 'danger');
+            }
+        })
+        .fail(function() {
+            showAlert('Failed to add skill', 'danger');
+        });
+    }
+
+    function removeSkill(skillId, skillName) {
+        if (!confirm(`Are you sure you want to remove the skill "${skillName}"?`)) {
+            return;
+        }
+
+        $.post('@Url.Action("RemoveEmployeeSkill", "Dashboard")', {
+            employeeId: currentEmployeeId,
+            skillId: skillId
+        })
+        .done(function(response) {
+            if (response.success) {
+                // Remove skill from UI
+                $(`[data-skill-id="${skillId}"]`).fadeOut(300, function() {
+                    $(this).remove();
+                    updateSkillsCount();
+                });
+                showAlert('Skill removed successfully!', 'success');
+            } else {
+                showAlert(response.message || 'Failed to remove skill', 'danger');
+            }
+        })
+        .fail(function() {
+            showAlert('Failed to remove skill', 'danger');
+        });
+    }
+
+    function addSkillToUI(skill) {
+        const skillConfig = getSkillConfig(skill.level);
+        const skillHtml = `
+            <div class="skill-badge d-inline-block me-2 mb-2 position-relative hover-lift"
+                 data-skill-id="${skill.id}"
+                 style="background: white; border: 2px solid var(--gray-200); border-radius: var(--radius-lg); padding: 0.5rem 0.75rem; transition: all var(--transition-normal);">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fas fa-${skillConfig.icon} text-${skillConfig.color}"></i>
+                    <span class="fw-medium">${skill.name}</span>
+                    <span class="badge badge-soft-${skillConfig.color}">${skill.levelName}</span>
+                    <button class="btn btn-sm p-0 ms-1 text-danger skill-remove-btn"
+                            onclick="removeSkill(${skill.id}, '${skill.name}')"
+                            title="Remove Skill"
+                            style="width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border: none; background: none; font-size: 0.7rem;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        $('#skillsContainer').append(skillHtml);
+    }
+
+    function getSkillConfig(level) {
+        switch (level) {
+            case 0: return { color: "secondary", icon: "seedling" };
+            case 1: return { color: "warning", icon: "chart-line" };
+            case 2: return { color: "success", icon: "trophy" };
+            case 3: return { color: "primary", icon: "crown" };
+            default: return { color: "secondary", icon: "circle" };
+        }
+    }
+
+    function updateSkillsCount() {
+        const count = $('#skillsContainer .skill-badge').length;
+        $('#skillsCount').text(`${count} skills`);
+    }
+
+    function showAlert(message, type) {
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+
+        // Remove existing alerts
+        $('.alert').remove();
+
+        // Add new alert at the top
+        $('body').prepend('<div class="container mt-3">' + alertHtml + '</div>');
+
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            $('.alert').fadeOut();
+        }, 3000);
+    }
+</script>
