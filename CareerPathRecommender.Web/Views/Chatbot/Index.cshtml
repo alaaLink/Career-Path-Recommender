@@ -20,11 +20,21 @@
                         </div>
                     </div>
                     <div class="card-footer p-3">
-                        <form id="chat-form" class="d-flex">
-                            <input type="text" id="user-input" class="form-control me-2" placeholder="Type your message..." autocomplete="off" required>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-paper-plane"></i> Send
-                            </button>
+                        <form id="chat-form" class="d-flex flex-column">
+                            <div class="d-flex mb-2">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="recommended-toggle" checked>
+                                    <label class="form-check-label small text-muted" for="recommended-toggle">
+                                        <i class="fas fa-database me-1"></i>Include database recommendations
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="d-flex">
+                                <input type="text" id="user-input" class="form-control me-2" placeholder="Type your message..." autocomplete="off" required>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i> Send
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -73,18 +83,82 @@
             margin-bottom: 1rem;
         }
         
+        .typing-dots {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 0;
+        }
+        
         .typing-dot {
             display: inline-block;
             width: 8px;
             height: 8px;
             border-radius: 50%;
             background-color: #6c757d;
-            margin: 0 2px;
-            opacity: 0.6;
+            animation: typing-dot 1.4s infinite ease-in-out both;
+        }
+        
+        .typing-dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+        
+        @@keyframes typing-dot {
+            0%, 100% { 
+                transform: translateY(0) scale(0.8);
+                opacity: 0.5;
+            }
+            50% { 
+                transform: translateY(-4px) scale(1);
+                opacity: 1;
+                background-color: #0d6efd;
+            }
         }
 
-        #chat-form input {
+        #chat-form input[type="text"] {
             color: #333;
+        }
+        
+        .message-text {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+        
+        .message-text br {
+            margin-bottom: 0.5rem;
+            display: block;
+            content: "";
+        }
+        
+        /* Custom switch styling */
+        .form-switch .form-check-input {
+            width: 2.5em;
+            margin-left: -2.8em;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%28(, 255, 255, 0.25)'/%3e%3c/svg%3e");
+            background-position: left center;
+            border-radius: 2em;
+            transition: background-position 0.15s ease-in-out;
+        }
+        
+        .form-switch .form-check-input:checked {
+            background-position: right center;
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        
+        .form-switch .form-check-label {
+            margin-left: 1.5em;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .form-switch .form-check-label:hover {
+            color: #495057;
         }
     </style>
 }
@@ -106,15 +180,20 @@
                     userInput.val('');
                     
                     // Show typing indicator
-                    const typingIndicator = $('<div id="typing-indicator">\
-                        <div class="message bot-message">\
-                            <div class="message-content p-2 rounded">\
-                                <div class="typing-dot"></div>\
-                                <div class="typing-dot"></div>\
-                                <div class="typing-dot"></div>\
-                            </div>\
-                        </div>\
-                    </div>');
+                    const typingIndicator = $(`
+                        <div id="typing-indicator" style="display: none;">
+                            <div class="message bot-message mb-3">
+                                <div class="message-content p-2 rounded">
+                                    <small class="text-muted">Assistant is typing</small>
+                                    <div class="typing-dots d-flex align-items-center" style="height: 24px;">
+                                        <div class="typing-dot"></div>
+                                        <div class="typing-dot"></div>
+                                        <div class="typing-dot"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `);
                     
                     chatMessages.append(typingIndicator);
                     typingIndicator.fadeIn(200);
@@ -122,12 +201,18 @@
                     // Scroll to bottom
                     chatMessages.scrollTop(chatMessages[0].scrollHeight);
                     
-                    // Send message to server
-                    $.ajax({
-                        url: '/Chatbot/SendMessage',
-                        type: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify({ message: message }),
+                    // Get the checkbox state
+                const useRecommended = $('#recommended-toggle').is(':checked');
+                
+                // Send message to server
+                $.ajax({
+                    url: '/Chatbot/SendMessage',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ 
+                        message: message,
+                        recommendedFromDatabase: useRecommended 
+                    }),
                         success: function(response) {
                             // Remove typing indicator
                             typingIndicator.fadeOut(200, function() {
@@ -150,11 +235,32 @@
                 const messageClass = sender === 'user' ? 'user-message' : 'bot-message';
                 const senderName = sender === 'user' ? 'You' : 'Assistant';
                 
+                // Replace newlines with <br> and preserve other HTML
+                let formattedText = text.replace(/\n/g, '<br>');
+                
+                // Convert Markdown-style links [text](url) to HTML anchor tags
+                formattedText = formattedText.replace(/\[([^\]]+)\]\(([^)]+)\)/g, 
+                    (match, text, url) => {
+                        return `<a href="${url}" target="_blank" class="text-primary text-decoration-underline">${text}</a>`;
+                    }
+                );
+                
+                // Also keep support for the existing (link) format for backward compatibility
+                formattedText = formattedText.replace(/\(link\)(.*?)\(link\)/g, 
+                    (match, url) => {
+                        // Extract URL and optional display text (format: (link)https://example.com|Display Text(link))
+                        const parts = url.split('|');
+                        const link = parts[0];
+                        const displayText = parts[1] || link;
+                        return `<a href="${link}" target="_blank" class="text-primary text-decoration-underline">${displayText}</a>`;
+                    }
+                );
+                
                 const messageElement = $(`
                     <div class="message ${messageClass} mb-3">
                         <div class="message-content p-2 rounded">
                             <small class="text-muted">${senderName}</small>
-                            <p class="mb-0">${text}</p>
+                            <div class="message-text mb-0">${formattedText}</div>
                         </div>
                     </div>
                 `);
