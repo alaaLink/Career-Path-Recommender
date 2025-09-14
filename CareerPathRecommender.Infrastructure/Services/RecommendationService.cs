@@ -12,6 +12,7 @@ public class RecommendationService : IRecommendationService
     private readonly ICourseRepository _courseRepository;
     private readonly IProjectRepository _projectRepository;
     private readonly IRecommendationRepository _recommendationRepository;
+    private readonly ISkillRepository _skillRepository;
     private readonly IAIService _aiService;
     private readonly ILogger<RecommendationService> _logger;
 
