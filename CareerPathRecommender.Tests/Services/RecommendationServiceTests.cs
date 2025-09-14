@@ -7,6 +7,7 @@ using CareerPathRecommender.Application.Interfaces;
 using CareerPathRecommender.Domain.Entities;
 using CareerPathRecommender.Domain.Enums;
 using Moq;
+using Microsoft.Extensions.Logging;
 
 namespace CareerPathRecommender.Tests.Services;
 
@@ -15,6 +16,7 @@ public class RecommendationServiceTests : IDisposable
     private readonly ApplicationDbContext _context;
     private readonly RecommendationService _service;
     private readonly Mock<IAIService> _mockAIService;
+    private readonly Mock<ILogger<RecommendationService>> _mockLogger;
 
     public RecommendationServiceTests()
     {
@@ -24,13 +26,14 @@ public class RecommendationServiceTests : IDisposable
 
         _context = new ApplicationDbContext(options);
         _mockAIService = new Mock<IAIService>();
+        _mockLogger = new Mock<ILogger<RecommendationService>>();
 
         var employeeRepo = new EmployeeRepository(_context);
         var courseRepo = new CourseRepository(_context);
         var projectRepo = new ProjectRepository(_context);
         var recommendationRepo = new RecommendationRepository(_context);
 
-        _service = new RecommendationService(employeeRepo, courseRepo, projectRepo, recommendationRepo, _mockAIService.Object);
+        _service = new RecommendationService(employeeRepo, courseRepo, projectRepo, recommendationRepo, _mockAIService.Object, _mockLogger.Object);
 
         SeedTestData();
         SetupMockAIService();
