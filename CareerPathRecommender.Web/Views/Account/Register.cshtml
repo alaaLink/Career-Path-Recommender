@@ -71,18 +71,36 @@
                     <i class="fas fa-chart-line"></i>
                     Years of Experience
                 </label>
-                <select asp-for="YearsOfExperience" class="form-control">
-                    <option value="">Select your experience level</option>
-                    <option value="0">0 - Entry Level</option>
-                    <option value="1">1 Year</option>
-                    <option value="2">2 Years</option>
-                    <option value="3">3 Years</option>
-                    <option value="4">4 Years</option>
-                    <option value="5">5 Years</option>
-                    <option value="6">6-10 Years</option>
-                    <option value="11">11-15 Years</option>
-                    <option value="16">16+ Years</option>
-                </select>
+                <div class="experience-select-wrapper">
+                    <select asp-for="YearsOfExperience" class="form-control experience-select" id="experienceSelect">
+                        <option value="">Select your experience level</option>
+                        <optgroup label="Entry Level">
+                            <option value="0">Less than 1 year</option>
+                            <option value="1">1 year</option>
+                            <option value="2">2 years</option>
+                        </optgroup>
+                        <optgroup label="Mid Level">
+                            <option value="3">3 years</option>
+                            <option value="4">4 years</option>
+                            <option value="5">5 years</option>
+                            <option value="6">6 years</option>
+                            <option value="7">7 years</option>
+                        </optgroup>
+                        <optgroup label="Senior Level">
+                            <option value="8">8 years</option>
+                            <option value="9">9 years</option>
+                            <option value="10">10 years</option>
+                            <option value="11">11-12 years</option>
+                            <option value="13">13-15 years</option>
+                        </optgroup>
+                        <optgroup label="Expert Level">
+                            <option value="16">16-20 years</option>
+                            <option value="21">21-25 years</option>
+                            <option value="26">26+ years</option>
+                        </optgroup>
+                    </select>
+                    <div class="experience-badge" id="experienceBadge"></div>
+                </div>
                 <span asp-validation-for="YearsOfExperience" class="text-danger"></span>
             </div>
 
@@ -167,6 +185,52 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <style>
+        .experience-select-wrapper {
+            position: relative;
+            margin-bottom: 5px;
+        }
+        
+        .experience-select {
+            appearance: auto;
+            padding-right: 30px;
+        }
+        
+        .experience-badge {
+            display: none;
+            position: absolute;
+            right: 10px;
+            top: -10px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: white;
+            text-transform: uppercase;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        optgroup {
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .badge-entry {
+            background-color: #4CAF50;
+        }
+        
+        .badge-mid {
+            background-color: #2196F3;
+        }
+        
+        .badge-senior {
+            background-color: #FF9800;
+        }
+        
+        .badge-expert {
+            background-color: #9C27B0;
+        }
+    </style>
     <script>
         // Password strength checker
         document.getElementById('Password').addEventListener('input', function() {
@@ -265,9 +329,61 @@
             // Terms checkbox handler
             document.getElementById('terms').addEventListener('change', validateForm);
             
+            // Experience select handler
+            const experienceSelect = document.getElementById('experienceSelect');
+            const experienceBadge = document.getElementById('experienceBadge');
+            
+            if (experienceSelect && experienceBadge) {
+                experienceSelect.addEventListener('change', function() {
+                    updateExperienceBadge(this.value);
+                });
+                
+                // Initialize badge if a value is already selected
+                if (experienceSelect.value) {
+                    updateExperienceBadge(experienceSelect.value);
+                }
+            }
+            
             // Initial validation
             validateForm();
         });
+        
+        // Function to update experience badge
+        function updateExperienceBadge(value) {
+            const badge = document.getElementById('experienceBadge');
+            if (!badge) return;
+            
+            let badgeClass = '';
+            let badgeText = '';
+            
+            // Clear previous classes
+            badge.className = 'experience-badge';
+            
+            if (value === '') {
+                badge.style.display = 'none';
+                return;
+            }
+            
+            const years = parseInt(value);
+            
+            if (years <= 2) {
+                badgeClass = 'badge-entry';
+                badgeText = 'Entry';
+            } else if (years <= 7) {
+                badgeClass = 'badge-mid';
+                badgeText = 'Mid';
+            } else if (years <= 15) {
+                badgeClass = 'badge-senior';
+                badgeText = 'Senior';
+            } else {
+                badgeClass = 'badge-expert';
+                badgeText = 'Expert';
+            }
+            
+            badge.classList.add(badgeClass);
+            badge.textContent = badgeText;
+            badge.style.display = 'block';
+        }
         
         // Form submission loading state
         document.querySelector('.auth-form').addEventListener('submit', function() {

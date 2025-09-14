@@ -15,4 +15,10 @@ public interface IEmployeeRepository
     Task<Employee> UpdateAsync(Employee employee, CancellationToken cancellationToken = default);
     Task DeleteAsync(int id, CancellationToken cancellationToken = default);
     Task<int> GetTotalCountAsync(CancellationToken cancellationToken = default);
+
+    // Skill management methods
+    Task<Skill?> GetSkillByNameAsync(string name, CancellationToken cancellationToken = default);
+    Task<Skill> CreateSkillAsync(Skill skill, CancellationToken cancellationToken = default);
+    Task<EmployeeSkill> AddEmployeeSkillAsync(EmployeeSkill employeeSkill, CancellationToken cancellationToken = default);
+    Task RemoveEmployeeSkillAsync(int employeeId, int skillId, CancellationToken cancellationToken = default);
 }
